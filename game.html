@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #101827;
+  color: #edf2f7;
+  font-family: system-ui, sans-serif;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: auto;
+  padding: 8px;
+}
+
+#stage {
+  position: relative;
+  height: 430px;
+  background: #8cc9ec;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+#stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#instruments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.instrument {
+  background: #1d293c;
+  padding: 9px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.instrument strong {
+  display: block;
+  font-size: 18px;
+  color: #a5f3fc;
+}
+
+#status {
+  min-height: 44px;
+  color: #fde68a;
+  text-align: center;
+  font-size: 14px;
+  padding: 8px;
+}
+
+#menu {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(10, 19, 34, .96);
+  overflow-y: auto;
+}
+
+#menu.hidden { display: none; }
+
+h2 { margin: 0 0 10px; color: #a5f3fc; }
+
+label {
+  display: block;
+  margin: 7px 0;
+  font-size: 13px;
+}
+
+select {
+  width: 100%;
+  padding: 9px;
+  margin-top: 3px;
+  border-radius: 7px;
+  background: #24344d;
+  color: white;
+  border: 1px solid #64748b;
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 12px;
+  font: bold 14px system-ui;
+  background: #a5f3fc;
+  color: #083344;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button:disabled { opacity: .5; }
+
+#launch { margin-top: 12px; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+#stick {
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  border: 2px solid #64748b;
+  background:
+    linear-gradient(transparent 49%, #475569 50%, transparent 51%),
+    linear-gradient(90deg, transparent 49%, #475569 50%, transparent 51%),
+    #1e293b;
+  position: relative;
+  touch-action: none;
+}
+
+#knob {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #67e8f9;
+  left: 50%;
+  top: 50%;
+  margin-left: -23px;
+  margin-top: -23px;
+  pointer-events: none;
+}
+
+.throttle {
+  min-width: 150px;
+  flex: 1;
+  max-width: 280px;
+}
+
+input[type="range"] {
+  width: 100%;
+  min-height: 40px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.buttons button { flex: 1; min-width: 90px; }
+
+small {
+  display: block;
+  color: #a8b6ca;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 26px;
+  pointer-events: none;
+  opacity: .7;
+}
+
+#loadMessage {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  right: 12px;
+  z-index: 6;
+  font-size: 12px;
+  color: #fde68a;
+}
+
+@media(max-width: 500px) {
+  #stage { height: 360px; }
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <div id="stage">
+    <div id="crosshair">─┼─</div>
+
+    <div id="menu">
+      <h2>✈️ ISLAND FLIGHT</h2>
+
+      <label>
+        Airport setting
+        <select id="airport">
+          <option value="heathrow">London Heathrow — long runway</option>
+          <option value="juliana">Princess Juliana — coastal runway</option>
+          <option value="kaitak">Historic Kai Tak — harbor setting</option>
+        </select>
+      </label>
+
+      <label>
+        Start
+        <select id="startMode">
+          <option value="takeoff">On runway — takeoff practice</option>
+          <option value="approach">Airborne — landing approach</option>
+        </select>
+      </label>
+
+      <label>
+        Weather
+        <select id="weather">
+          <option value="clear">Clear — calm wind</option>
+          <option value="crosswind">Crosswind — 8 knots from the left</option>
+        </select>
+      </label>
+
+      <button id="launch" disabled>Loading 3D engine…</button>
+    </div>
+
+    <div id="loadMessage"></div>
+  </div>
+
+  <div id="instruments">
+    <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
+    <div class="instrument">Height above ground<strong id="altitude">0 ft</strong></div>
+    <div class="instrument">Vertical speed<strong id="vertical">0 ft/min</strong></div>
+    <div class="instrument">Heading<strong id="heading">000°</strong></div>
+    <div class="instrument">Throttle<strong id="power">0%</strong></div>
+    <div class="instrument">Aircraft<strong id="flightState">READY</strong></div>
+  </div>
+
+  <div id="status">Choose your airport and starting position.</div>
+
+  <div class="controls">
+    <div>
+      <div id="stick"><div id="knob"></div></div>
+    </div>
+
+    <div class="throttle">
+      <label for="throttle">Throttle</label>
+      <input id="throttle" type="range" min="0" max="100" value="0">
+      <small>
+        Pull the stick DOWN to raise the nose.<br>
+        Push UP to lower the nose.<br>
+        Move LEFT/RIGHT to bank.
+      </small>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button id="flaps">Flaps: UP</button>
+    <button id="brakes">Brakes: OFF</button>
+    <button id="camera">Camera: CHASE</button>
+    <button id="pause">Pause</button>
+    <button id="restart">Setup</button>
+  </div>
+
+  <small>
+    Aircraft: a fictional light propeller plane with fixed landing gear.
+    No gear-retraction control is needed.<br>
+    Keyboard: ↑ nose down, ↓ nose up, ←/→ bank,
+    Q/E rudder, W/S throttle.<br>
+    Touch controls automatically coordinate turns in flight.
+    Airports use approximate single-runway lengths and stylized surroundings;
+    they are not geographically accurate recreations.
+  </small>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+"use strict";
+
+(() => {
+const $ = id => document.getElementById(id);
+
+if (!window.THREE) {
+  $("loadMessage").textContent =
+    "The 3D engine could not load. Check your connection or content blocker.";
+  $("launch").textContent = "3D engine unavailable";
+  return;
+}
+
+let renderer;
+
+try {
+  renderer = new THREE.WebGLRenderer({antialias: true});
+} catch (error) {
+  $("loadMessage").textContent =
+    "WebGL could not start. Try Safari with hardware graphics available.";
+  $("launch").textContent = "3D graphics unavailable";
+  return;
+}
+
+const stage = $("stage");
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+renderer.shadowMap.enabled = false;
+stage.insertBefore(renderer.domElement, stage.firstChild);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("#99ccec");
+scene.fog = new THREE.Fog("#99ccec", 2400, 12000);
+
+const camera = new THREE.PerspectiveCamera(65, 1, .2, 20000);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x63764b, 2.2));
+
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(-400, 800, 300);
+scene.add(sun);
+
+let scenery = new THREE.Group();
+scene.add(scenery);
+
+const plane = new THREE.Group();
+scene.add(plane);
+
+function material(color) {
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: .8
+  });
+}
+
+const white = material("#f1f5f9");
+const blue = material("#0891b2");
+const dark = material("#243449");
+const tire = material("#111827");
+
+function box(parent, x, y, z, sx, sy, sz, mat) {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(sx, sy, sz),
+    mat
+  );
+  mesh.position.set(x, y, z);
+  parent.add(mesh);
+  return mesh;
+}
+
+// Aircraft points along local -Z.
+box(plane, 0, 0, 0, 1.05, 1.05, 6, white);
+box(plane, 0, .1, -.4, 10.5, .18, 1.5, blue);
+box(plane, 0, .45, 2.1, 3.4, .14, .9, blue);
+box(plane, 0, 1.05, 2.1, .15, 1.6, 1.1, blue);
+box(plane, 0, .7, -.8, .85, .6, 1.6, dark);
+
+const propeller = box(
+  plane, 0, 0, -3.1, 2.8, .12, .1, dark
+);
+
+for (const [x, z] of [[-1.05, .4], [1.05, .4], [0, -1.8]]) {
+  box(plane, x, -.7, z, .1, .9, .1, dark);
+  const wheel = new THREE.Mesh(
+    new THREE.CylinderGeometry(.3, .3, .2, 10),
+    tire
+  );
+  wheel.rotation.z = Math.PI / 2;
+  wheel.position.set(x, -1.2, z);
+  plane.add(wheel);
+}
+
+const settings = {
+  heathrow: {
+    name: "London Heathrow",
+    length: 3900,
+    width: 50,
+    heading: 90,
+    coast: false
+  },
+  juliana: {
+    name: "Princess Juliana",
+    length: 2300,
+    width: 45,
+    heading: 100,
+    coast: true
+  },
+  kaitak: {
+    name: "Historic Kai Tak",
+    length: 3390,
+    width: 55,
+    heading: 130,
+    coast: true
+  }
+};
+
+let airport = settings.heathrow;
+let state = "menu";
+let chase = true;
+let position = new THREE.Vector3();
+let velocity = new THREE.Vector3();
+let quaternion = new THREE.Quaternion();
+
+let pitch = 0;
+let bank = 0;
+let yaw = 0;
+let pitchRate = 0;
+let bankRate = 0;
+let throttle = 0;
+let flaps = false;
+let brakes = false;
+let wind = new THREE.Vector3();
+
+let grounded = true;
+let flew = false;
+let landed = false;
+let time = 0;
+let airspeed = 0;
+let alpha = 0;
+let sinkAtContact = 0;
+let message = "";
+
+let stickX = 0;
+let stickY = 0;
+let stickPointer = null;
+const keys = new Set();
+
+const MASS = 1100;
+const AREA = 16.2;
+const G = 9.81;
+const GROUND_Y = 1.5;
+
+function disposeScenery() {
+  scenery.traverse(object => {
+    if (object.geometry) object.geometry.dispose();
+    if (object.material) {
+      const materials = Array.isArray(object.material)
+        ? object.material : [object.material];
+      for (const m of materials) m.dispose();
+    }
+  });
+  scene.remove(scenery);
+  scenery = new THREE.Group();
+  scene.add(scenery);
+}
+
+function buildAirport() {
+  disposeScenery();
+
+  const seaMat = material("#2a93b5");
+  const landMat = material(airport.coast ? "#719663" : "#618154");
+  const runwayMat = material("#353c45");
+  const stripeMat = material("#f1f5f9");
+  const buildingMat = material("#a7b3c4");
+
+  box(scenery, 0, -12, 0, 26000, 10, 26000, seaMat);
+
+  // A stylized airport island/land patch, not real terrain.
+  box(
+    scenery, 0, -3, 0,
+    airport.coast ? 1400 : 15000,
+    5,
+    airport.length + (airport.coast ? 250 : 9000),
+    landMat
+  );
+
+  box(
+    scenery, 0, -.06, 0,
+    airport.width, .12, airport.length,
+    runwayMat
+  );
+
+  // Runway centerline.
+  for (let z = -airport.length / 2 + 60;
+       z < airport.length / 2 - 60; z += 100) {
+    box(scenery, 0, .03, z, 1.2, .04, 35, stripeMat);
+  }
+
+  // Runway edges and threshold bars.
+  for (const side of [-1, 1]) {
+    box(
+      scenery,
+      side * (airport.width / 2 - 1),
+      .03, 0, .5, .04, airport.length,
+      stripeMat
+    );
+
+    for (const end of [-1, 1]) {
+      for (let i = -3; i <= 3; i++) {
+        box(
+          scenery, i * 4, .04,
+          end * (airport.length / 2 - 35),
+          2, .04, 22, stripeMat
+        );
+      }
+    }
+  }
+
+  // Terminal and control tower away from runway.
+  box(scenery, 180, 12, 0, 100, 24, 220, buildingMat);
+  box(scenery, 125, 24, -180, 16, 48, 16, buildingMat);
+  box(scenery, 125, 51, -180, 30, 10, 30, dark.clone());
+
+  // Decorative city blocks, outside the flight path.
+  for (let i = 0; i < 55; i++) {
+    const side = i % 2 ? -1 : 1;
+    const x = side * (400 + Math.random() * 2200);
+    const z = (Math.random() - .5) * 6500;
+    const height = 15 + Math.random() *
+      (airport === settings.kaitak ? 110 : 45);
+
+    box(
+      scenery, x, height / 2 - 2, z,
+      30 + Math.random() * 50,
+      height,
+      30 + Math.random() * 50,
+      buildingMat
+    );
+  }
+}
+
+function resetStick() {
+  stickX = stickY = 0;
+  stickPointer = null;
+  $("knob").style.transform = "translate(0px,0px)";
+}
+
+function clearControls() {
+  keys.clear();
+  resetStick();
+}
+
+function updateButtons() {
+  $("flaps").textContent = flaps ? "Flaps: DOWN" : "Flaps: UP";
+  $("brakes").textContent = brakes ? "Brakes: ON" : "Brakes: OFF";
+  $("camera").textContent = chase ? "Camera: CHASE" : "Camera: COCKPIT";
+  $("pause").textContent = state === "paused" ? "Resume" : "Pause";
+}
+
+function start() {
+  airport = settings[$("airport").value];
+  buildAirport();
+
+  pitch = bank = yaw = pitchRate = bankRate = 0;
+  quaternion.identity();
+  time = 0;
+  landed = false;
+  sinkAtContact = 0;
+
+  wind.set(
+    $("weather").value === "crosswind" ? 4.115 : 0,
+    0, 0
+  );
+
+  const approach = $("startMode").value === "approach";
+
+  position.set(
+    0,
+    approach ? 105 : GROUND_Y,
+    approach ? airport.length / 2 + 1150 : airport.length / 2 - 120
+  );
+
+  velocity.set(0, approach ? -2.2 : 0, approach ? -38 : 0);
+
+  grounded = !approach;
+  flew = approach;
+  flaps = approach;
+  brakes = false;
+  throttle = approach ? .35 : 0;
+
+  $("throttle").value = throttle * 100;
+  clearControls();
+
+  state = "playing";
+  plane.visible = true;
+  $("menu").classList.add("hidden");
+
+  message = approach
+    ? "Landing practice: align with the runway, reduce power, and descend gently."
+    : "Increase throttle. Around 65–70 kt, gently pull DOWN to raise the nose.";
+
+  updateButtons();
+  updateAircraft();
+  updateCamera(1, true);
+}
+
+function setup() {
+  state = "menu";
+  clearControls();
+  $("menu").classList.remove("hidden");
+  $("launch").textContent = "Start flight";
+  $("status").textContent = "Choose an airport and starting position.";
+}
+
+function pause() {
+  if (state === "playing") {
+    state = "paused";
+    clearControls();
+  } else if (state === "paused") {
+    state = "playing";
+  }
+  updateButtons();
+}
+
+function crash(reason) {
+  if (state !== "playing") return;
+  state = "crashed";
+  clearControls();
+  message = "CRASH: " + reason + " Tap Setup to try again.";
+}
+
+function onRunway() {
+  return Math.abs(position.x) <= airport.width / 2 &&
+    Math.abs(position.z) <= airport.length / 2;
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function physics(dt) {
+  if (state !== "playing") return;
+
+  time += dt;
+
+  const pitchInput = clamp(
+    stickY +
+    Number(keys.has("ArrowDown")) -
+    Number(keys.has("ArrowUp")),
+    -1, 1
+  );
+
+  const rollInput = clamp(
+    stickX +
+    Number(keys.has("ArrowRight")) -
+    Number(keys.has("ArrowLeft")),
+    -1, 1
+  );
+
+  const rudder =
+    Number(keys.has("q")) - Number(keys.has("e"));
+
+  if (keys.has("w")) throttle = Math.min(1, throttle + dt * .3);
+  if (keys.has("s")) throttle = Math.max(0, throttle - dt * .3);
+  $("throttle").value = throttle * 100;
+
+  // Damped angular controls, not a full rigid-body aircraft model.
+  const authority = clamp(airspeed / 32, .15, 1.4);
+  pitchRate += (
+    pitchInput * .85 * authority - pitchRate * 3.2
+  ) * dt;
+
+  bankRate += (
+    -rollInput * 2.1 * authority - bankRate * 3.5
+  ) * dt;
+
+  pitch = clamp(pitch + pitchRate * dt, -.65, .65);
+  bank = clamp(bank + bankRate * dt, -1.15, 1.15);
+
+  if (grounded) {
+    bank *= Math.exp(-dt * 8);
+    pitch = clamp(pitch, 0, airspeed > 25 ? .22 : .035);
+    yaw += (rudder - rollInput) * .22 *
+      clamp(velocity.length() / 12, 0, 1) * dt;
+  } else {
+    // Automatic coordinated-turn approximation.
+    yaw += (
+      Math.tan(bank) * G / Math.max(airspeed, 20) +
+      rudder * .12
+    ) * dt;
+  }
+
+  quaternion.setFromEuler(
+    new THREE.Euler(pitch, yaw, bank, "YXZ")
+  );
+
+  const forward = new THREE.Vector3(0, 0, -1)
+    .applyQuaternion(quaternion);
+
+  const right = new THREE.Vector3(1, 0, 0)
+    .applyQuaternion(quaternion);
+
+  const up = new THREE.Vector3(0, 1, 0)
+    .applyQuaternion(quaternion);
+
+  // Forces depend on air-relative velocity, including crosswind.
+  const airflow = velocity.clone().sub(wind);
+  airspeed = airflow.length();
+
+  const airDirection = airspeed > .1
+    ? airflow.clone().divideScalar(airspeed)
+    : forward.clone();
+
+  alpha = airspeed > 5
+    ? Math.atan2(
+        -airflow.dot(up),
+        Math.max(.1, airflow.dot(forward))
+      )
+    : 0;
+
+  const density = 1.225 * Math.exp(-Math.max(0, position.y) / 8500);
+  const dynamicPressure = .5 * density * airspeed * airspeed;
+
+  let liftCoefficient = .25 + 4.5 * alpha + (flaps ? .4 : 0);
+  liftCoefficient = clamp(liftCoefficient, -1.2, flaps ? 1.8 : 1.5);
+
+  // Lift falls beyond the stall angle; drag increases.
+  const stalled = Math.abs(alpha) > .27;
+  if (stalled) {
+    liftCoefficient *= Math.max(.25, 1 - (Math.abs(alpha) - .27) * 2);
+  }
+
+  const dragCoefficient =
+    .032 +
+    .055 * liftCoefficient * liftCoefficient +
+    (flaps ? .045 : 0) +
+    (stalled ? .16 : 0);
+
+  const liftDirection = right.clone().cross(airDirection).normalize();
+
+  const force = new THREE.Vector3(0, -MASS * G, 0);
+
+  force.addScaledVector(
+    forward,
+    throttle * 3300 * clamp(density / 1.225, .5, 1)
+  );
+
+  force.addScaledVector(
+    liftDirection,
+    dynamicPressure * AREA * liftCoefficient
+  );
+
+  force.addScaledVector(
+    airDirection,
+    -dynamicPressure * AREA * dragCoefficient
+  );
+
+  velocity.addScaledVector(force, dt / MASS);
+
+  if (grounded) {
+    // Rolling resistance, brakes, and lateral tire grip.
+    const horizontal = new THREE.Vector3(velocity.x, 0, velocity.z);
+    const speed = horizontal.length();
+    const deceleration = brakes ? 4.2 : .18;
+
+    if (speed > .001) {
+      const loss = Math.min(speed, deceleration * dt);
+      velocity.x -= horizontal.x / speed * loss;
+      velocity.z -= horizontal.z / speed * loss;
+    }
+
+    const flatRight = new THREE.Vector3(
+      Math.cos(yaw), 0, -Math.sin(yaw)
+    );
+
+    const sideways = velocity.dot(flatRight);
+    velocity.addScaledVector(flatRight, -sideways * Math.min(1, dt * 7));
+
+    if (velocity.y > .35 && airspeed > 25) {
+      grounded = false;
+      flew = true;
+      message = "Airborne! Keep a gentle climb. Retract flaps once established.";
+    } else {
+      velocity.y = 0;
+    }
+  }
+
+  const previousY = position.y;
+  position.addScaledVector(velocity, dt);
+
+  if (!grounded && position.y <= GROUND_Y) {
+    sinkAtContact = Math.max(0, -velocity.y);
+
+    if (!onRunway()) {
+      crash("You touched down outside the runway.");
+      return;
+    }
+
+    if (
+      sinkAtContact > 3 ||
+      Math.abs(bank) > .18 ||
+      Math.abs(pitch) > .25 ||
+      airspeed > 52
+    ) {
+      crash("Landing was too hard, too fast, or not level.");
+      return;
+    }
+
+    // A valid runway touchdown.
+    position.y = GROUND_Y;
+    velocity.y = 0;
+    grounded = true;
+    landed = true;
+
+    message = "Touchdown! Reduce throttle to zero and turn brakes ON.";
+  }
+
+  if (grounded) {
+    position.y = GROUND_Y;
+
+    if (!onRunway()) {
+      crash("You left the runway.");
+      return;
+    }
+
+    if (landed && velocity.length() < 1) {
+      state = "complete";
+      message = "LANDING COMPLETE! Safely stopped. Tap Setup for another flight.";
+      clearControls();
+    }
+  }
+
+  // Basic stall nose-drop tendency.
+  if (!grounded && stalled && airspeed < 35) {
+    pitch -= .12 * dt;
+  }
+
+  if (!grounded && position.y > 1800) {
+    message = "High altitude: lower the nose and return toward the airport.";
+  }
+
+  if (!Number.isFinite(position.y) || !Number.isFinite(previousY)) {
+    crash("Simulation stopped. Please restart.");
+  }
+}
+
+function updateAircraft() {
+  plane.position.copy(position);
+  plane.quaternion.copy(quaternion);
+  propeller.rotation.z += .6 + throttle * 1.2;
+  plane.visible = chase;
+}
+
+function updateCamera(dt, snap = false) {
+  if (!playerStarted()) return;
+
+  const forward = new THREE.Vector3(0, 0, -1)
+    .applyQuaternion(quaternion);
+
+  let desired;
+  let target;
+
+  if (chase) {
+    desired = position.clone()
+      .addScaledVector(forward, -24)
+      .add(new THREE.Vector3(0, 9, 0));
+
+    target = position.clone()
+      .addScaledVector(forward, 45);
+
+    camera.up.set(0, 1, 0);
+  } else {
+    desired = position.clone().add(
+      new THREE.Vector3(0, 1.2, -1.6)
+        .applyQuaternion(quaternion)
+    );
+
+    target = desired.clone().addScaledVector(forward, 100);
+    camera.up.copy(
+      new THREE.Vector3(0, 1, 0).applyQuaternion(quaternion)
+    );
+  }
+
+  if (snap || !chase) camera.position.copy(desired);
+  else camera.position.lerp(desired, 1 - Math.exp(-dt * 5));
+
+  camera.lookAt(target);
+}
+
+function playerStarted() {
+  return state !== "menu";
+}
+
+function hud() {
+  if (state === "menu") return;
+
+  const heading =
+    ((airport.heading - yaw * 180 / Math.PI) % 360 + 360) % 360;
+
+  $("speed").textContent = Math.round(airspeed * 1.94384) + " kt";
+  $("altitude").textContent =
+    Math.max(0, Math.round((position.y - GROUND_Y) * 3.28084)) + " ft";
+  $("vertical").textContent =
+    Math.round(velocity.y * 196.85) + " ft/min";
+  $("heading").textContent =
+    String(Math.round(heading) % 360).padStart(3, "0") + "°";
+  $("power").textContent = Math.round(throttle * 100) + "%";
+
+  let label = grounded ? "ON RUNWAY" : "FLYING";
+
+  if (state === "paused") label = "PAUSED";
+  else if (state === "crashed") label = "CRASHED";
+  else if (state === "complete") label = "STOPPED";
+  else if (!grounded && Math.abs(alpha) > .27) label = "STALL!";
+  else if (!grounded && airspeed < 28) label = "LOW SPEED";
+
+  $("flightState").textContent = label;
+  $("flightState").style.color =
+    label === "STALL!" || label === "CRASHED" ? "#fb7185" : "#a5f3fc";
+
+  let text = message;
+
+  if (state === "playing" && !grounded && Math.abs(alpha) > .27) {
+    text = "STALL WARNING: lower the nose and increase power.";
+  } else if (state === "playing" && grounded && brakes && throttle > .5) {
+    text = "Brakes are ON. Release them before takeoff.";
+  }
+
+  $("status").textContent = text;
+}
+
+// Touch flight stick.
+const stick = $("stick");
+
+function moveStick(event) {
+  const rect = stick.getBoundingClientRect();
+  const radius = rect.width * .34;
+
+  let x = (event.clientX - rect.left - rect.width / 2) / radius;
+  let y = (event.clientY - rect.top - rect.height / 2) / radius;
+
+  const length = Math.hypot(x, y);
+  if (length > 1) {
+    x /= length;
+    y /= length;
+  }
+
+  stickX = x;
+  stickY = y;
+
+  $("knob").style.transform =
+    `translate(${x * radius}px,${y * radius}px)`;
+}
+
+stick.addEventListener("pointerdown", event => {
+  if (stickPointer !== null || state !== "playing") return;
+  event.preventDefault();
+  stickPointer = event.pointerId;
+  stick.setPointerCapture(event.pointerId);
+  moveStick(event);
+});
+
+stick.addEventListener("pointermove", event => {
+  if (event.pointerId !== stickPointer) return;
+  event.preventDefault();
+  moveStick(event);
+});
+
+function releaseStick(event) {
+  if (event.pointerId === stickPointer) resetStick();
+}
+
+stick.addEventListener("pointerup", releaseStick);
+stick.addEventListener("pointercancel", releaseStick);
+stick.addEventListener("lostpointercapture", releaseStick);
+stick.addEventListener("contextmenu", event => event.preventDefault());
+
+$("throttle").addEventListener("input", event => {
+  throttle = Number(event.target.value) / 100;
+});
+
+$("flaps").onclick = () => {
+  if (state !== "playing" && state !== "paused") return;
+  flaps = !flaps;
+  updateButtons();
+};
+
+$("brakes").onclick = () => {
+  if (state !== "playing" && state !== "paused") return;
+  brakes = !brakes;
+  updateButtons();
+};
+
+$("camera").onclick = () => {
+  chase = !chase;
+  plane.visible = chase;
+  updateButtons();
+  updateCamera(1, true);
+};
+
+$("pause").onclick = pause;
+$("restart").onclick = setup;
+$("launch").onclick = start;
+
+window.addEventListener("keydown", event => {
+  const key = event.key.length === 1
+    ? event.key.toLowerCase() : event.key;
+
+  if ([
+    "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+    "q", "e", "w", "s"
+  ].includes(key)) {
+    event.preventDefault();
+    if (state === "playing") keys.add(key);
+  }
+
+  if (key === "p" && !event.repeat) pause();
+});
+
+window.addEventListener("keyup", event => {
+  keys.delete(
+    event.key.length === 1
+      ? event.key.toLowerCase() : event.key
+  );
+});
+
+window.addEventListener("blur", () => {
+  clearControls();
+  if (state === "playing") pause();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && state === "playing") pause();
+});
+
+function resize() {
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+  renderer.setSize(width, height);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+// Background view before the first flight.
+buildAirport();
+camera.position.set(110, 90, airport.length / 2 + 180);
+camera.lookAt(0, 0, airport.length / 2 - 500);
+plane.visible = false;
+
+$("launch").disabled = false;
+$("launch").textContent = "Start flight";
+$("loadMessage").textContent = "";
+updateButtons();
+
+let previous = performance.now();
+
+function frame(now) {
+  const dt = Math.min((now - previous) / 1000, .05);
+  previous = now;
+
+  if (state === "playing") {
+    const steps = Math.max(1, Math.ceil(dt / .008));
+    for (let i = 0; i < steps; i++) physics(dt / steps);
+  }
+
+  if (playerStarted()) {
+    updateAircraft();
+    updateCamera(dt);
+    hud();
+  }
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
