@@ -11,8 +11,8 @@ st.set_page_config(
 
 st.title("✈️ Island Flight")
 st.caption(
-    "Choose an airport and practice takeoff or landing. "
-    "Simplified flight physics and stylized scenery."
+    "Updated takeoff physics • Touch flight controls • "
+    "Selectable airport settings"
 )
 
 html = Path(__file__).with_name("game.html").read_text(
