@@ -2,25 +2,10 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(
-    page_title="Island Flight",
-    page_icon="✈️",
-    layout="wide",
-)
+st.set_page_config(page_title="Island Flight", page_icon="✈️", layout="wide")
 
-st.markdown(
-    """
-    <style>
-    .block-container {
-        padding-top: 1rem;
-        padding-bottom: 0;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+st.markdown("<style>.block-container {padding-top: 1rem; padding-bottom: 0;}</style>", unsafe_allow_html=True)
 
-# Read the HTML file
 try:
     html = Path(__file__).with_name("game.html").read_text(encoding="utf-8")
     components.html(html, height=1050, scrolling=True)
