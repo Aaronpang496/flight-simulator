@@ -285,7 +285,6 @@ function initGame() {
       let screenShakeTime = 0;
       let survivalTime = 0;
 
-      // FASTER PLANE
       const MASS = 1100, AREA = 16.2, G = 9.81, GROUND_Y = 1.5;
       const settings = {
         heathrow: { length: 3900, width: 50, heading: 90, coast: false },
@@ -331,7 +330,6 @@ function initGame() {
       }
 
       function spawnRocket() {
-        // Spawn in front of the plane, far away
         const rx = (Math.random() - 0.5) * 400;
         const ry = Math.random() * 100 + 20;
         const rz = position.z - 1000; 
@@ -343,7 +341,7 @@ function initGame() {
         mesh.position.set(rx, ry, rz);
         mesh.rotation.x = Math.PI / 2; 
         scene.add(mesh);
-        rockets.push({ mesh, speed: 80 }); // Slow enough to dodge
+        rockets.push({ mesh, speed: 80 });
       }
 
       function updateExplosion(dt) {
@@ -392,7 +390,6 @@ function initGame() {
         for (const end of [-1,1]) { for (let i=-3; i<=3; i++) box(scenery,i*4,.04, end * (airport.length/2 - 35), 2,.04,22,stripe); }
         box(scenery,180,12,0,100,24,220,building); box(scenery,125,24,-180,16,48,16,building); box(scenery,125,51,-180,30,10,30,dark.clone());
 
-        // MAP HAZARDS
         if (airport === settings.heathrow) {
           const towerMat = material("#1e293b");
           const laserMat = material("#00ffff");
@@ -695,8 +692,8 @@ function initGame() {
           if (airport === settings.juliana) {
             const squidX = Math.sin(performance.now() / 1000) * 300;
             
-            if (Math.random() < 0.03) { // Slightly less frequent
-              for (let i = 0; i < 2; i++) { // Only 2 blobs
+            if (Math.random() < 0.03) { 
+              for (let i = 0; i < 2; i++) { 
                 const ink = new THREE.Mesh(
                   new THREE.SphereGeometry(12, 8, 8), 
                   new THREE.MeshStandardMaterial({ color: "#000000" })
@@ -705,7 +702,7 @@ function initGame() {
                 ink.userData.vel = new THREE.Vector3(
                   (position.x - ink.position.x) * 0.3 + (i - 1) * 40, 
                   (position.y - ink.position.y) * 0.3, 
-                  -80 // Slower
+                  -80 
                 );
                 scene.add(ink);
                 rockets.push({ mesh: ink, isInk: true });
@@ -714,7 +711,7 @@ function initGame() {
           }
 
           if (airport === settings.kaitak) {
-            if (Math.random() < 0.008) spawnRocket(); // Less frequent
+            if (Math.random() < 0.008) spawnRocket(); 
           }
 
           for (let i = rockets.length - 1; i >= 0; i--) {
@@ -728,7 +725,7 @@ function initGame() {
               const dz = position.z - r.mesh.position.z;
               const dist = Math.hypot(dx, dy, dz);
               
-              r.mesh.position.x += (dx / dist) * (r.speed * 0.5) * dt; // Much slower homing
+              r.mesh.position.x += (dx / dist) * (r.speed * 0.5) * dt;
               r.mesh.position.y += (dy / dist) * (r.speed * 0.5) * dt;
               r.mesh.position.z += (dz / dist) * (r.speed * 0.5) * dt;
               r.mesh.lookAt(position);
@@ -777,7 +774,6 @@ function initGame() {
         if (state === "menu") return;
         const forward = new THREE.Vector3(0,0,-1).applyQuaternion(quaternion);
         if (chase) {
-          // Pulled back for faster feel
           const desired = position.clone().addScaledVector(forward,-30).add(new THREE.Vector3(0,10,0));
           if (snap) camera.position.copy(desired); else camera.position.lerp(desired,1-Math.exp(-dt*5));
           camera.up.set(0,1,0); camera.lookAt(position.clone().addScaledVector(forward,60));
