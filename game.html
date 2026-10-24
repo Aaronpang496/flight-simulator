@@ -413,7 +413,7 @@ small {
   <small id="controlsFound"></small>
 </div>
 
-<!-- THE FIX: Safari/iPad compatible Three.js scripts -->
+<!-- REPLACED IMPORTMAP WITH STANDARD SCRIPT TAGS FOR IPAD -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
@@ -421,393 +421,446 @@ small {
 "use strict";
 
 const $ = id => document.getElementById(id);
-const canvas = $("game");
-// We don't need the canvas variable anymore because the renderer creates its own inside #stage, 
-// but I'll leave it here just in case it breaks something else.
-</script>
 
-<script>
-"use strict";
+let THREE, GLTFLoader;
 
-const $ = id => document.getElementById(id);
-const stage = $("stage");
-
-let THREE_LOADED = false;
-let renderer, scene, camera;
-let plane, cockpitRig, cockpitModel;
-const animatedParts = [];
-const glassMaterials = [];
-
-const position = new THREE.Vector3();
-const velocity = new THREE.Vector3();
-const quaternion = new THREE.Quaternion();
-const wind = new THREE.Vector3();
-
-let state = "menu";
-let chase = true;
-let pitch = 0, bank = 0, yaw = 0;
-let pitchRate = 0, bankRate = 0;
-let throttle = 0;
-let flaps = true;
-let brakes = false;
-let grounded = true;
-let landed = false;
-let airspeed = 0;
-let alpha = 0;
-let message = "";
-let stickX = 0, stickY = 0;
-let stickPointer = null;
-let cockpitTouch = null;
-
-let cockpitReady = false;
-let cockpitNotice = "Cockpit loading...";
-let glassHidden = true;
-let modelTurned = false;
-
-const MASS = 1100;
-const AREA = 16.2;
-const G = 9.81;
-const GROUND_Y = 1.5;
-const airport = { length: 3900, width: 50, heading: 90, coast: false };
-
-function init3D() {
-    try {
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-        renderer.outputEncoding = THREE.sRGBEncoding; // R128 uses outputEncoding
-        renderer.domElement.style.touchAction = "none";
-        renderer.setSize(stage.clientWidth, stage.clientHeight);
-        stage.insertBefore(renderer.domElement, stage.firstChild);
-
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color("#99ccec");
-        scene.fog = new THREE.Fog("#99ccec", 2400, 12000);
-
-        camera = new THREE.PerspectiveCamera(65, stage.clientWidth / stage.clientHeight, .2, 20000);
-
-        scene.add(new THREE.HemisphereLight(0xffffff, 0x63764b, 2.2));
-        const sun = new THREE.DirectionalLight(0xffffff, 2.2);
-        sun.position.set(-400, 800, 300);
-        scene.add(sun);
-
-        plane = new THREE.Group();
-        scene.add(plane);
-        
-        cockpitRig = new THREE.Group();
-        cockpitRig.visible = false;
-        scene.add(cockpitRig);
-        
-        cockpitModel = new THREE.Group();
-        cockpitRig.add(cockpitModel);
-
-        buildAirport();
-        buildPlane();
-
-        const loader = new THREE.GLTFLoader();
-        loader.crossOrigin = 'anonymous';
-        const assetBase = "https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
-        
-        loader.load(assetBase + "cockpit.glb", (gltf) => {
-            const model = gltf.scene;
-            cockpitModel.add(model);
-            cockpitModel.rotation.set(0, -Math.PI/2, 0);
-            cockpitRig.updateMatrixWorld(true);
-            
-            const bounds = new THREE.Box3().setFromObject(cockpitModel);
-            const center = bounds.getCenter(new THREE.Vector3());
-            cockpitModel.position.x -= center.x;
-            cockpitModel.position.y += -1.2 - bounds.min.y;
-            
-            cockpitReady = true;
-            cockpitNotice = "Cockpit loaded.";
-            $("loadMessage").textContent = cockpitNotice;
-            setTimeout(() => $("loadMessage").style.display = 'none', 2000);
-        }, undefined, (error) => {
-            console.error(error);
-            cockpitNotice = "Cockpit failed to load. (View will be empty).";
-            $("loadMessage").textContent = cockpitNotice;
-            setTimeout(() => $("loadMessage").style.display = 'none', 3000);
-        });
-
-        $("launch").disabled = false;
-        $("launch").textContent = "Start flight";
-
-        // Start Loop
-        let previous = performance.now();
-        function frame(now) {
-            const dt = Math.min((now - previous) / 1000, .05);
-            previous = now;
-            if (state === "playing") {
-                const steps = Math.max(1, Math.ceil(dt / .008));
-                for (let i = 0; i < steps; i++) physics(dt / steps);
-            }
-            if (state !== "menu") {
-                updateAircraft(dt);
-                updateCamera(dt);
-                hud();
-            }
-            renderer.render(scene, camera);
-            requestAnimationFrame(frame);
-        }
-        requestAnimationFrame(frame);
-
-        // Resize
-        window.addEventListener('resize', () => {
-            renderer.setSize(stage.clientWidth, stage.clientHeight);
-            camera.aspect = stage.clientWidth / stage.clientHeight;
-            camera.updateProjectionMatrix();
-        });
-
-    } catch (e) {
-        $("loadMessage").textContent = "Engine Error: " + e.message;
-        console.error(e);
-    }
+try {
+  // Assign the global variables loaded from the script tags
+  THREE = window.THREE;
+  GLTFLoader = window.THREE.GLTFLoader;
+} catch (error) {
+  $("loadMessage").textContent = "The 3D engine failed to load.";
+  $("launch").textContent = "Engine unavailable";
+  throw error;
 }
 
-function material(color) {
+function controlBusy(controlName) {
+  return false;
+}
+
+(() => {
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+  } catch (error) {
+    $("loadMessage").textContent = "WebGL unavailable.";
+    return;
+  }
+
+  const stage = $("stage");
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+  // R128 uses outputEncoding instead of outputColorSpace
+  renderer.outputEncoding = THREE.sRGBEncoding; 
+  renderer.domElement.style.touchAction = "none";
+  stage.insertBefore(renderer.domElement, stage.firstChild);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color("#99ccec");
+  scene.fog = new THREE.Fog("#99ccec", 2400, 12000);
+
+  const camera = new THREE.PerspectiveCamera(65, 1, .2, 20000);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x63764b, 2.2));
+  const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+  sun.position.set(-400, 800, 300);
+  scene.add(sun);
+
+  const plane = new THREE.Group();
+  scene.add(plane);
+
+  let scenery = new THREE.Group();
+  scene.add(scenery);
+
+  const cockpitRig = new THREE.Group();
+  cockpitRig.visible = false;
+  scene.add(cockpitRig);
+
+  const cockpitModel = new THREE.Group();
+  cockpitRig.add(cockpitModel);
+
+  const position = new THREE.Vector3();
+  const velocity = new THREE.Vector3();
+  const quaternion = new THREE.Quaternion();
+  const wind = new THREE.Vector3();
+
+  const pilotEye = new THREE.Vector3();
+  const eyeOffset = new THREE.Vector3();
+
+  const keys = new Set();
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+
+  const animatedParts = [];
+  const glassMaterials = [];
+
+  let cockpitReady = false;
+  let cockpitNotice = "Cockpit loading…";
+  let glassHidden = true;
+  let modelTurned = false;
+
+  let state = "menu";
+  let chase = true;
+
+  let pitch = 0, bank = 0, yaw = 0;
+  let pitchRate = 0, bankRate = 0;
+
+  let throttle = 0;
+  let flaps = true;
+  let brakes = false;
+  let grounded = true;
+  let landed = false;
+
+  let airspeed = 0;
+  let alpha = 0;
+  let message = "";
+
+  let stickX = 0, stickY = 0;
+  let stickPointer = null;
+  let cockpitTouch = null;
+
+  const MASS = 1100;
+  const AREA = 16.2;
+  const G = 9.81;
+  const GROUND_Y = 1.5;
+
+  const settings = {
+    heathrow: { length: 3900, width: 50, heading: 90, coast: false },
+    juliana: { length: 2300, width: 45, heading: 100, coast: true },
+    kaitak: { length: 3390, width: 55, heading: 130, coast: true }
+  };
+
+  let airport = settings.heathrow;
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function material(color) {
     return new THREE.MeshStandardMaterial({ color, roughness: .8 });
-}
+  }
 
-function box(parent, x, y, z, sx, sy, sz, mat) {
+  function box(parent, x, y, z, sx, sy, sz, mat) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
     mesh.position.set(x, y, z);
     parent.add(mesh);
     return mesh;
-}
+  }
 
-function buildPlane() {
-    const white = material("#f1f5f9");
-    const blue = material("#0891b2");
-    const dark = material("#243449");
+  const white = material("#f1f5f9");
+  const blue = material("#0891b2");
+  const dark = material("#243449");
 
-    box(plane, 0, 0, 0, 1.05, 1.05, 6, white);
-    box(plane, 0, .1, -.4, 10.5, .18, 1.5, blue);
-    box(plane, 0, .45, 2.1, 3.4, .14, .9, blue);
-    box(plane, 0, 1.05, 2.1, .15, 1.6, 1.1, blue);
-    box(plane, 0, .7, -.8, .85, .6, 1.6, dark);
-    plane.userData.propeller = box(plane, 0, 0, -3.1, 2.8, .12, .1, dark);
-    plane.visible = false;
-}
+  box(plane, 0, 0, 0, 1.05, 1.05, 6, white);
+  box(plane, 0, .1, -.4, 10.5, .18, 1.5, blue);
+  box(plane, 0, .45, 2.1, 3.4, .14, .9, blue);
+  box(plane, 0, 1.05, 2.1, .15, 1.6, 1.1, blue);
+  box(plane, 0, .7, -.8, .85, .6, 1.6, dark);
 
-function buildAirport() {
+  const propeller = box(plane, 0, 0, -3.1, 2.8, .12, .1, dark);
+
+  for (const [x,z] of [[-1.05,.4], [1.05,.4], [0,-1.8]]) {
+    box(plane, x, -.7, z, .1, .9, .1, dark);
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.2,10), material("#111827"));
+    wheel.rotation.z = Math.PI / 2;
+    wheel.position.set(x,-1.2,z);
+    plane.add(wheel);
+  }
+
+  function disposeScenery() {
+    const geometries = new Set();
+    const materials = new Set();
+    scenery.traverse(object => {
+      if (object.geometry) geometries.add(object.geometry);
+      if (object.material) {
+        const list = Array.isArray(object.material) ? object.material : [object.material];
+        list.forEach(mat => materials.add(mat));
+      }
+    });
+    geometries.forEach(item => item.dispose());
+    materials.forEach(item => item.dispose());
+    scene.remove(scenery);
+    scenery = new THREE.Group();
+    scene.add(scenery);
+  }
+
+  function buildAirport() {
+    disposeScenery();
     const sea = material("#2a93b5");
-    const land = material("#618154");
+    const land = material(airport.coast ? "#719663" : "#618154");
     const runway = material("#353c45");
     const stripe = material("#f1f5f9");
     const building = material("#a7b3c4");
 
-    box(scene,0,-12,0,26000,10,26000,sea);
-    box(scene,0,-3,0, 1400, 5, airport.length + 250, land);
-    box(scene,0,-.06,0, airport.width,.12,airport.length, runway);
+    box(scenery,0,-12,0,26000,10,26000,sea);
+    box(scenery,0,-3,0, airport.coast ? 1400 : 15000, 5, airport.length + (airport.coast ? 250 : 9000), land);
+    box(scenery,0,-.06,0, airport.width,.12,airport.length, runway);
 
     for (let z = -airport.length/2 + 60; z < airport.length/2 - 60; z += 100) {
-      box(scene,0,.03,z,1.2,.04,35,stripe);
+      box(scenery,0,.03,z,1.2,.04,35,stripe);
     }
-}
-
-function physics(dt) {
-    const pitchInput = Math.max(-1, Math.min(1, stickY + Number(keys.has("ArrowDown")) - Number(keys.has("ArrowUp"))));
-    const rollInput = Math.max(-1, Math.min(1, stickX + Number(keys.has("ArrowRight")) - Number(keys.has("ArrowLeft"))));
-    const rudder = Number(keys.has("q")) - Number(keys.has("e"));
-
-    if (keys.has("w")) { throttle = Math.min(1,throttle+dt*.3); syncPower(); }
-    if (keys.has("s")) { throttle = Math.max(0,throttle-dt*.3); syncPower(); }
-
-    const authority = Math.max(0.15, Math.min(airspeed/32, 1.4));
-    pitchRate += (pitchInput*.85*authority - pitchRate*3.2)*dt;
-    bankRate += (-rollInput*2.1*authority - bankRate*3.5)*dt;
-    pitch = Math.max(-0.65, Math.min(0.65, pitch+pitchRate*dt));
-    bank = Math.max(-1.15, Math.min(1.15, bank+bankRate*dt));
-
-    if (grounded) {
-      bank *= Math.exp(-dt*8);
-      pitch = Math.max(0, Math.min(pitch, airspeed>25 ? .22 : .035));
-      yaw += (rudder-rollInput)*.22*Math.max(0, Math.min(velocity.length()/12,1))*dt;
-    } else {
-      yaw += (Math.tan(bank)*G / Math.max(airspeed,20) + rudder*.12)*dt;
+    for (const side of [-1,1]) {
+      box(scenery, side * (airport.width/2 - 1), .03,0, .5,.04,airport.length, stripe);
     }
-    
-    quaternion.setFromEuler(new THREE.Euler(pitch,yaw,bank,"YXZ"));
-
-    const forward = new THREE.Vector3(0,0,-1).applyQuaternion(quaternion);
-    const right = new THREE.Vector3(1,0,0).applyQuaternion(quaternion);
-    const up = new THREE.Vector3(0,1,0).applyQuaternion(quaternion);
-
-    const airflow = velocity.clone().sub(wind);
-    airspeed = airflow.length();
-    const airDirection = airspeed>.1 ? airflow.clone().divideScalar(airspeed) : forward.clone();
-    alpha = airspeed>5 ? Math.atan2(-airflow.dot(up), Math.max(.1,airflow.dot(forward))) : 0;
-    const density = 1.225*Math.exp(-Math.max(0,position.y)/8500);
-    const pressure = .5*density*airspeed*airspeed;
-
-    let cl = Math.max(-1.2, Math.min(.25 + 4.5*alpha + (flaps ? .4 : 0), flaps ? 1.8 : 1.5));
-    const stalled = Math.abs(alpha)>.27;
-    if (stalled) cl *= Math.max(.25,1-(Math.abs(alpha)-.27)*2);
-    const cd = .032 + .055*cl*cl + (flaps ? .045 : 0) + (stalled ? .16 : 0);
-
-    const liftDirection = right.clone().cross(airDirection).normalize();
-    const force = new THREE.Vector3(0,-MASS*G,0);
-    force.addScaledVector(forward, throttle*3300 * Math.max(0.5, Math.min(density/1.225,1)));
-    force.addScaledVector(liftDirection, pressure*AREA*cl);
-    force.addScaledVector(airDirection, -pressure*AREA*cd);
-    velocity.addScaledVector(force, dt/MASS);
-
-    if (grounded) {
-      const horizontal = new THREE.Vector3(velocity.x,0,velocity.z);
-      const speed = horizontal.length();
-      if (speed>.001) {
-        const loss = Math.min(speed,(brakes ? 4.2 : .18)*dt);
-        velocity.x -= horizontal.x/speed*loss;
-        velocity.z -= horizontal.z/speed*loss;
+    for (const end of [-1,1]) {
+      for (let i=-3; i<=3; i++) {
+        box(scenery,i*4,.04, end * (airport.length/2 - 35), 2,.04,22,stripe);
       }
-      const flatRight = new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
-      const sideways = velocity.dot(flatRight);
-      velocity.addScaledVector(flatRight, -sideways*Math.min(1,dt*7));
-      if (force.y>MASS*.2 && airspeed>25) {
-        grounded = false;
-        message = "Airborne! Ease the yoke toward center.";
+    }
+    box(scenery,180,12,0,100,24,220,building);
+    box(scenery,125,24,-180,16,48,16,building);
+    box(scenery,125,51,-180,30,10,30,dark.clone());
+
+    for (let i=0; i<55; i++) {
+      const side = i%2 ? -1 : 1;
+      const h = 15 + Math.random() * (airport === settings.kaitak ? 110 : 45);
+      box(scenery, side * (400 + Math.random()*2200), h/2 - 2, (Math.random()-.5)*6500, 30 + Math.random()*50, h, 30 + Math.random()*50, building);
+    }
+  }
+
+  function readView() {
+    eyeOffset.set(Number($("eyeX").value), Number($("eyeY").value), Number($("eyeZ").value));
+  }
+
+  for (const id of ["eyeX","eyeY","eyeZ","lookYaw","lookPitch"]) {
+    $(id).addEventListener("input",readView);
+  }
+
+  function normalizeName(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]/g,"");
+  }
+
+  function findPart(root,name) {
+    const wanted = normalizeName(name);
+    let found = null;
+    root.traverse(object => {
+      if (!found && normalizeName(object.name) === wanted) found = object;
+    });
+    return found;
+  }
+
+  function calibratePilotEye() {
+    const savedPosition = cockpitRig.position.clone();
+    const savedRotation = cockpitRig.quaternion.clone();
+    cockpitRig.position.set(0,0,0);
+    cockpitRig.quaternion.identity();
+    cockpitRig.updateMatrixWorld(true);
+    const model = cockpitModel.children[0];
+    const yoke = model ? findPart(model,"yoke.capt") : null;
+    const bounds = new THREE.Box3().setFromObject(yoke || cockpitModel);
+    if (!bounds.isEmpty()) {
+      const center = bounds.getCenter(new THREE.Vector3());
+      if (yoke) {
+        pilotEye.copy(center).add(new THREE.Vector3(0,.50,.50));
       } else {
-        velocity.y = 0;
+        const size = bounds.getSize(new THREE.Vector3());
+        pilotEye.set(bounds.min.x + size.x*.3, bounds.min.y + size.y*.65, bounds.min.z + size.z*.65);
       }
     }
+    cockpitRig.position.copy(savedPosition);
+    cockpitRig.quaternion.copy(savedRotation);
+    cockpitRig.updateMatrixWorld(true);
+  }
 
-    position.addScaledVector(velocity,dt);
+  $("resetView").onclick = () => {
+    $("eyeX").value = "0"; $("eyeY").value = "0"; $("eyeZ").value = "0";
+    $("lookYaw").value = "0"; $("lookPitch").value = "-5";
+    readView();
+  };
 
-    if (!grounded && position.y<=GROUND_Y) {
-      const sinkRate = Math.max(0,-velocity.y);
-      position.y = GROUND_Y;
-      if (!onRunway()) { crash("Touchdown outside the runway."); return; }
-      if (sinkRate>3 || Math.abs(bank)>.18 || Math.abs(pitch)>.25 || airspeed>52) {
-        crash("Touchdown too hard, fast, or tilted."); return;
+  $("turnModel").onclick = () => {
+    if (!cockpitReady) return;
+    modelTurned = !modelTurned;
+    cockpitModel.rotation.y = -Math.PI/2 + (modelTurned ? Math.PI : 0);
+    calibratePilotEye();
+  };
+
+  function applyGlassSetting() {
+    for (const item of glassMaterials) {
+      item.material.visible = glassHidden ? false : item.visible;
+      item.material.needsUpdate = true;
+    }
+    $("hideGlass").textContent = "Window glass: " + (glassHidden ? "HIDDEN" : "SHOWN");
+  }
+
+  $("hideGlass").onclick = () => {
+    glassHidden = !glassHidden;
+    applyGlassSetting();
+  };
+
+  function makeControlPivot(object,control) {
+    if (!object || !object.parent) return;
+    object.updateWorldMatrix(true,true);
+    const parent = object.parent;
+    const bounds = new THREE.Box3().setFromObject(object);
+    if (bounds.isEmpty()) return;
+    const point = bounds.getCenter(new THREE.Vector3());
+    if (control !== "yoke") point.y = bounds.min.y;
+    parent.worldToLocal(point);
+    const pivot = new THREE.Group();
+    pivot.position.copy(point);
+    parent.add(pivot);
+    pivot.updateWorldMatrix(true,false);
+    pivot.attach(object);
+    const rigWorld = cockpitRig.getWorldQuaternion(new THREE.Quaternion());
+    const pivotInverse = pivot.getWorldQuaternion(new THREE.Quaternion()).invert();
+    function localAxis(axis) {
+      return axis.applyQuaternion(rigWorld).applyQuaternion(pivotInverse).normalize();
+    }
+    animatedParts.push({
+      pivot, control, base: pivot.quaternion.clone(),
+      pitchAxis: localAxis(new THREE.Vector3(1,0,0)),
+      rollAxis: localAxis(new THREE.Vector3(0,0,1))
+    });
+  }
+
+  function installControls(root) {
+    const recognized = new Set();
+    const definitions = [
+      ["yoke.capt","yoke"], ["pd.n1","throttle"], ["pd.n2","throttle"],
+      ["pd.flaps","flaps"], ["pd.parking-brake","brakes"]
+    ];
+    for (const [name,control] of definitions) {
+      const object = findPart(root,name);
+      if (!object) continue;
+      object.userData.flightControl = control;
+      recognized.add(control);
+      makeControlPivot(object,control);
+    }
+    $("controlsFound").textContent = "Recognized cockpit controls: " + ([...recognized].join(", ") || "none");
+  }
+
+  function animateControls() {
+    const first = new THREE.Quaternion();
+    const second = new THREE.Quaternion();
+    for (const item of animatedParts) {
+      let angle = 0;
+      if (item.control === "yoke") {
+        first.setFromAxisAngle(item.pitchAxis, stickY * .10);
+        second.setFromAxisAngle(item.rollAxis, -stickX * .55);
+        item.pivot.quaternion.copy(item.base).multiply(first).multiply(second);
+        continue;
       }
-      velocity.y = 0;
-      grounded = true; landed = true;
-      pitchRate = bankRate = 0;
-      message = "Touchdown! Apply brakes.";
+      if (item.control === "throttle") angle = -throttle * .65;
+      else if (item.control === "flaps") angle = flaps ? .45 : 0;
+      else if (item.control === "brakes") angle = brakes ? .45 : 0;
+      first.setFromAxisAngle(item.pitchAxis,angle);
+      item.pivot.quaternion.copy(item.base).multiply(first);
     }
+  }
 
-    if (grounded) {
-      position.y = GROUND_Y;
-      if (!onRunway()) { crash("You left the runway."); return; }
-      if (landed && velocity.length()<1) {
-        state = "complete";
-        clearControls();
-        message = "LANDING COMPLETE!";
+  const assetBase = "https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
+  const failedAssets = new Set();
+
+  function showLoadMessage() {
+    $("loadMessage").textContent = cockpitNotice;
+  }
+
+  // R128 WAY TO LOAD GLTF
+  const loader = new THREE.GLTFLoader();
+  loader.crossOrigin = 'anonymous'; // THE FIX FOR IPAD SAFARI
+  
+  loader.load(
+    assetBase + "cockpit.glb",
+    gltf => {
+      try {
+        const model = gltf.scene;
+        cockpitModel.add(model);
+        cockpitModel.rotation.set(0,-Math.PI/2,0);
+        cockpitRig.updateMatrixWorld(true);
+        const bounds = new THREE.Box3().setFromObject(cockpitModel);
+        const size = bounds.getSize(new THREE.Vector3());
+        if (bounds.isEmpty() || !Number.isFinite(size.length()) || size.length() <= 0) throw new Error("Invalid");
+        const center = bounds.getCenter(new THREE.Vector3());
+        cockpitModel.position.x -= center.x;
+        cockpitModel.position.y += -1.2 - bounds.min.y;
+        cockpitRig.updateMatrixWorld(true);
+
+        const seenMaterials = new Set();
+        model.traverse(object => {
+          if (!object.isMesh || !object.material) return;
+          const list = Array.isArray(object.material) ? object.material : [object.material];
+          for (const mat of list) {
+            if (seenMaterials.has(mat)) continue;
+            seenMaterials.add(mat);
+            const image = mat.map?.image;
+            const source = String(image?.currentSrc || image?.src || "");
+            const identifiers = [mat.name || "", mat.map?.name || "", source].join(" ");
+            if (/window[-_ ]?trans/i.test(identifiers)) {
+              glassMaterials.push({ material: mat, visible: mat.visible });
+            }
+          }
+        });
+
+        applyGlassSetting();
+        calibratePilotEye();
+        installControls(model);
+        cockpitReady = true;
+        cockpitNotice = "Cockpit loaded.";
+        showLoadMessage();
+        setTimeout(() => $("loadMessage").style.display = 'none', 2000);
+      } catch (error) {
+        cockpitReady = false;
+        cockpitNotice = "Cockpit setup failed.";
+        showLoadMessage();
       }
+    },
+    undefined,
+    error => {
+      cockpitNotice = "Cockpit could not load.";
+      showLoadMessage();
     }
+  );
 
-    if (!grounded && stalled && airspeed<35) {
-      pitch = Math.max(-0.65, Math.min(pitch-.12*dt,0.65));
+  function syncPower() {
+    const value = Math.round(throttle * 100);
+    $("power").textContent = value + "%";
+    $("overlayPower").textContent = value + "%";
+    $("throttle").value = String(value);
+
+    const lever = $("throttleLever");
+    const grip = $("throttleGrip");
+
+    if (lever && grip) {
+      const height = lever.clientHeight;
+      const top = 24;
+      const bottom = Math.max(top, height - 24);
+      grip.style.top = (bottom - throttle * (bottom - top)) + "px";
     }
-    quaternion.setFromEuler(new THREE.Euler(pitch,yaw,bank,"YXZ"));
-}
+  }
 
-function updateAircraft(dt) {
-    plane.position.copy(position);
-    plane.quaternion.copy(quaternion);
-    plane.visible = chase;
-    if (cockpitReady) {
-      cockpitRig.position.copy(position);
-      cockpitRig.quaternion.copy(quaternion);
-    }
-    cockpitRig.visible = cockpitReady && !chase && state !== "menu";
-    if (state === "playing" && plane.userData.propeller) {
-        plane.userData.propeller.rotation.z += (15+throttle*100)*dt;
-    }
-}
+  function resetStick() {
+    stickX = 0; stickY = 0; stickPointer = null;
+    $("knob").style.transform = "translate(0px,0px)";
+  }
 
-function updateCamera(dt,snap=false) {
-    if (state === "menu") return;
-    const forward = new THREE.Vector3(0,0,-1).applyQuaternion(quaternion);
+  function releaseCockpitTouch(event) {
+    if (!cockpitTouch) return;
+    if (event && event.pointerId !== cockpitTouch.pointerId) return;
+    if (cockpitTouch.control === "yoke") { stickX = 0; stickY = 0; }
+    cockpitTouch = null;
+  }
 
-    if (chase) {
-      const desired = position.clone().addScaledVector(forward,-24).add(new THREE.Vector3(0,9,0));
-      if (snap) camera.position.copy(desired);
-      else camera.position.lerp(desired,1-Math.exp(-dt*5));
-      camera.up.set(0,1,0);
-      camera.lookAt(position.clone().addScaledVector(forward,45));
-    } else {
-      const eye = new THREE.Vector3(0,1.2,-1.6).applyQuaternion(quaternion).add(position);
-      camera.position.copy(eye);
-      const lookRotation = new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(
-          THREE.MathUtils.degToRad(Number($("lookPitch").value)),
-          THREE.MathUtils.degToRad(Number($("lookYaw").value)),
-          0, "YXZ"
-        )
-      );
-      camera.quaternion.copy(quaternion).multiply(lookRotation);
-    }
-    const near = chase ? .2 : .02;
-    if (camera.near !== near) {
-      camera.near = near;
-      camera.updateProjectionMatrix();
-    }
-}
+  function clearControls() {
+    keys.clear();
+    releaseCockpitTouch();
+    resetStick();
+  }
 
-function crash(reason) {
-    if (state !== "playing") return;
-    state = "crashed";
-    clearControls();
-    message = "CRASH: " + reason;
-}
-
-function onRunway() {
-    return Math.abs(position.x) <= airport.width/2 && Math.abs(position.z) <= airport.length/2;
-}
-
-function hud() {
-    const heading = ((airport.heading-yaw*180/Math.PI)%360+360)%360;
-    $("speed").textContent = Math.round(airspeed*1.94384)+" kt";
-    $("altitude").textContent = Math.max(0,Math.round((position.y-GROUND_Y)*3.28084))+" ft";
-    $("vertical").textContent = Math.round(velocity.y*196.85)+" ft/min";
-    $("heading").textContent = String(Math.round(heading)%360).padStart(3,"0")+"°";
-    $("power").textContent = Math.round(throttle*100)+"%";
-    let label = grounded ? "ON RUNWAY" : "FLYING";
-    if (state === "paused") label = "PAUSED";
-    if (state === "crashed") label = "CRASHED";
-    if (state === "complete") label = "STOPPED";
-    if (state === "playing" && !grounded && Math.abs(alpha)>.27) label = "STALL!";
-    $("flightState").textContent = label;
-    $("flightState").style.color = ["CRASHED","STALL!"].includes(label) ? "#fb7185" : "#a5f3fc";
-    $("status").textContent = state === "paused" ? "Paused." : message;
-}
-
-$("launch").onclick = () => {
-    state = "playing";
-    position.set(0, 1.5, -120);
-    velocity.set(0, 0, 0);
-    pitch = 0; bank = 0; yaw = 0;
-    quaternion.identity();
-    clearControls();
-    plane.visible = true;
-    $("menu").classList.add("hidden");
-    message = "Runway ready.";
-    updateAircraft(0);
-    updateCamera(1,true);
-};
-
-$("camera").onclick = () => {
-    clearControls(); chase = !chase; 
+  function updateButtons() {
     $("camera").textContent = chase ? "Camera: CHASE" : "Camera: COCKPIT";
-    if (state!=="menu") { updateAircraft(0); updateCamera(1,true); }
-};
+    $("flaps").textContent = flaps ? "Flaps: DOWN" : "Flaps: UP";
+    $("brakes").textContent = brakes ? "Brakes: ON" : "Brakes: OFF";
+    $("pause").textContent = state === "paused" ? "Resume" : "Pause";
+  }
 
-$("pause").onclick = () => {
-    if (state === "playing") { state = "paused"; clearControls(); $("pause").textContent = "Resume"; }
-    else if (state === "paused") { state = "playing"; $("pause").textContent = "Pause"; }
-};
-
-const keys = new Set();
-window.addEventListener("keydown", (e) => {
-    keys.add(e.key);
-});
-window.addEventListener("keyup", (e) => {
-    keys.delete(e.key);
-});
-
-// Initialize
-init3D();
-</script>
-</body>
-</html>
+  function start() {
+    airport = settings[$("airport").value];
+    buildAirport();
+    pitch = bank = yaw = 0; pitchRate = bankRate = 0;
+    quaternion.identity();
+    landed = false; alpha = 0;
+    wind.set($("weather").value === "crosswind" ? 4.115 : 0, 0, 0);
+    const approach = $("startMode").value === "approach";
+    position.set(0, approach ? 105 : GROUND_Y, airport.length/2 + (approach ? 1150 : -120));
+    velocity.set(0, approach ? -2.2 : 0, approach ? -38 : 0);
+    airspeed = velocity.clone().sub
