@@ -10,7 +10,7 @@
 body { margin: 0; background: #101827; color: #edf2f7; font-family: system-ui, sans-serif; }
 .wrap { max-width: 1200px; margin: auto; padding: 8px; }
 .version { text-align: center; color: #86efac; font-size: 12px; padding: 6px; }
-#stage { position: relative; height: 560px; overflow: hidden; border-radius: 12px; background: #99ccec; }
+#stage { position: relative; height: 560px; overflow: hidden; border-radius: 12px; background: #4a0e17; }
 #stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
 
 #menu { position: absolute; inset: 0; z-index: 5; padding: 22px; background: rgba(10,19,34,.97); overflow: auto; display: flex; flex-direction: column; justify-content: flex-start; }
@@ -81,6 +81,15 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
   #stage { height: 340px; min-height: 340px; }
 }
 </style>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 
 <body>
@@ -196,15 +205,6 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
   <small id="controlsFound"></small>
 </div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
-
 <script type="module">
 "use strict";
 
@@ -264,8 +264,8 @@ function initGame() {
       stage.insertBefore(renderer.domElement, stage.firstChild);
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color("#99ccec");
-      scene.fog = new THREE.Fog("#99ccec", 2400, 12000);
+      scene.background = new THREE.Color("#4a0e17"); // Dark red sky
+      scene.fog = new THREE.Fog("#4a0e17", 2400, 12000);
       const camera = new THREE.PerspectiveCamera(65, 1, .2, 20000);
 
       scene.add(new THREE.HemisphereLight(0xffffff, 0x63764b, 2.2));
@@ -279,7 +279,7 @@ function initGame() {
       const cockpitModel = new THREE.Group(); cockpitRig.add(cockpitModel);
       
       const explosionParticles = [];
-      const rockets = []; // For missiles and ink
+      const rockets = []; 
       const particleGeometry = new THREE.BoxGeometry(1, 1, 1);
       const particleMaterials = [
         new THREE.MeshStandardMaterial({ color: "#ff4400", emissive: "#ff2200" }),
@@ -355,7 +355,7 @@ function initGame() {
         mesh.position.set(rx, ry, rz);
         mesh.rotation.x = Math.PI / 2; 
         scene.add(mesh);
-        rockets.push({ mesh, speed: 120 + Math.random() * 80 });
+        rockets.push({ mesh, speed: 80 + Math.random() * 40 }); // Slower speed
       }
 
       function updateExplosion(dt) {
@@ -406,28 +406,26 @@ function initGame() {
         if (airport === settings.heathrow) {
           const towerMat = material("#1e293b");
           const laserMat = material("#00ffff");
-          box(scenery, -150, 150, 500, 40, 300, 40, towerMat);
-          box(scenery, -150, 300, 500, 60, 20, 60, towerMat);
-          box(scenery, -150, 200, 500, 45, 5, 45, laserMat);
+          box(scenery, 0, 150, 0, 60, 300, 60, towerMat); 
+          box(scenery, 0, 300, 0, 100, 20, 100, towerMat);
+          box(scenery, 0, 200, 0, 400, 5, 400, laserMat); 
         }
 
         if (airport === settings.juliana) {
           const squidMat = material("#4a044e");
-          box(scenery, 0, -5, 1000, 200, 40, 200, squidMat);
-          box(scenery, 0, 20, 1000, 150, 30, 150, squidMat);
-          box(scenery, -100, 40, 1000, 30, 80, 30, squidMat);
-          box(scenery, 100, 40, 1000, 30, 80, 30, squidMat);
-          box(scenery, 0, 60, 1100, 40, 100, 40, squidMat);
+          box(scenery, 0, 20, 300, 300, 80, 300, squidMat);
+          box(scenery, 0, 80, 300, 150, 60, 150, squidMat);
+          box(scenery, -150, 120, 300, 40, 100, 40, squidMat);
+          box(scenery, 150, 120, 300, 40, 100, 40, squidMat);
         }
 
         if (airport === settings.kaitak) {
           const volcanoMat = material("#332222");
           const lavaMat = material("#ff4400");
-          box(scenery, 0, 30, 500, 400, 60, 400, volcanoMat);
-          box(scenery, 0, 90, 500, 250, 60, 250, volcanoMat);
-          box(scenery, 0, 140, 500, 100, 40, 100, volcanoMat);
-          box(scenery, 0, 161, 500, 80, 2, 80, lavaMat);
-          box(scenery, 50, 80, 500, 20, 120, 20, lavaMat);
+          box(scenery, 300, 40, 200, 300, 80, 300, volcanoMat);
+          box(scenery, 300, 120, 200, 150, 80, 150, volcanoMat);
+          box(scenery, 300, 180, 200, 80, 40, 80, volcanoMat);
+          box(scenery, 300, 201, 200, 60, 2, 60, lavaMat);
         }
 
         for (let i=0; i<55; i++) {
@@ -691,39 +689,39 @@ function initGame() {
         // --- MAP HAZARDS ---
         if (state === "playing" && !grounded) {
           
-          // 1. HEATHROW LASER TOWER
           if (airport === settings.heathrow) {
-            const distToTower = Math.hypot(position.x - (-150), position.z - 500);
-            if (distToTower < 100 && position.y < 200) {
+            const distToTower = Math.hypot(position.x - 0, position.z - 0);
+            if (distToTower < 400 && position.y < 210) {
               crash("Zapped by the Laser Tower!");
               createExplosion(position);
             }
           }
 
-          // 2. JULIANA INK BLASTS
           if (airport === settings.juliana) {
-            if (Math.random() < 0.02) {
-              const ink = new THREE.Mesh(
-                new THREE.SphereGeometry(15, 8, 8), 
-                new THREE.MeshStandardMaterial({ color: "#000000" })
-              );
-              ink.position.set((Math.random() - 0.5) * 200, 50 + Math.random() * 100, 1000);
-              ink.userData.vel = new THREE.Vector3(
-                (position.x - ink.position.x) * 0.5, 
-                (position.y - ink.position.y) * 0.5, 
-                -150
-              );
-              scene.add(ink);
-              rockets.push({ mesh: ink, isInk: true });
+            const squidX = Math.sin(performance.now() / 1000) * 300;
+            
+            if (Math.random() < 0.05) {
+              for (let i = 0; i < 3; i++) {
+                const ink = new THREE.Mesh(
+                  new THREE.SphereGeometry(12, 8, 8), 
+                  new THREE.MeshStandardMaterial({ color: "#000000" })
+                );
+                ink.position.set(squidX, 50 + Math.random() * 50, 300);
+                ink.userData.vel = new THREE.Vector3(
+                  (position.x - ink.position.x) * 0.4 + (i - 1) * 30, 
+                  (position.y - ink.position.y) * 0.4, 
+                  -120
+                );
+                scene.add(ink);
+                rockets.push({ mesh: ink, isInk: true });
+              }
             }
           }
 
-          // 3. KAI TAK MISSILES
           if (airport === settings.kaitak) {
             if (Math.random() < 0.01) spawnRocket(); 
           }
 
-          // PROCESS PROJECTILES
           for (let i = rockets.length - 1; i >= 0; i--) {
             const r = rockets[i];
             
@@ -735,9 +733,9 @@ function initGame() {
               const dz = position.z - r.mesh.position.z;
               const dist = Math.hypot(dx, dy, dz);
               
-              r.mesh.position.x += (dx / dist) * r.speed * dt;
-              r.mesh.position.y += (dy / dist) * r.speed * dt;
-              r.mesh.position.z += (dz / dist) * r.speed * dt;
+              r.mesh.position.x += (dx / dist) * (r.speed * 0.7) * dt;
+              r.mesh.position.y += (dy / dist) * (r.speed * 0.7) * dt;
+              r.mesh.position.z += (dz / dist) * (r.speed * 0.7) * dt;
               r.mesh.lookAt(position);
             }
 
@@ -747,7 +745,7 @@ function initGame() {
               position.z - r.mesh.position.z
             );
 
-            if (distToPlayer < 18) {
+            if (distToPlayer < 12) {
               crash(r.isInk ? "Splattered by the Sea Monster!" : "Hit by a homing missile!");
               createExplosion(position);
               scene.remove(r.mesh);
