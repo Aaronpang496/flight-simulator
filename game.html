@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Island Flight</title>
+<title>Island Flight: Survival</title>
 
 <style>
 * { box-sizing: border-box; }
@@ -31,7 +31,7 @@ button:disabled { opacity: .5; }
 .instrument strong { display: block; font-size: 19px; color: #a5f3fc; }
 
 #status { min-height: 45px; padding: 8px; text-align: center; color: #fde68a; font-size: 18px; font-weight: bold; }
-#status.danger { color: #ff0000; animation: flash 0.5s infinite; }
+#status.danger { color: #ff0000; animation: flash 0.3s infinite; }
 @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
 
 .buttons { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
@@ -101,12 +101,12 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 
   <div id="stage">
     <div id="menu">
-      <h2>✈️ ISLAND FLIGHT</h2>
+      <h2>✈️ ISLAND FLIGHT: SURVIVAL</h2>
       <label>Airport setting
         <select id="airport">
-          <option value="heathrow">London Heathrow — long runway</option>
-          <option value="juliana">Princess Juliana — coastal runway</option>
-          <option value="kaitak">Historic Kai Tak — harbor setting</option>
+          <option value="heathrow">London Heathrow — Laser Tower</option>
+          <option value="juliana">Princess Juliana — Kraken</option>
+          <option value="kaitak">Historic Kai Tak — Volcano & Missiles</option>
         </select>
       </label>
       <label>Starting position
@@ -174,12 +174,9 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
   </div>
 
   <div id="instruments">
+    <div class="instrument">SURVIVAL TIME<strong id="timer">0.0s</strong></div>
     <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
-    <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
-    <div class="instrument">VS<strong id="vertical">0 ft/min</strong></div>
-    <div class="instrument">Heading<strong id="heading">000°</strong></div>
-    <div class="instrument">Power<strong id="power">0%</strong></div>
-    <div class="instrument">State<strong id="flightState">READY</strong></div>
+    <div class="instrument">Altitude<strong id="altitude">0 ft</strong></div>
   </div>
 
   <div id="status">Choose a starting position.</div>
@@ -189,23 +186,6 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
     <button id="pause">Pause</button>
     <button id="restart">Setup</button>
   </div>
-
-  <details>
-    <summary>Camera Adjustments</summary>
-    <div class="cameraGrid">
-      <label>X<input id="eyeX" type="range" min="-1.5" max="1.5" step=".01" value="0"></label>
-      <label>Y<input id="eyeY" type="range" min="-1.5" max="1.5" step=".01" value="0"></label>
-      <label>Z<input id="eyeZ" type="range" min="-3" max="3" step=".01" value="0"></label>
-      <label>Yaw<input id="lookYaw" type="range" min="-180" max="180" step="1" value="0"></label>
-      <label>Pitch<input id="lookPitch" type="range" min="-60" max="60" step="1" value="-5"></label>
-    </div>
-    <div class="buttons">
-      <button id="hideGlass">Window glass: HIDDEN</button>
-      <button id="turnModel">Turn cockpit 180°</button>
-      <button id="resetView">Reset view</button>
-    </div>
-  </details>
-  <small id="controlsFound"></small>
 </div>
 
 <script type="module">
@@ -303,7 +283,9 @@ function initGame() {
       let stickX = 0, stickY = 0, stickPointer = null, cockpitTouch = null;
       let leverPointer = null, leverStartY = 0, leverStartPower = 0;
       let screenShakeTime = 0;
+      let survivalTime = 0;
 
+      // FASTER PLANE
       const MASS = 1100, AREA = 16.2, G = 9.81, GROUND_Y = 1.5;
       const settings = {
         heathrow: { length: 3900, width: 50, heading: 90, coast: false },
@@ -333,7 +315,7 @@ function initGame() {
       }
 
       function createExplosion(pos) {
-        screenShakeTime = 1.5; // SHAKE THE SCREEN
+        screenShakeTime = 1.5; 
         for (let i = 0; i < 150; i++) {
           const mat = particleMaterials[Math.floor(Math.random() * particleMaterials.length)];
           const mesh = new THREE.Mesh(particleGeometry, mat);
@@ -349,18 +331,19 @@ function initGame() {
       }
 
       function spawnRocket() {
-        // Spawn BEHIND the plane
-        const rx = position.x + (Math.random() - 0.5) * 100;
-        const ry = position.y + (Math.random() - 0.5) * 100;
-        const rz = position.z + 600; 
+        // Spawn in front of the plane, far away
+        const rx = (Math.random() - 0.5) * 400;
+        const ry = Math.random() * 100 + 20;
+        const rz = position.z - 1000; 
 
         const mesh = new THREE.Mesh(
           new THREE.CylinderGeometry(2, 2, 15, 8), 
           new THREE.MeshStandardMaterial({ color: "#ff0000", emissive: "#ff0000" })
         );
         mesh.position.set(rx, ry, rz);
+        mesh.rotation.x = Math.PI / 2; 
         scene.add(mesh);
-        rockets.push({ mesh, speed: 150 + Math.random() * 80 });
+        rockets.push({ mesh, speed: 80 }); // Slow enough to dodge
       }
 
       function updateExplosion(dt) {
@@ -582,6 +565,7 @@ function initGame() {
 
       function start() {
         clearExplosion();
+        survivalTime = 0;
         airport = settings[$("airport").value]; buildAirport();
         pitch = bank = yaw = 0; pitchRate = bankRate = 0; quaternion.identity(); landed = false; alpha = 0;
         wind.set($("weather").value === "crosswind" ? 4.115 : 0, 0, 0);
@@ -616,7 +600,7 @@ function initGame() {
         if (state !== "playing") return; 
         state = "crashed"; 
         clearControls(); 
-        message = "CRASH: " + reason; 
+        message = "CRASH: " + reason + " (Survived: " + survivalTime.toFixed(1) + "s)"; 
         plane.visible = false;
         createExplosion(position); 
       }
@@ -626,6 +610,8 @@ function initGame() {
 
       function physics(dt) {
         if (state !== "playing") return;
+        if (grounded) survivalTime = 0; else survivalTime += dt;
+
         const pitchInput = clamp(stickY + Number(keys.has("ArrowDown")) - Number(keys.has("ArrowUp")), -1,1);
         const rollInput = clamp(stickX + Number(keys.has("ArrowRight")) - Number(keys.has("ArrowLeft")), -1,1);
         const rudder = Number(keys.has("q")) - Number(keys.has("e"));
@@ -699,7 +685,7 @@ function initGame() {
           
           if (airport === settings.heathrow) {
             const distToTower = Math.hypot(position.x - 0, position.z - 0);
-            if (distToTower < 500 && position.y < 250) dangerWarning = "DANGER: LASER TOWER!";
+            if (distToTower < 450 && position.y < 220) dangerWarning = "DANGER: LASER TOWER!";
             if (distToTower < 400 && position.y < 210) {
               crash("Zapped by the Laser Tower!");
               createExplosion(position);
@@ -709,17 +695,17 @@ function initGame() {
           if (airport === settings.juliana) {
             const squidX = Math.sin(performance.now() / 1000) * 300;
             
-            if (Math.random() < 0.05) {
-              for (let i = 0; i < 3; i++) {
+            if (Math.random() < 0.03) { // Slightly less frequent
+              for (let i = 0; i < 2; i++) { // Only 2 blobs
                 const ink = new THREE.Mesh(
                   new THREE.SphereGeometry(12, 8, 8), 
                   new THREE.MeshStandardMaterial({ color: "#000000" })
                 );
                 ink.position.set(squidX, 50 + Math.random() * 50, 300);
                 ink.userData.vel = new THREE.Vector3(
-                  (position.x - ink.position.x) * 0.4 + (i - 1) * 30, 
-                  (position.y - ink.position.y) * 0.4, 
-                  -120
+                  (position.x - ink.position.x) * 0.3 + (i - 1) * 40, 
+                  (position.y - ink.position.y) * 0.3, 
+                  -80 // Slower
                 );
                 scene.add(ink);
                 rockets.push({ mesh: ink, isInk: true });
@@ -728,7 +714,7 @@ function initGame() {
           }
 
           if (airport === settings.kaitak) {
-            if (Math.random() < 0.01) spawnRocket(); 
+            if (Math.random() < 0.008) spawnRocket(); // Less frequent
           }
 
           for (let i = rockets.length - 1; i >= 0; i--) {
@@ -742,9 +728,9 @@ function initGame() {
               const dz = position.z - r.mesh.position.z;
               const dist = Math.hypot(dx, dy, dz);
               
-              r.mesh.position.x += (dx / dist) * (r.speed * 0.7) * dt;
-              r.mesh.position.y += (dy / dist) * (r.speed * 0.7) * dt;
-              r.mesh.position.z += (dz / dist) * (r.speed * 0.7) * dt;
+              r.mesh.position.x += (dx / dist) * (r.speed * 0.5) * dt; // Much slower homing
+              r.mesh.position.y += (dy / dist) * (r.speed * 0.5) * dt;
+              r.mesh.position.z += (dz / dist) * (r.speed * 0.5) * dt;
               r.mesh.lookAt(position);
             }
 
@@ -754,9 +740,9 @@ function initGame() {
               position.z - r.mesh.position.z
             );
 
-            if (distToPlayer < 200) {
+            if (distToPlayer < 150) {
               dangerWarning = r.isInk ? "DANGER: INK INCOMING!" : "WARNING: MISSILE LOCK!";
-              screenShakeTime = Math.max(screenShakeTime, 0.1); // Slight rumble
+              screenShakeTime = Math.max(screenShakeTime, 0.1); 
             }
 
             if (distToPlayer < 12) {
@@ -771,7 +757,6 @@ function initGame() {
           }
         }
         
-        // Apply Alarm Text
         if (dangerWarning) {
           $("status").textContent = dangerWarning;
           $("status").classList.add("danger");
@@ -792,9 +777,10 @@ function initGame() {
         if (state === "menu") return;
         const forward = new THREE.Vector3(0,0,-1).applyQuaternion(quaternion);
         if (chase) {
-          const desired = position.clone().addScaledVector(forward,-24).add(new THREE.Vector3(0,9,0));
+          // Pulled back for faster feel
+          const desired = position.clone().addScaledVector(forward,-30).add(new THREE.Vector3(0,10,0));
           if (snap) camera.position.copy(desired); else camera.position.lerp(desired,1-Math.exp(-dt*5));
-          camera.up.set(0,1,0); camera.lookAt(position.clone().addScaledVector(forward,45));
+          camera.up.set(0,1,0); camera.lookAt(position.clone().addScaledVector(forward,60));
         } else {
           const eye = cockpitReady ? pilotEye.clone() : new THREE.Vector3(0,1.2,-1.6);
           eye.add(eyeOffset).applyQuaternion(quaternion).add(position); camera.position.copy(eye);
@@ -802,11 +788,10 @@ function initGame() {
           camera.quaternion.copy(quaternion).multiply(lookRotation);
         }
         
-        // Add Screen Shake
         if (screenShakeTime > 0) {
-           camera.position.x += (Math.random() - 0.5) * 2;
-           camera.position.y += (Math.random() - 0.5) * 2;
-           camera.position.z += (Math.random() - 0.5) * 2;
+           camera.position.x += (Math.random() - 0.5) * 3;
+           camera.position.y += (Math.random() - 0.5) * 3;
+           camera.position.z += (Math.random() - 0.5) * 3;
         }
 
         const near = chase ? .2 : .02;
@@ -815,19 +800,11 @@ function initGame() {
 
       function hud() {
         syncPower();
+        $("timer").textContent = survivalTime.toFixed(1) + "s";
         const heading = ((airport.heading-yaw*180/Math.PI)%360+360)%360;
         $("speed").textContent = Math.round(airspeed*1.94384)+" kt";
         $("altitude").textContent = Math.max(0,Math.round((position.y-GROUND_Y)*3.28084))+" ft";
-        $("vertical").textContent = Math.round(velocity.y*196.85)+" ft/min";
-        $("heading").textContent = String(Math.round(heading)%360).padStart(3,"0")+"°";
-        $("power").textContent = Math.round(throttle*100)+"%";
-        let label = grounded ? "ON RUNWAY" : "FLYING";
-        if (state === "paused") label = "PAUSED";
-        if (state === "crashed") label = "CRASHED";
-        if (state === "complete") label = "STOPPED";
-        if (state === "playing" && !grounded && Math.abs(alpha)>.27) label = "STALL!";
-        $("flightState").textContent = label;
-        $("flightState").style.color = ["CRASHED","STALL!"].includes(label) ? "#fb7185" : "#a5f3fc";
+        
         if (!$("status").classList.contains("danger")) {
             $("status").textContent = state === "paused" ? "Paused." : message;
         }
@@ -886,29 +863,6 @@ function initGame() {
       $("camera").onclick = () => { clearControls(); chase=!chase; updateButtons(); if (state!=="menu") { updateAircraft(0); updateCamera(1,true); } };
 
       $("pause").onclick=pause; $("restart").onclick=setup; $("launch").onclick=start;
-
-      const throttleLever = $("throttleLever");
-
-      throttleLever.addEventListener("pointerdown", event => {
-        if (state !== "playing" || leverPointer !== null) return;
-        if (event.pointerType === "mouse" && event.button !== 0) return;
-        event.preventDefault(); leverPointer = event.pointerId; leverStartY = event.clientY; leverStartPower = throttle;
-        throttleLever.setPointerCapture(event.pointerId); message = "Throttle handle: push up for more power.";
-      });
-
-      throttleLever.addEventListener("pointermove", event => {
-        if (event.pointerId !== leverPointer || state !== "playing") return;
-        event.preventDefault(); const travel = Math.max(40, throttleLever.clientHeight - 48);
-        const movement = leverStartY - event.clientY; throttle = clamp(leverStartPower + movement / travel, 0, 1); syncPower();
-      });
-
-      function releaseThrottleLever(event) { if (event.pointerId === leverPointer) leverPointer = null; }
-      for (const eventName of ["pointerup","pointercancel","lostpointercapture"]) throttleLever.addEventListener(eventName, releaseThrottleLever);
-      function updateYokeHandle() { $("yokeWheel").style.transform = `rotate(${stickX * 28}deg)`; }
-      stick.addEventListener("pointermove", updateYokeHandle);
-      for (const eventName of ["pointerup","pointercancel","lostpointercapture"]) stick.addEventListener(eventName, () => { $("yokeWheel").style.transform = "rotate(0deg)"; });
-      window.addEventListener("blur", () => { leverPointer = null; $("yokeWheel").style.transform = "rotate(0deg)"; });
-      document.addEventListener("visibilitychange", () => { if (document.hidden) { leverPointer = null; $("yokeWheel").style.transform = "rotate(0deg)"; } });
 
       window.addEventListener("keydown",event => {
         const key=event.key.length===1 ? event.key.toLowerCase() : event.key; const tag = event.target?.tagName;
