@@ -1,0 +1,100 @@
+name: Convert cockpit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  convert:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Download aircraft source
+        run: |
+          git clone --depth 1 \
+            https://github.com/REXO-77/737-MAX.git aircraft
+
+      - name: Install conversion tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y assimp-utils
+
+      - name: Check texture dependencies and prepare files
+        shell: python
+        run: |
+          import re
+          import shutil
+          from pathlib import Path
+
+          repo = Path("aircraft")
+          cockpit = repo / "Models" / "Cockpit"
+          model = cockpit / "cockpit.ac"
+
+          text = model.read_text(
+              encoding="utf-8", errors="replace"
+          )
+          textures = sorted(set(re.findall(
+              r'^\s*texture\s+"([^"]+)"',
+              text,
+              re.MULTILINE,
+          )))
+
+          missing = [
+              name for name in textures
+              if not (cockpit / name).is_file()
+          ]
+
+          if missing:
+              raise RuntimeError(
+                  "Missing texture files:\n" +
+                  "\n".join(missing)
+              )
+
+          output = Path("cockpit-test")
+          output.mkdir()
+
+          # Preserve the source folder and relative texture paths.
+          shutil.copytree(cockpit, output / "Cockpit")
+
+          # Retain common repository-level notices when present.
+          notices = output / "repository-notices"
+          notices.mkdir()
+          for item in repo.iterdir():
+              if item.is_file() and item.name.lower().startswith(
+                  ("license", "licence", "copying", "copyright",
+                   "authors", "readme", "notice")
+              ):
+                  shutil.copy2(item, notices / item.name)
+
+          revision = (
+              repo / ".git" / "shallow"
+          ).read_text().strip()
+
+          (output / "SOURCE.txt").write_text(
+              "Source: https://github.com/REXO-77/737-MAX\n"
+              f"Shallow source revision: {revision}\n"
+              "Modification: main cockpit converted using Assimp.\n"
+              "FlightGear XML behavior is not implemented by this conversion.\n"
+              "The separate overhead model is not assembled into the GLB.\n"
+              "Asset licensing still requires review before distribution.\n",
+              encoding="utf-8",
+          )
+
+          print(f"Found all {len(textures)} referenced textures.")
+
+      - name: Convert main cockpit to GLB
+        working-directory: cockpit-test/Cockpit
+        run: |
+          assimp export cockpit.ac cockpit.glb -fglb2
+          test -s cockpit.glb
+
+      - name: Save conversion files
+        uses: actions/upload-artifact@v4
+        with:
+          name: cockpit-conversion-test
+          path: cockpit-test/
+          retention-days: 7
+          if-no-files-found: error
