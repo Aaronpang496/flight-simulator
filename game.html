@@ -79,9 +79,6 @@ body:has(#menu:not(.hidden)) #fallback { display: none !important; }
   #stage { height: 340px; min-height: 340px; }
 }
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 
 <body>
@@ -201,10 +198,27 @@ body:has(#menu:not(.hidden)) #fallback { display: none !important; }
 "use strict";
 const $ = id => document.getElementById(id);
 
+// 1. Manually inject Three.js if not found
 if (typeof THREE === 'undefined') {
-    $("loadMessage").textContent = "3D engine failed to load. Check internet.";
-    $("launch").textContent = "Engine unavailable";
+    $("loadMessage").textContent = "Loading 3D engine...";
+    const script1 = document.createElement('script');
+    script1.src = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js";
+    script1.onload = () => {
+        const script2 = document.createElement('script');
+        script2.src = "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js";
+        script2.onload = () => { initGame(); };
+        document.head.appendChild(script2);
+    };
+    script1.onerror = () => {
+        $("loadMessage").textContent = "Failed to load 3D engine. Check internet.";
+        $("launch").textContent = "Engine unavailable";
+    };
+    document.head.appendChild(script1);
 } else {
+    initGame();
+}
+
+function initGame() {
     (() => {
       const stage = document.getElementById("stage");
       const controls = document.getElementById("fallback");
@@ -248,13 +262,12 @@ if (typeof THREE === 'undefined') {
       const cockpitRig = new THREE.Group(); cockpitRig.visible = false; scene.add(cockpitRig);
       const cockpitModel = new THREE.Group(); cockpitRig.add(cockpitModel);
       
-      // --- EXPLOSION PARTICLES SYSTEM ---
       const explosionParticles = [];
       const particleGeometry = new THREE.BoxGeometry(1, 1, 1);
       const particleMaterials = [
-        new THREE.MeshStandardMaterial({ color: "#ff4400", emissive: "#ff2200" }), // Fire
-        new THREE.MeshStandardMaterial({ color: "#ffcc00", emissive: "#ffaa00" }), // Yellow
-        new THREE.MeshStandardMaterial({ color: "#333333" }) // Smoke
+        new THREE.MeshStandardMaterial({ color: "#ff4400", emissive: "#ff2200" }),
+        new THREE.MeshStandardMaterial({ color: "#ffcc00", emissive: "#ffaa00" }),
+        new THREE.MeshStandardMaterial({ color: "#333333" })
       ];
 
       const position = new THREE.Vector3(), velocity = new THREE.Vector3(), quaternion = new THREE.Quaternion(), wind = new THREE.Vector3();
@@ -302,16 +315,11 @@ if (typeof THREE === 'undefined') {
           const mat = particleMaterials[Math.floor(Math.random() * particleMaterials.length)];
           const mesh = new THREE.Mesh(particleGeometry, mat);
           mesh.position.copy(pos);
-          
           const size = Math.random() * 2 + 0.5;
           mesh.scale.set(size, size, size);
-
           const vel = new THREE.Vector3(
-            (Math.random() - 0.5) * 40,
-            (Math.random() - 0.5) * 40 + 10,
-            (Math.random() - 0.5) * 40
+            (Math.random() - 0.5) * 40, (Math.random() - 0.5) * 40 + 10, (Math.random() - 0.5) * 40
           );
-
           scene.add(mesh);
           explosionParticles.push({ mesh, vel, life: 1.0 });
         }
@@ -321,24 +329,14 @@ if (typeof THREE === 'undefined') {
         for (let i = explosionParticles.length - 1; i >= 0; i--) {
           const p = explosionParticles[i];
           p.mesh.position.addScaledVector(p.vel, dt);
-          p.vel.y -= 9.8 * dt; // Gravity
+          p.vel.y -= 9.8 * dt;
           p.life -= dt * 0.8;
-          
-          if (p.mesh.material === particleMaterials[2]) { // Smoke
-            p.mesh.position.y += dt * 5; // Smoke floats up
-          }
-
-          p.mesh.scale.multiplyScalar(1 - dt * 0.5); // Shrink over time
-          p.mesh.rotation.x += dt * 2;
-          p.mesh.rotation.y += dt * 2;
-
-          if (p.life <= 0) {
-            scene.remove(p.mesh);
-            explosionParticles.splice(i, 1);
-          }
+          if (p.mesh.material === particleMaterials[2]) p.mesh.position.y += dt * 5;
+          p.mesh.scale.multiplyScalar(1 - dt * 0.5);
+          p.mesh.rotation.x += dt * 2; p.mesh.rotation.y += dt * 2;
+          if (p.life <= 0) { scene.remove(p.mesh); explosionParticles.splice(i, 1); }
         }
       }
-      // -----------------------------------
 
       function disposeScenery() {
         const geometries = new Set(), materials = new Set();
@@ -412,7 +410,7 @@ if (typeof THREE === 'undefined') {
         const point = bounds.getCenter(new THREE.Vector3());
         if (control !== "yoke") point.y = bounds.min.y;
         parent.worldToLocal(point);
-        const pivot = new THREE.Group(); pivot.position.copy(point); parent.add(pivot); pivot.updateWorldMatrix(true,false); pivot.attach(object);
+        const pivot = new THREE.Group(); pivot.position.copy(point); parent.add(pivot); pivot.updateMatrixWorld(true,false); pivot.attach(object);
         const rigWorld = cockpitRig.getWorldQuaternion(new THREE.Quaternion()); const pivotInverse = pivot.getWorldQuaternion(new THREE.Quaternion()).invert();
         function localAxis(axis) { return axis.applyQuaternion(rigWorld).applyQuaternion(pivotInverse).normalize(); }
         animatedParts.push({ pivot, control, base: pivot.quaternion.clone(), pitchAxis: localAxis(new THREE.Vector3(1,0,0)), rollAxis: localAxis(new THREE.Vector3(0,0,1)) });
@@ -448,7 +446,7 @@ if (typeof THREE === 'undefined') {
 
       const manager = new THREE.LoadingManager();
       manager.onError = url => { cockpitNotice = "A cockpit asset failed to load."; showLoadMessage(); };
-      const loader = new GLTFLoader(manager);
+      const loader = new THREE.GLTFLoader(manager);
 
       loader.load(
         assetBase + "cockpit.glb",
@@ -474,10 +472,11 @@ if (typeof THREE === 'undefined') {
 
             applyGlassSetting(); calibratePilotEye(); installControls(model);
             cockpitReady = true; cockpitNotice = "Cockpit loaded."; showLoadMessage();
+            $("launch").disabled = false; $("launch").textContent = "Start flight";
           } catch (error) { cockpitReady = false; cockpitNotice = "Cockpit setup failed."; showLoadMessage(); }
         },
         undefined,
-        error => { cockpitNotice = "Cockpit could not load."; showLoadMessage(); }
+        error => { cockpitNotice = "Cockpit could not load (check GitHub file)."; showLoadMessage(); $("launch").disabled = false; $("launch").textContent = "Start flight (No Cockpit)"; }
       );
 
       function syncPower() {
@@ -528,7 +527,7 @@ if (typeof THREE === 'undefined') {
         clearControls(); 
         message = "CRASH: " + reason; 
         plane.visible = false;
-        createExplosion(position); // 💥 BOOM!
+        createExplosion(position); 
       }
 
       function onRunway() { return Math.abs(position.x) <= airport.width/2 && Math.abs(position.z) <= airport.length/2; }
@@ -754,10 +753,7 @@ if (typeof THREE === 'undefined') {
         const dt=Math.min((now-previous)/1000,.05); previous=now;
         if (state==="playing") { const steps=Math.max(1,Math.ceil(dt/.008)); for (let i=0;i<steps;i++) physics(dt/steps); }
         if (state!=="menu") { updateAircraft(dt); updateCamera(dt); hud(); }
-        
-        // Update the explosion particles every frame
         updateExplosion(dt);
-
         renderer.render(scene,camera); requestAnimationFrame(frame);
       }
       requestAnimationFrame(frame);
