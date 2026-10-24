@@ -6,8 +6,15 @@ st.set_page_config(page_title="Island Flight", page_icon="✈️", layout="wide"
 
 st.markdown("<style>.block-container {padding-top: 1rem; padding-bottom: 0;}</style>", unsafe_allow_html=True)
 
+game_file = Path(__file__).resolve().with_name("game.html")
+
 try:
-    html = Path(__file__).with_name("game.html").read_text(encoding="utf-8")
-    components.html(html, height=1050, scrolling=True)
+    html = game_file.read_text(encoding="utf-8")
 except FileNotFoundError:
-    st.error("Error: game.html not found. Make sure it is in the same folder as app.py.")
+    st.error("game.html was not found. Place it beside app.py and check the filename.")
+    st.stop()
+except (OSError, UnicodeError):
+    st.error("game.html could not be read as a UTF-8 text file.")
+    st.stop()
+
+components.html(html, height=1050, scrolling=True)
