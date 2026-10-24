@@ -9,10 +9,16 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("✈️ Island Flight")
-st.caption(
-    "Interactive cockpit prototype • Touch controls • "
-    "Simplified flight physics"
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 0;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 html = Path(__file__).with_name("game.html").read_text(
@@ -21,6 +27,6 @@ html = Path(__file__).with_name("game.html").read_text(
 
 components.html(
     html,
-    height=1550,
+    height=1050,
     scrolling=True,
 )
