@@ -279,6 +279,7 @@ function initGame() {
       const cockpitModel = new THREE.Group(); cockpitRig.add(cockpitModel);
       
       const explosionParticles = [];
+      const rockets = []; // For missiles and ink
       const particleGeometry = new THREE.BoxGeometry(1, 1, 1);
       const particleMaterials = [
         new THREE.MeshStandardMaterial({ color: "#ff4400", emissive: "#ff2200" }),
@@ -342,6 +343,21 @@ function initGame() {
         }
       }
 
+      function spawnRocket() {
+        const rx = (Math.random() - 0.5) * 400;
+        const ry = Math.random() * 150 + 20;
+        const rz = position.z - 800;
+
+        const mesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(2, 2, 15, 8), 
+          new THREE.MeshStandardMaterial({ color: "#ff0000", emissive: "#ff0000" })
+        );
+        mesh.position.set(rx, ry, rz);
+        mesh.rotation.x = Math.PI / 2; 
+        scene.add(mesh);
+        rockets.push({ mesh, speed: 120 + Math.random() * 80 });
+      }
+
       function updateExplosion(dt) {
         for (let i = explosionParticles.length - 1; i >= 0; i--) {
           const p = explosionParticles[i];
@@ -358,6 +374,8 @@ function initGame() {
       function clearExplosion() {
         for (const particle of explosionParticles) { scene.remove(particle.mesh); }
         explosionParticles.length = 0;
+        for (const r of rockets) { scene.remove(r.mesh); }
+        rockets.length = 0;
       }
 
       function disposeScenery() {
@@ -383,6 +401,35 @@ function initGame() {
         for (const side of [-1,1]) box(scenery, side * (airport.width/2 - 1), .03,0, .5,.04,airport.length, stripe);
         for (const end of [-1,1]) { for (let i=-3; i<=3; i++) box(scenery,i*4,.04, end * (airport.length/2 - 35), 2,.04,22,stripe); }
         box(scenery,180,12,0,100,24,220,building); box(scenery,125,24,-180,16,48,16,building); box(scenery,125,51,-180,30,10,30,dark.clone());
+
+        // MAP HAZARDS
+        if (airport === settings.heathrow) {
+          const towerMat = material("#1e293b");
+          const laserMat = material("#00ffff");
+          box(scenery, -150, 150, 500, 40, 300, 40, towerMat);
+          box(scenery, -150, 300, 500, 60, 20, 60, towerMat);
+          box(scenery, -150, 200, 500, 45, 5, 45, laserMat);
+        }
+
+        if (airport === settings.juliana) {
+          const squidMat = material("#4a044e");
+          box(scenery, 0, -5, 1000, 200, 40, 200, squidMat);
+          box(scenery, 0, 20, 1000, 150, 30, 150, squidMat);
+          box(scenery, -100, 40, 1000, 30, 80, 30, squidMat);
+          box(scenery, 100, 40, 1000, 30, 80, 30, squidMat);
+          box(scenery, 0, 60, 1100, 40, 100, 40, squidMat);
+        }
+
+        if (airport === settings.kaitak) {
+          const volcanoMat = material("#332222");
+          const lavaMat = material("#ff4400");
+          box(scenery, 0, 30, 500, 400, 60, 400, volcanoMat);
+          box(scenery, 0, 90, 500, 250, 60, 250, volcanoMat);
+          box(scenery, 0, 140, 500, 100, 40, 100, volcanoMat);
+          box(scenery, 0, 161, 500, 80, 2, 80, lavaMat);
+          box(scenery, 50, 80, 500, 20, 120, 20, lavaMat);
+        }
+
         for (let i=0; i<55; i++) {
           const side = i%2 ? -1 : 1; const h = 15 + Math.random() * (airport === settings.kaitak ? 110 : 45);
           box(scenery, side * (400 + Math.random()*2200), h/2 - 2, (Math.random()-.5)*6500, 30 + Math.random()*50, h, 30 + Math.random()*50, building);
@@ -640,6 +687,77 @@ function initGame() {
         if (!grounded && stalled && airspeed<35) pitch = clamp(pitch-.12*dt,-.65,.65);
         if (!Number.isFinite(position.x) || !Number.isFinite(position.y) || !Number.isFinite(position.z)) { crash("Simulation error."); return; }
         updateOrientation();
+
+        // --- MAP HAZARDS ---
+        if (state === "playing" && !grounded) {
+          
+          // 1. HEATHROW LASER TOWER
+          if (airport === settings.heathrow) {
+            const distToTower = Math.hypot(position.x - (-150), position.z - 500);
+            if (distToTower < 100 && position.y < 200) {
+              crash("Zapped by the Laser Tower!");
+              createExplosion(position);
+            }
+          }
+
+          // 2. JULIANA INK BLASTS
+          if (airport === settings.juliana) {
+            if (Math.random() < 0.02) {
+              const ink = new THREE.Mesh(
+                new THREE.SphereGeometry(15, 8, 8), 
+                new THREE.MeshStandardMaterial({ color: "#000000" })
+              );
+              ink.position.set((Math.random() - 0.5) * 200, 50 + Math.random() * 100, 1000);
+              ink.userData.vel = new THREE.Vector3(
+                (position.x - ink.position.x) * 0.5, 
+                (position.y - ink.position.y) * 0.5, 
+                -150
+              );
+              scene.add(ink);
+              rockets.push({ mesh: ink, isInk: true });
+            }
+          }
+
+          // 3. KAI TAK MISSILES
+          if (airport === settings.kaitak) {
+            if (Math.random() < 0.01) spawnRocket(); 
+          }
+
+          // PROCESS PROJECTILES
+          for (let i = rockets.length - 1; i >= 0; i--) {
+            const r = rockets[i];
+            
+            if (r.isInk) {
+              r.mesh.position.addScaledVector(r.mesh.userData.vel, dt);
+            } else {
+              const dx = position.x - r.mesh.position.x;
+              const dy = position.y - r.mesh.position.y;
+              const dz = position.z - r.mesh.position.z;
+              const dist = Math.hypot(dx, dy, dz);
+              
+              r.mesh.position.x += (dx / dist) * r.speed * dt;
+              r.mesh.position.y += (dy / dist) * r.speed * dt;
+              r.mesh.position.z += (dz / dist) * r.speed * dt;
+              r.mesh.lookAt(position);
+            }
+
+            const distToPlayer = Math.hypot(
+              position.x - r.mesh.position.x,
+              position.y - r.mesh.position.y,
+              position.z - r.mesh.position.z
+            );
+
+            if (distToPlayer < 18) {
+              crash(r.isInk ? "Splattered by the Sea Monster!" : "Hit by a homing missile!");
+              createExplosion(position);
+              scene.remove(r.mesh);
+              rockets.splice(i, 1);
+            } else if (distToPlayer > 2000 || r.mesh.position.z > 2000) {
+              scene.remove(r.mesh);
+              rockets.splice(i, 1);
+            }
+          }
+        }
       }
 
       function updateAircraft(dt) {
