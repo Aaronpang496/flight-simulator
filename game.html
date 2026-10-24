@@ -30,7 +30,10 @@ button:disabled { opacity: .5; }
 .instrument { background: #1d293c; border-radius: 8px; padding: 9px; text-align: center; font-size: 12px; }
 .instrument strong { display: block; font-size: 19px; color: #a5f3fc; }
 
-#status { min-height: 45px; padding: 8px; text-align: center; color: #fde68a; font-size: 14px; }
+#status { min-height: 45px; padding: 8px; text-align: center; color: #fde68a; font-size: 18px; font-weight: bold; }
+#status.danger { color: #ff0000; animation: flash 0.5s infinite; }
+@keyframes flash { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+
 .buttons { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
 .buttons button { flex: 1; min-width: 110px; }
 
@@ -68,7 +71,7 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
   .cameraGrid { grid-template-columns: 1fr; }
   .instrument { padding: 6px 3px; font-size: 10px; }
   .instrument strong { font-size: 14px; }
-  #status { min-height: 30px; font-size: 12px; }
+  #status { min-height: 30px; font-size: 14px; }
   #fallback.phoneControls { position: relative; inset: auto; display: flex; justify-content: space-between; align-items: stretch; gap: 8px; width: 100%; padding: 6px 0; pointer-events: auto; }
   #fallback.phoneControls .fallbackPanel { position: relative; inset: auto; margin: 0; padding: 6px; flex: 1; min-width: 0; background: #172235; }
   #fallback.phoneControls #stick { width: 100%; max-width: 150px; height: 118px; margin: auto; }
@@ -264,7 +267,7 @@ function initGame() {
       stage.insertBefore(renderer.domElement, stage.firstChild);
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color("#4a0e17"); // Dark red sky
+      scene.background = new THREE.Color("#4a0e17");
       scene.fog = new THREE.Fog("#4a0e17", 2400, 12000);
       const camera = new THREE.PerspectiveCamera(65, 1, .2, 20000);
 
@@ -299,6 +302,7 @@ function initGame() {
       let airspeed = 0, alpha = 0, message = "";
       let stickX = 0, stickY = 0, stickPointer = null, cockpitTouch = null;
       let leverPointer = null, leverStartY = 0, leverStartPower = 0;
+      let screenShakeTime = 0;
 
       const MASS = 1100, AREA = 16.2, G = 9.81, GROUND_Y = 1.5;
       const settings = {
@@ -329,6 +333,7 @@ function initGame() {
       }
 
       function createExplosion(pos) {
+        screenShakeTime = 1.5; // SHAKE THE SCREEN
         for (let i = 0; i < 150; i++) {
           const mat = particleMaterials[Math.floor(Math.random() * particleMaterials.length)];
           const mesh = new THREE.Mesh(particleGeometry, mat);
@@ -344,18 +349,18 @@ function initGame() {
       }
 
       function spawnRocket() {
-        const rx = (Math.random() - 0.5) * 400;
-        const ry = Math.random() * 150 + 20;
-        const rz = position.z - 800;
+        // Spawn BEHIND the plane
+        const rx = position.x + (Math.random() - 0.5) * 100;
+        const ry = position.y + (Math.random() - 0.5) * 100;
+        const rz = position.z + 600; 
 
         const mesh = new THREE.Mesh(
           new THREE.CylinderGeometry(2, 2, 15, 8), 
           new THREE.MeshStandardMaterial({ color: "#ff0000", emissive: "#ff0000" })
         );
         mesh.position.set(rx, ry, rz);
-        mesh.rotation.x = Math.PI / 2; 
         scene.add(mesh);
-        rockets.push({ mesh, speed: 80 + Math.random() * 40 }); // Slower speed
+        rockets.push({ mesh, speed: 150 + Math.random() * 80 });
       }
 
       function updateExplosion(dt) {
@@ -369,6 +374,7 @@ function initGame() {
           p.mesh.rotation.x += dt * 2; p.mesh.rotation.y += dt * 2;
           if (p.life <= 0) { scene.remove(p.mesh); explosionParticles.splice(i, 1); }
         }
+        if (screenShakeTime > 0) screenShakeTime -= dt;
       }
 
       function clearExplosion() {
@@ -376,6 +382,7 @@ function initGame() {
         explosionParticles.length = 0;
         for (const r of rockets) { scene.remove(r.mesh); }
         rockets.length = 0;
+        screenShakeTime = 0;
       }
 
       function disposeScenery() {
@@ -687,10 +694,12 @@ function initGame() {
         updateOrientation();
 
         // --- MAP HAZARDS ---
+        let dangerWarning = "";
         if (state === "playing" && !grounded) {
           
           if (airport === settings.heathrow) {
             const distToTower = Math.hypot(position.x - 0, position.z - 0);
+            if (distToTower < 500 && position.y < 250) dangerWarning = "DANGER: LASER TOWER!";
             if (distToTower < 400 && position.y < 210) {
               crash("Zapped by the Laser Tower!");
               createExplosion(position);
@@ -745,6 +754,11 @@ function initGame() {
               position.z - r.mesh.position.z
             );
 
+            if (distToPlayer < 200) {
+              dangerWarning = r.isInk ? "DANGER: INK INCOMING!" : "WARNING: MISSILE LOCK!";
+              screenShakeTime = Math.max(screenShakeTime, 0.1); // Slight rumble
+            }
+
             if (distToPlayer < 12) {
               crash(r.isInk ? "Splattered by the Sea Monster!" : "Hit by a homing missile!");
               createExplosion(position);
@@ -755,6 +769,14 @@ function initGame() {
               rockets.splice(i, 1);
             }
           }
+        }
+        
+        // Apply Alarm Text
+        if (dangerWarning) {
+          $("status").textContent = dangerWarning;
+          $("status").classList.add("danger");
+        } else {
+          $("status").classList.remove("danger");
         }
       }
 
@@ -779,6 +801,14 @@ function initGame() {
           const lookRotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(THREE.MathUtils.degToRad(Number($("lookPitch").value)), THREE.MathUtils.degToRad(Number($("lookYaw").value)), 0, "YXZ"));
           camera.quaternion.copy(quaternion).multiply(lookRotation);
         }
+        
+        // Add Screen Shake
+        if (screenShakeTime > 0) {
+           camera.position.x += (Math.random() - 0.5) * 2;
+           camera.position.y += (Math.random() - 0.5) * 2;
+           camera.position.z += (Math.random() - 0.5) * 2;
+        }
+
         const near = chase ? .2 : .02;
         if (camera.near !== near) { camera.near = near; camera.updateProjectionMatrix(); }
       }
@@ -798,7 +828,9 @@ function initGame() {
         if (state === "playing" && !grounded && Math.abs(alpha)>.27) label = "STALL!";
         $("flightState").textContent = label;
         $("flightState").style.color = ["CRASHED","STALL!"].includes(label) ? "#fb7185" : "#a5f3fc";
-        $("status").textContent = state === "paused" ? "Paused." : message;
+        if (!$("status").classList.contains("danger")) {
+            $("status").textContent = state === "paused" ? "Paused." : message;
+        }
       }
 
       function controlAt(event) {
