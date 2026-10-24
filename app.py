@@ -11,8 +11,8 @@ st.set_page_config(
 
 st.title("✈️ Island Flight")
 st.caption(
-    "3D cockpit prototype • Touch flight controls • "
-    "Selectable airport settings • Simplified flight physics"
+    "Interactive cockpit prototype • Touch controls • "
+    "Simplified flight physics"
 )
 
 html = Path(__file__).with_name("game.html").read_text(
@@ -21,6 +21,6 @@ html = Path(__file__).with_name("game.html").read_text(
 
 components.html(
     html,
-    height=1200,
+    height=1550,
     scrolling=True,
 )
