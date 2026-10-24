@@ -860,6 +860,29 @@ function initGame() {
 
       $("pause").onclick=pause; $("restart").onclick=setup; $("launch").onclick=start;
 
+      const throttleLever = $("throttleLever");
+
+      throttleLever.addEventListener("pointerdown", event => {
+        if (state !== "playing" || leverPointer !== null) return;
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        event.preventDefault(); leverPointer = event.pointerId; leverStartY = event.clientY; leverStartPower = throttle;
+        throttleLever.setPointerCapture(event.pointerId); message = "Throttle handle: push up for more power.";
+      });
+
+      throttleLever.addEventListener("pointermove", event => {
+        if (event.pointerId !== leverPointer || state !== "playing") return;
+        event.preventDefault(); const travel = Math.max(40, throttleLever.clientHeight - 48);
+        const movement = leverStartY - event.clientY; throttle = clamp(leverStartPower + movement / travel, 0, 1); syncPower();
+      });
+
+      function releaseThrottleLever(event) { if (event.pointerId === leverPointer) leverPointer = null; }
+      for (const eventName of ["pointerup","pointercancel","lostpointercapture"]) throttleLever.addEventListener(eventName, releaseThrottleLever);
+      function updateYokeHandle() { $("yokeWheel").style.transform = `rotate(${stickX * 28}deg)`; }
+      stick.addEventListener("pointermove", updateYokeHandle);
+      for (const eventName of ["pointerup","pointercancel","lostpointercapture"]) stick.addEventListener(eventName, () => { $("yokeWheel").style.transform = "rotate(0deg)"; });
+      window.addEventListener("blur", () => { leverPointer = null; $("yokeWheel").style.transform = "rotate(0deg)"; });
+      document.addEventListener("visibilitychange", () => { if (document.hidden) { leverPointer = null; $("yokeWheel").style.transform = "rotate(0deg)"; } });
+
       window.addEventListener("keydown",event => {
         const key=event.key.length===1 ? event.key.toLowerCase() : event.key; const tag = event.target?.tagName;
         if (tag==="INPUT" || tag==="SELECT" || tag==="TEXTAREA") return;
