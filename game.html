@@ -539,15 +539,13 @@ try {
          *
          * Must be checked against the actual export.
          */
-        const alignment = new THREE.Matrix4()
-          .makeBasis(
-            new THREE.Vector3(0, 0, 1),
-            new THREE.Vector3(1, 0, 0),
-            new THREE.Vector3(0, 1, 0)
-          );
-
-        cockpitModel.quaternion
-          .setFromRotationMatrix(alignment);
+        // Keep the exported model's Y-up direction.
+// Rotate horizontally so the aircraft faces game -Z.
+cockpitModel.rotation.set(
+  0,
+  -Math.PI / 2,
+  0
+);
 
         /*
          * Measure with an identity rig so this also works
