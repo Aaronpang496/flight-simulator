@@ -10,21 +10,21 @@
 body { margin: 0; background: #101827; color: #edf2f7; font-family: system-ui, sans-serif; }
 .wrap { max-width: 1200px; margin: auto; padding: 8px; }
 .version { text-align: center; color: #86efac; font-size: 12px; padding: 6px; }
-
 #stage { position: relative; height: 560px; overflow: hidden; border-radius: 12px; background: #99ccec; }
 #stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
 
-#menu { position: absolute; inset: 0; z-index: 5; padding: 22px; background: rgba(10,19,34,.97); overflow: auto; display: flex; flex-direction: column; justify-content: center; }
+#menu { position: absolute; inset: 0; z-index: 5; padding: 22px; background: rgba(10,19,34,.97); overflow: auto; display: flex; flex-direction: column; justify-content: flex-start; }
 #menu.hidden { display: none; }
+#menu h2 { margin-top: auto; }
+#launch { margin-bottom: auto; margin-top: 12px; }
 
 h2 { color: #a5f3fc; margin: 0 0 10px; }
 label { display: block; font-size: 13px; margin: 8px 0; }
 select { width: 100%; padding: 9px; margin-top: 4px; background: #24344d; color: white; border: 1px solid #64748b; border-radius: 7px; font: inherit; }
 button { padding: 11px; border: 0; border-radius: 8px; background: #a5f3fc; color: #083344; font: bold 14px system-ui; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 button:disabled { opacity: .5; }
-#launch { margin-top: 12px; }
 
-#loadMessage { position: absolute; bottom: 8px; left: 8px; right: 8px; padding: 7px; background: rgba(10,19,34,.82); color: #fde68a; font-size: 12px; border-radius: 6px; pointer-events: none; z-index: 6; }
+#loadMessage { position: absolute; top: 6px; left: 8px; right: 8px; padding: 7px; background: rgba(10,19,34,.82); color: #fde68a; font-size: 11px; border-radius: 6px; pointer-events: none; z-index: 6; }
 
 #instruments { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin: 10px 0; }
 .instrument { background: #1d293c; border-radius: 8px; padding: 9px; text-align: center; font-size: 12px; }
@@ -41,6 +41,7 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 #controlsFound { color: #86efac; }
 
 #fallback { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
+#fallback[hidden] { display: none !important; }
 .fallbackPanel { pointer-events: auto; background: rgba(15,23,42,.85); border: 1px solid #475569; border-radius: 12px; margin: 10px; }
 .panelTitle { text-align: center; color: #a5f3fc; font-size: 10px; font-weight: bold; margin: 4px; }
 #stickPanel { left: 8px; padding: 7px; }
@@ -63,11 +64,12 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 .miniButtons { display: flex; gap: 4px; margin-top: 6px; }
 .miniButtons button { flex: 1; padding: 5px; font-size: 10px; }
 
-body:has(#menu:not(.hidden)) #fallback { display: none !important; }
 @media (max-width: 600px) {
   .cameraGrid { grid-template-columns: 1fr; }
+  .instrument { padding: 6px 3px; font-size: 10px; }
+  .instrument strong { font-size: 14px; }
+  #status { min-height: 30px; font-size: 12px; }
   #fallback.phoneControls { position: relative; inset: auto; display: flex; justify-content: space-between; align-items: stretch; gap: 8px; width: 100%; padding: 6px 0; pointer-events: auto; }
-  #fallback.phoneControls.hidden { display: none; }
   #fallback.phoneControls .fallbackPanel { position: relative; inset: auto; margin: 0; padding: 6px; flex: 1; min-width: 0; background: #172235; }
   #fallback.phoneControls #stick { width: 100%; max-width: 150px; height: 118px; margin: auto; }
   #fallback.phoneControls #knob { width: 110px; height: 76px; margin: -38px 0 0 -55px; }
@@ -112,7 +114,7 @@ body:has(#menu:not(.hidden)) #fallback { display: none !important; }
 
     <div id="loadMessage">Loading 3D engine...</div>
 
-    <div id="fallback">
+    <div id="fallback" hidden>
       <div id="stickPanel" class="fallbackPanel">
         <div class="panelTitle">GRAB THE YOKE</div>
         <div id="stick" aria-label="Flight yoke">
@@ -194,32 +196,46 @@ body:has(#menu:not(.hidden)) #fallback { display: none !important; }
   <small id="controlsFound"></small>
 </div>
 
-<script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
 "use strict";
+
 const $ = id => document.getElementById(id);
 
-// 1. Manually inject Three.js if not found
-if (typeof THREE === 'undefined') {
-    $("loadMessage").textContent = "Loading 3D engine...";
-    const script1 = document.createElement('script');
-    script1.src = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js";
-    script1.onload = () => {
-        const script2 = document.createElement('script');
-        script2.src = "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js";
-        script2.onload = () => { initGame(); };
-        document.head.appendChild(script2);
-    };
-    script1.onerror = () => {
-        $("loadMessage").textContent = "Failed to load 3D engine. Check internet.";
-        $("launch").textContent = "Engine unavailable";
-    };
-    document.head.appendChild(script1);
-} else {
-    initGame();
+let THREE;
+let GLTFLoader;
+
+try {
+  THREE = await import("three");
+  ({ GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js"));
+} catch (error) {
+  $("loadMessage").textContent = "The 3D engine could not load. Check your internet connection or content blocker, then reload.";
+  $("launch").disabled = true;
+  $("launch").textContent = "Engine unavailable";
+  console.error("Engine import failed:", error);
+  throw error;
 }
 
+requestAnimationFrame(() => {
+  try {
+    initGame();
+  } catch (error) {
+    $("loadMessage").textContent = "The game could not initialize. See the browser console.";
+    $("launch").disabled = true;
+    console.error("Game initialization failed:", error);
+  }
+});
+
 function initGame() {
-    (() => {
+  (() => {
       const stage = document.getElementById("stage");
       const controls = document.getElementById("fallback");
       const phoneLayout = window.matchMedia("(max-width: 600px)");
@@ -281,6 +297,7 @@ function initGame() {
       let throttle = 0, flaps = true, brakes = false, grounded = true, landed = false;
       let airspeed = 0, alpha = 0, message = "";
       let stickX = 0, stickY = 0, stickPointer = null, cockpitTouch = null;
+      let leverPointer = null, leverStartY = 0, leverStartPower = 0;
 
       const MASS = 1100, AREA = 16.2, G = 9.81, GROUND_Y = 1.5;
       const settings = {
@@ -336,6 +353,11 @@ function initGame() {
           p.mesh.rotation.x += dt * 2; p.mesh.rotation.y += dt * 2;
           if (p.life <= 0) { scene.remove(p.mesh); explosionParticles.splice(i, 1); }
         }
+      }
+
+      function clearExplosion() {
+        for (const particle of explosionParticles) { scene.remove(particle.mesh); }
+        explosionParticles.length = 0;
       }
 
       function disposeScenery() {
@@ -446,7 +468,7 @@ function initGame() {
 
       const manager = new THREE.LoadingManager();
       manager.onError = url => { cockpitNotice = "A cockpit asset failed to load."; showLoadMessage(); };
-      const loader = new THREE.GLTFLoader(manager);
+      const loader = new GLTFLoader(manager);
 
       loader.load(
         assetBase + "cockpit.glb",
@@ -489,12 +511,25 @@ function initGame() {
         }
       }
 
-      function resetStick() { stickX = 0; stickY = 0; stickPointer = null; $("knob").style.transform = "translate(0px,0px)"; }
+      function resetStick() {
+        stickX = 0; stickY = 0; stickPointer = null;
+        $("knob").style.transform = "translate(0px,0px)";
+        $("yokeWheel").style.transform = "rotate(0deg)";
+      }
+
       function releaseCockpitTouch(event) { if (!cockpitTouch) return; if (event && event.pointerId !== cockpitTouch.pointerId) return; if (cockpitTouch.control === "yoke") { stickX = 0; stickY = 0; } cockpitTouch = null; }
-      function clearControls() { keys.clear(); releaseCockpitTouch(); resetStick(); }
+      
+      function clearControls() {
+        keys.clear();
+        releaseCockpitTouch();
+        resetStick();
+        leverPointer = null;
+      }
+
       function updateButtons() { $("camera").textContent = chase ? "Camera: CHASE" : "Camera: COCKPIT"; $("flaps").textContent = flaps ? "Flaps: DOWN" : "Flaps: UP"; $("brakes").textContent = brakes ? "Brakes: ON" : "Brakes: OFF"; $("pause").textContent = state === "paused" ? "Resume" : "Pause"; }
 
       function start() {
+        clearExplosion();
         airport = settings[$("airport").value]; buildAirport();
         pitch = bank = yaw = 0; pitchRate = bankRate = 0; quaternion.identity(); landed = false; alpha = 0;
         wind.set($("weather").value === "crosswind" ? 4.115 : 0, 0, 0);
@@ -504,14 +539,18 @@ function initGame() {
         airspeed = velocity.clone().sub(wind).length();
         grounded = !approach; flaps = true; brakes = false; throttle = approach ? .35 : 0;
         $("throttle").value = String(throttle*100); syncPower(); clearControls();
-        state = "playing"; $("menu").classList.add("hidden");
+        state = "playing";
+        $("menu").classList.add("hidden");
+        $("fallback").hidden = false;
+        syncPower();
         message = approach ? "Stay aligned and control the descent." : "Runway ready.";
         updateButtons(); updateAircraft(0); updateCamera(1,true);
       }
 
       function setup() {
+        clearExplosion();
         state = "menu"; clearControls(); plane.visible = false; cockpitRig.visible = false;
-        $("menu").classList.remove("hidden"); $("status").textContent = "Choose a starting position.";
+        $("menu").classList.remove("hidden"); $("fallback").hidden = true; $("status").textContent = "Choose a starting position.";
         updateButtons();
       }
 
@@ -629,6 +668,7 @@ function initGame() {
       }
 
       function hud() {
+        syncPower();
         const heading = ((airport.heading-yaw*180/Math.PI)%360+360)%360;
         $("speed").textContent = Math.round(airspeed*1.94384)+" kt";
         $("altitude").textContent = Math.max(0,Math.round((position.y-GROUND_Y)*3.28084))+" ft";
@@ -699,7 +739,6 @@ function initGame() {
 
       $("pause").onclick=pause; $("restart").onclick=setup; $("launch").onclick=start;
 
-      let leverPointer = null, leverStartY = 0, leverStartPower = 0;
       const throttleLever = $("throttleLever");
 
       throttleLever.addEventListener("pointerdown", event => {
@@ -740,6 +779,7 @@ function initGame() {
         const width=stage.clientWidth, height=stage.clientHeight;
         if (!width || !height) return;
         renderer.setSize(width,height); camera.aspect=width/height; camera.updateProjectionMatrix();
+        syncPower();
       }
       new ResizeObserver(resize).observe(stage); window.addEventListener("resize",resize);
       resize(); readView(); buildAirport(); plane.visible=false;
