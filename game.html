@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Island Flight: Survival</title>
+<title>Island Flight</title>
 
 <style>
 * { box-sizing: border-box; }
 body { margin: 0; background: #101827; color: #edf2f7; font-family: system-ui, sans-serif; }
 .wrap { max-width: 1200px; margin: auto; padding: 8px; }
 .version { text-align: center; color: #86efac; font-size: 12px; padding: 6px; }
-#stage { position: relative; height: 560px; overflow: hidden; border-radius: 12px; background: #4a0e17; }
+#stage { position: relative; height: 560px; overflow: hidden; border-radius: 12px; background: #99ccec; }
 #stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
 
 #menu { position: absolute; inset: 0; z-index: 5; padding: 22px; background: rgba(10,19,34,.97); overflow: auto; display: flex; flex-direction: column; justify-content: flex-start; }
@@ -31,9 +31,6 @@ button:disabled { opacity: .5; }
 .instrument strong { display: block; font-size: 19px; color: #a5f3fc; }
 
 #status { min-height: 45px; padding: 8px; text-align: center; color: #fde68a; font-size: 18px; font-weight: bold; }
-#status.danger { color: #ff0000; animation: flash 0.3s infinite; }
-@keyframes flash { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-
 .buttons { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
 .buttons button { flex: 1; min-width: 110px; }
 
@@ -85,7 +82,6 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 }
 </style>
 
-<!-- LOAD THREE.JS GLOBALLY (STREAMLIT CANNOT BLOCK THIS) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
@@ -96,12 +92,12 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 
   <div id="stage">
     <div id="menu">
-      <h2>✈️ ISLAND FLIGHT: SURVIVAL</h2>
+      <h2>✈️ ISLAND FLIGHT</h2>
       <label>Airport setting
         <select id="airport">
-          <option value="heathrow">London Heathrow — Laser Tower</option>
-          <option value="juliana">Princess Juliana — Kraken</option>
-          <option value="kaitak">Historic Kai Tak — Volcano & Missiles</option>
+          <option value="heathrow">London Heathrow</option>
+          <option value="juliana">Princess Juliana</option>
+          <option value="kaitak">Historic Kai Tak</option>
         </select>
       </label>
       <label>Starting position
@@ -169,7 +165,7 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
   </div>
 
   <div id="instruments">
-    <div class="instrument">SURVIVAL TIME<strong id="timer">0.0s</strong></div>
+    <div class="instrument">FLIGHT TIME<strong id="timer">0.0s</strong></div>
     <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
     <div class="instrument">Altitude<strong id="altitude">0 ft</strong></div>
   </div>
@@ -187,7 +183,6 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 "use strict";
 const $ = id => document.getElementById(id);
 
-// Wait for the scripts in the <head> to load before starting
 window.addEventListener('load', () => {
     if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
         $("loadMessage").textContent = "3D engine failed to load. Check internet.";
@@ -219,13 +214,13 @@ window.addEventListener('load', () => {
       catch (error) { $("loadMessage").textContent = "WebGL unavailable."; return; }
 
       renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-      renderer.outputEncoding = THREE.sRGBEncoding; 
+      renderer.outputEncoding = THREE.sRGBEncoding;
       renderer.domElement.style.touchAction = "none";
       stage.insertBefore(renderer.domElement, stage.firstChild);
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color("#4a0e17");
-      scene.fog = new THREE.Fog("#4a0e17", 2400, 12000);
+      scene.background = new THREE.Color("#99ccec");
+      scene.fog = new THREE.Fog("#99ccec", 2400, 12000);
       const camera = new THREE.PerspectiveCamera(65, 1, .2, 20000);
 
       scene.add(new THREE.HemisphereLight(0xffffff, 0x63764b, 2.2));
@@ -238,15 +233,6 @@ window.addEventListener('load', () => {
       const cockpitRig = new THREE.Group(); cockpitRig.visible = false; scene.add(cockpitRig);
       const cockpitModel = new THREE.Group(); cockpitRig.add(cockpitModel);
       
-      const explosionParticles = [];
-      const rockets = []; 
-      const particleGeometry = new THREE.BoxGeometry(1, 1, 1);
-      const particleMaterials = [
-        new THREE.MeshStandardMaterial({ color: "#ff4400", emissive: "#ff2200" }),
-        new THREE.MeshStandardMaterial({ color: "#ffcc00", emissive: "#ffaa00" }),
-        new THREE.MeshStandardMaterial({ color: "#333333" })
-      ];
-
       const position = new THREE.Vector3(), velocity = new THREE.Vector3(), quaternion = new THREE.Quaternion(), wind = new THREE.Vector3();
       const pilotEye = new THREE.Vector3(), eyeOffset = new THREE.Vector3();
       const keys = new Set(), raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
@@ -259,8 +245,7 @@ window.addEventListener('load', () => {
       let airspeed = 0, alpha = 0, message = "";
       let stickX = 0, stickY = 0, stickPointer = null, cockpitTouch = null;
       let leverPointer = null, leverStartY = 0, leverStartPower = 0;
-      let screenShakeTime = 0;
-      let survivalTime = 0;
+      let flightTime = 0;
 
       const MASS = 1100, AREA = 16.2, G = 9.81, GROUND_Y = 1.5;
       const settings = {
@@ -290,59 +275,6 @@ window.addEventListener('load', () => {
         wheel.rotation.z = Math.PI / 2; wheel.position.set(x,-1.2,z); plane.add(wheel);
       }
 
-      function createExplosion(pos) {
-        screenShakeTime = 1.5; 
-        for (let i = 0; i < 150; i++) {
-          const mat = particleMaterials[Math.floor(Math.random() * particleMaterials.length)];
-          const mesh = new THREE.Mesh(particleGeometry, mat);
-          mesh.position.copy(pos);
-          const size = Math.random() * 2 + 0.5;
-          mesh.scale.set(size, size, size);
-          const vel = new THREE.Vector3(
-            (Math.random() - 0.5) * 40, (Math.random() - 0.5) * 40 + 10, (Math.random() - 0.5) * 40
-          );
-          scene.add(mesh);
-          explosionParticles.push({ mesh, vel, life: 1.0 });
-        }
-      }
-
-      function spawnRocket() {
-        const rx = (Math.random() - 0.5) * 400;
-        const ry = Math.random() * 100 + 20;
-        const rz = position.z - 1000; 
-
-        const mesh = new THREE.Mesh(
-          new THREE.CylinderGeometry(2, 2, 15, 8), 
-          new THREE.MeshStandardMaterial({ color: "#ff0000", emissive: "#ff0000" })
-        );
-        mesh.position.set(rx, ry, rz);
-        mesh.rotation.x = Math.PI / 2; 
-        scene.add(mesh);
-        rockets.push({ mesh, speed: 80 });
-      }
-
-      function updateExplosion(dt) {
-        for (let i = explosionParticles.length - 1; i >= 0; i--) {
-          const p = explosionParticles[i];
-          p.mesh.position.addScaledVector(p.vel, dt);
-          p.vel.y -= 9.8 * dt;
-          p.life -= dt * 0.8;
-          if (p.mesh.material === particleMaterials[2]) p.mesh.position.y += dt * 5;
-          p.mesh.scale.multiplyScalar(1 - dt * 0.5);
-          p.mesh.rotation.x += dt * 2; p.mesh.rotation.y += dt * 2;
-          if (p.life <= 0) { scene.remove(p.mesh); explosionParticles.splice(i, 1); }
-        }
-        if (screenShakeTime > 0) screenShakeTime -= dt;
-      }
-
-      function clearExplosion() {
-        for (const particle of explosionParticles) { scene.remove(particle.mesh); }
-        explosionParticles.length = 0;
-        for (const r of rockets) { scene.remove(r.mesh); }
-        rockets.length = 0;
-        screenShakeTime = 0;
-      }
-
       function disposeScenery() {
         const geometries = new Set(), materials = new Set();
         scenery.traverse(object => {
@@ -352,48 +284,40 @@ window.addEventListener('load', () => {
             list.forEach(mat => materials.add(mat));
           }
         });
-        geometries.forEach(item => item.dispose()); materials.forEach(item => item.dispose());
+        geometries.forEach(item => item.dispose()); materials.forEach(item => materials.dispose());
         scene.remove(scenery); scenery = new THREE.Group(); scene.add(scenery);
       }
 
       function buildAirport() {
         disposeScenery();
-        const sea = material("#2a93b5"), land = material(airport.coast ? "#719663" : "#618154"), runway = material("#353c45"), stripe = material("#f1f5f9"), building = material("#a7b3c4");
+        const sea = material("#2a93b5"), land = material(airport.coast ? "#719663" : "#618154"), runway = material("#353c45"), stripe = material("#f1f5f9"), building = material("#a7b3c4"), mountain = material("#4a5c47");
+        
         box(scenery,0,-12,0,26000,10,26000,sea);
         box(scenery,0,-3,0, airport.coast ? 1400 : 15000, 5, airport.length + (airport.coast ? 250 : 9000), land);
         box(scenery,0,-.06,0, airport.width,.12,airport.length, runway);
         for (let z = -airport.length/2 + 60; z < airport.length/2 - 60; z += 100) box(scenery,0,.03,z,1.2,.04,35,stripe);
         for (const side of [-1,1]) box(scenery, side * (airport.width/2 - 1), .03,0, .5,.04,airport.length, stripe);
         for (const end of [-1,1]) { for (let i=-3; i<=3; i++) box(scenery,i*4,.04, end * (airport.length/2 - 35), 2,.04,22,stripe); }
-        box(scenery,180,12,0,100,24,220,building); box(scenery,125,24,-180,16,48,16,building); box(scenery,125,51,-180,30,10,30,dark.clone());
+        
+        box(scenery,180,12,0,100,24,220,building); 
+        box(scenery,125,24,-180,16,48,16,building); 
+        box(scenery,125,51,-180,30,10,30,dark.clone());
 
-        if (airport === settings.heathrow) {
-          const towerMat = material("#1e293b");
-          const laserMat = material("#00ffff");
-          box(scenery, 0, 150, 0, 60, 300, 60, towerMat); 
-          box(scenery, 0, 300, 0, 100, 20, 100, towerMat);
-          box(scenery, 0, 200, 0, 400, 5, 400, laserMat); 
+        // Procedural Mountains
+        for (let i=0; i<25; i++) {
+          const mx = (Math.random() - 0.5) * 8000;
+          const mz = (Math.random() - 0.5) * 8000;
+          // Don't spawn on the runway
+          if (Math.abs(mx) < 500 && Math.abs(mz) < airport.length) continue; 
+          
+          const h = 100 + Math.random() * 300;
+          box(scenery, mx, h/2 - 2, mz, 400 + Math.random()*300, h, 400 + Math.random()*300, mountain);
         }
 
-        if (airport === settings.juliana) {
-          const squidMat = material("#4a044e");
-          box(scenery, 0, 20, 300, 300, 80, 300, squidMat);
-          box(scenery, 0, 80, 300, 150, 60, 150, squidMat);
-          box(scenery, -150, 120, 300, 40, 100, 40, squidMat);
-          box(scenery, 150, 120, 300, 40, 100, 40, squidMat);
-        }
-
-        if (airport === settings.kaitak) {
-          const volcanoMat = material("#332222");
-          const lavaMat = material("#ff4400");
-          box(scenery, 300, 40, 200, 300, 80, 300, volcanoMat);
-          box(scenery, 300, 120, 200, 150, 80, 150, volcanoMat);
-          box(scenery, 300, 180, 200, 80, 40, 80, volcanoMat);
-          box(scenery, 300, 201, 200, 60, 2, 60, lavaMat);
-        }
-
+        // Procedural Buildings
         for (let i=0; i<55; i++) {
-          const side = i%2 ? -1 : 1; const h = 15 + Math.random() * (airport === settings.kaitak ? 110 : 45);
+          const side = i%2 ? -1 : 1; 
+          const h = 15 + Math.random() * (airport === settings.kaitak ? 110 : 45);
           box(scenery, side * (400 + Math.random()*2200), h/2 - 2, (Math.random()-.5)*6500, 30 + Math.random()*50, h, 30 + Math.random()*50, building);
         }
       }
@@ -538,8 +462,7 @@ window.addEventListener('load', () => {
       function updateButtons() { $("camera").textContent = chase ? "Camera: CHASE" : "Camera: COCKPIT"; $("flaps").textContent = flaps ? "Flaps: DOWN" : "Flaps: UP"; $("brakes").textContent = brakes ? "Brakes: ON" : "Brakes: OFF"; $("pause").textContent = state === "paused" ? "Resume" : "Pause"; }
 
       function start() {
-        clearExplosion();
-        survivalTime = 0;
+        flightTime = 0;
         airport = settings[$("airport").value]; buildAirport();
         pitch = bank = yaw = 0; pitchRate = bankRate = 0; quaternion.identity(); landed = false; alpha = 0;
         wind.set($("weather").value === "crosswind" ? 4.115 : 0, 0, 0);
@@ -558,7 +481,6 @@ window.addEventListener('load', () => {
       }
 
       function setup() {
-        clearExplosion();
         state = "menu"; clearControls(); plane.visible = false; cockpitRig.visible = false;
         $("menu").classList.remove("hidden"); $("fallback").hidden = true; $("status").textContent = "Choose a starting position.";
         updateButtons();
@@ -574,9 +496,8 @@ window.addEventListener('load', () => {
         if (state !== "playing") return; 
         state = "crashed"; 
         clearControls(); 
-        message = "CRASH: " + reason + " (Survived: " + survivalTime.toFixed(1) + "s)"; 
+        message = "CRASH: " + reason + " (Flight Time: " + flightTime.toFixed(1) + "s)"; 
         plane.visible = false;
-        createExplosion(position); 
       }
 
       function onRunway() { return Math.abs(position.x) <= airport.width/2 && Math.abs(position.z) <= airport.length/2; }
@@ -584,7 +505,7 @@ window.addEventListener('load', () => {
 
       function physics(dt) {
         if (state !== "playing") return;
-        if (grounded) survivalTime = 0; else survivalTime += dt;
+        if (grounded) flightTime = 0; else flightTime += dt;
 
         const pitchInput = clamp(stickY + Number(keys.has("ArrowDown")) - Number(keys.has("ArrowUp")), -1,1);
         const rollInput = clamp(stickX + Number(keys.has("ArrowRight")) - Number(keys.has("ArrowLeft")), -1,1);
@@ -652,91 +573,6 @@ window.addEventListener('load', () => {
         if (!grounded && stalled && airspeed<35) pitch = clamp(pitch-.12*dt,-.65,.65);
         if (!Number.isFinite(position.x) || !Number.isFinite(position.y) || !Number.isFinite(position.z)) { crash("Simulation error."); return; }
         updateOrientation();
-
-        // --- MAP HAZARDS ---
-        let dangerWarning = "";
-        if (state === "playing" && !grounded) {
-          
-          if (airport === settings.heathrow) {
-            const distToTower = Math.hypot(position.x - 0, position.z - 0);
-            if (distToTower < 450 && position.y < 220) dangerWarning = "DANGER: LASER TOWER!";
-            if (distToTower < 400 && position.y < 210) {
-              crash("Zapped by the Laser Tower!");
-              createExplosion(position);
-            }
-          }
-
-          if (airport === settings.juliana) {
-            const squidX = Math.sin(performance.now() / 1000) * 300;
-            
-            if (Math.random() < 0.03) { 
-              for (let i = 0; i < 2; i++) { 
-                const ink = new THREE.Mesh(
-                  new THREE.SphereGeometry(12, 8, 8), 
-                  new THREE.MeshStandardMaterial({ color: "#000000" })
-                );
-                ink.position.set(squidX, 50 + Math.random() * 50, 300);
-                ink.userData.vel = new THREE.Vector3(
-                  (position.x - ink.position.x) * 0.3 + (i - 1) * 40, 
-                  (position.y - ink.position.y) * 0.3, 
-                  -80 
-                );
-                scene.add(ink);
-                rockets.push({ mesh: ink, isInk: true });
-              }
-            }
-          }
-
-          if (airport === settings.kaitak) {
-            if (Math.random() < 0.008) spawnRocket(); 
-          }
-
-          for (let i = rockets.length - 1; i >= 0; i--) {
-            const r = rockets[i];
-            
-            if (r.isInk) {
-              r.mesh.position.addScaledVector(r.mesh.userData.vel, dt);
-            } else {
-              const dx = position.x - r.mesh.position.x;
-              const dy = position.y - r.mesh.position.y;
-              const dz = position.z - r.mesh.position.z;
-              const dist = Math.hypot(dx, dy, dz);
-              
-              r.mesh.position.x += (dx / dist) * (r.speed * 0.5) * dt;
-              r.mesh.position.y += (dy / dist) * (r.speed * 0.5) * dt;
-              r.mesh.position.z += (dz / dist) * (r.speed * 0.5) * dt;
-              r.mesh.lookAt(position);
-            }
-
-            const distToPlayer = Math.hypot(
-              position.x - r.mesh.position.x,
-              position.y - r.mesh.position.y,
-              position.z - r.mesh.position.z
-            );
-
-            if (distToPlayer < 150) {
-              dangerWarning = r.isInk ? "DANGER: INK INCOMING!" : "WARNING: MISSILE LOCK!";
-              screenShakeTime = Math.max(screenShakeTime, 0.1); 
-            }
-
-            if (distToPlayer < 12) {
-              crash(r.isInk ? "Splattered by the Sea Monster!" : "Hit by a homing missile!");
-              createExplosion(position);
-              scene.remove(r.mesh);
-              rockets.splice(i, 1);
-            } else if (distToPlayer > 2000 || r.mesh.position.z > 2000) {
-              scene.remove(r.mesh);
-              rockets.splice(i, 1);
-            }
-          }
-        }
-        
-        if (dangerWarning) {
-          $("status").textContent = dangerWarning;
-          $("status").classList.add("danger");
-        } else {
-          $("status").classList.remove("danger");
-        }
       }
 
       function updateAircraft(dt) {
@@ -761,19 +597,13 @@ window.addEventListener('load', () => {
           camera.quaternion.copy(quaternion).multiply(lookRotation);
         }
         
-        if (screenShakeTime > 0) {
-           camera.position.x += (Math.random() - 0.5) * 3;
-           camera.position.y += (Math.random() - 0.5) * 3;
-           camera.position.z += (Math.random() - 0.5) * 3;
-        }
-
         const near = chase ? .2 : .02;
         if (camera.near !== near) { camera.near = near; camera.updateProjectionMatrix(); }
       }
 
       function hud() {
         syncPower();
-        $("timer").textContent = survivalTime.toFixed(1) + "s";
+        $("timer").textContent = flightTime.toFixed(1) + "s";
         const heading = ((airport.heading-yaw*180/Math.PI)%360+360)%360;
         $("speed").textContent = Math.round(airspeed*1.94384)+" kt";
         $("altitude").textContent = Math.max(0,Math.round((position.y-GROUND_Y)*3.28084))+" ft";
@@ -891,7 +721,6 @@ window.addEventListener('load', () => {
         const dt=Math.min((now-previous)/1000,.05); previous=now;
         if (state==="playing") { const steps=Math.max(1,Math.ceil(dt/.008)); for (let i=0;i<steps;i++) physics(dt/steps); }
         if (state!=="menu") { updateAircraft(dt); updateCamera(dt); hud(); }
-        updateExplosion(dt);
         renderer.render(scene,camera); requestAnimationFrame(frame);
       }
       requestAnimationFrame(frame);
