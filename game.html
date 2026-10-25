@@ -9,6 +9,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: #101827; color: #edf2f7; font-family: system-ui, sans-serif; }
 .wrap { max-width: 1200px; margin: auto; padding: 8px; }
+.version { text-align: center; color: #86efac; font-size: 12px; padding: 6px; }
 #stage { position: relative; height: 560px; overflow: hidden; border-radius: 12px; background: #99ccec; }
 #stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
 
@@ -32,6 +33,12 @@ button:disabled { opacity: .5; }
 #status { min-height: 45px; padding: 8px; text-align: center; color: #fde68a; font-size: 18px; font-weight: bold; }
 .buttons { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
 .buttons button { flex: 1; min-width: 110px; }
+
+details { margin: 12px 0; padding: 12px; background: #1d293c; border-radius: 9px; }
+summary { cursor: pointer; color: #a5f3fc; font-weight: bold; }
+.cameraGrid { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px 16px; }
+small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margin-top: 8px; }
+#controlsFound { color: #86efac; }
 
 #fallback { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; pointer-events: none; z-index: 10; }
 #fallback[hidden] { display: none !important; }
@@ -58,6 +65,7 @@ button:disabled { opacity: .5; }
 .miniButtons button { flex: 1; padding: 5px; font-size: 10px; }
 
 @media (max-width: 600px) {
+  .cameraGrid { grid-template-columns: 1fr; }
   .instrument { padding: 6px 3px; font-size: 10px; }
   .instrument strong { font-size: 14px; }
   #status { min-height: 30px; font-size: 14px; }
@@ -80,6 +88,8 @@ button:disabled { opacity: .5; }
 
 <body>
 <div class="wrap">
+  <div class="version">INTERACTIVE COCKPIT PROTOTYPE</div>
+
   <div id="stage">
     <div id="menu">
       <h2>✈️ ISLAND FLIGHT</h2>
@@ -94,6 +104,12 @@ button:disabled { opacity: .5; }
         <select id="startMode">
           <option value="takeoff">On runway</option>
           <option value="approach">Landing approach</option>
+        </select>
+      </label>
+      <label>Weather
+        <select id="weather">
+          <option value="clear">Clear — calm</option>
+          <option value="crosswind">Crosswind — 8 knots</option>
         </select>
       </label>
       <button id="launch" disabled>Loading engine...</button>
@@ -146,21 +162,54 @@ button:disabled { opacity: .5; }
     <button id="pause">Pause</button>
     <button id="restart">Setup</button>
   </div>
+
+  <details>
+    <summary>Camera Adjustments</summary>
+    <div class="cameraGrid">
+      <label>X<input id="eyeX" type="range" min="-1.5" max="1.5" step=".01" value="0"></label>
+      <label>Y<input id="eyeY" type="range" min="-1.5" max="1.5" step=".01" value="0"></label>
+      <label>Z<input id="eyeZ" type="range" min="-3" max="3" step=".01" value="0"></label>
+      <label>Yaw<input id="lookYaw" type="range" min="-180" max="180" step="1" value="0"></label>
+      <label>Pitch<input id="lookPitch" type="range" min="-60" max="60" step="1" value="-5"></label>
+    </div>
+    <div class="buttons">
+      <button id="hideGlass">Window glass: HIDDEN</button>
+      <button id="turnModel">Turn cockpit 180°</button>
+      <button id="resetView">Reset view</button>
+    </div>
+  </details>
+  <small id="controlsFound"></small>
 </div>
 
 <script>
 "use strict";
 const $ = id => document.getElementById(id);
 
-// Wait for scripts to load
 window.addEventListener('load', () => {
-  if (typeof THREE === 'undefined') {
+  if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
     $("loadMessage").textContent = "3D engine failed to load. Check internet.";
     $("launch").textContent = "Engine unavailable";
     return;
   }
 
   const stage = $("stage");
+  const controls = $("fallback");
+  const phoneLayout = window.matchMedia("(max-width: 600px)");
+  if (stage && controls) {
+    function arrangeControls() {
+      if (phoneLayout.matches) {
+        controls.classList.add("phoneControls");
+        stage.insertAdjacentElement("afterend", controls);
+      } else {
+        controls.classList.remove("phoneControls");
+        stage.appendChild(controls);
+      }
+    }
+    arrangeControls();
+    if (phoneLayout.addEventListener) phoneLayout.addEventListener("change", arrangeControls);
+    else phoneLayout.addListener(arrangeControls);
+  }
+
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.outputEncoding = THREE.sRGBEncoding;
@@ -180,7 +229,6 @@ window.addEventListener('load', () => {
   const cockpitRig = new THREE.Group(); cockpitRig.visible = false; scene.add(cockpitRig);
   const cockpitModel = new THREE.Group(); cockpitRig.add(cockpitModel);
 
-  // Explosion setup
   const explosionParticles = [];
   const particleGeo = new THREE.BoxGeometry(1, 1, 1);
   const particleMats = [
@@ -194,7 +242,7 @@ window.addEventListener('load', () => {
   const keys = new Set(), raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
   const animatedParts = [], glassMaterials = [];
 
-  let cockpitReady = false, glassHidden = true;
+  let cockpitReady = false, glassHidden = true, modelTurned = false;
   let state = "menu", chase = true;
   let pitch = 0, bank = 0, yaw = 0, pitchRate = 0, bankRate = 0;
   let throttle = 0, flaps = true, brakes = false, grounded = true, landed = false;
@@ -333,7 +381,12 @@ window.addEventListener('load', () => {
   }
 
   $("resetView").onclick = () => { $("eyeX").value = "0"; $("eyeY").value = "0"; $("eyeZ").value = "0"; $("lookYaw").value = "0"; $("lookPitch").value = "-5"; readView(); };
-  $("turnModel").onclick = () => { if (!cockpitReady) return; cockpitModel.rotation.y = -Math.PI/2 + (cockpitModel.rotation.y > -Math.PI/2 ? Math.PI : 0); calibratePilotEye(); };
+  $("turnModel").onclick = () => {
+    if (!cockpitReady) return;
+    modelTurned = !modelTurned;
+    cockpitModel.rotation.y = -Math.PI / 2 + (modelTurned ? Math.PI : 0);
+    calibratePilotEye();
+  };
 
   function applyGlassSetting() {
     for (const item of glassMaterials) { item.material.visible = glassHidden ? false : item.visible; item.material.needsUpdate = true; }
@@ -432,7 +485,7 @@ window.addEventListener('load', () => {
     clearExplosion(); flightTime = 0;
     airport = settings[$("airport").value]; buildAirport();
     pitch = bank = yaw = 0; pitchRate = bankRate = 0; quaternion.identity(); landed = false; alpha = 0;
-    wind.set(0,0,0); // Removed crosswind for simplicity
+    wind.set($("weather").value === "crosswind" ? 4.115 : 0, 0, 0);
     const approach = $("startMode").value === "approach";
     position.set(0, approach ? 105 : GROUND_Y, airport.length/2 + (approach ? 1150 : -120));
     velocity.set(0, approach ? -2.2 : 0, approach ? -38 : 0);
