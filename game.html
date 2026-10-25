@@ -82,8 +82,14 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 
 <body>
@@ -179,18 +185,37 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
   </div>
 </div>
 
-<script>
+<script type="module">
 "use strict";
+
 const $ = id => document.getElementById(id);
 
-window.addEventListener('load', () => {
-    if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
-        $("loadMessage").textContent = "3D engine failed to load. Check internet.";
-        $("launch").textContent = "Engine unavailable";
-        return;
-    }
+let THREE;
+let GLTFLoader;
 
-    (() => {
+try {
+  THREE = await import("three");
+  ({ GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js"));
+} catch (error) {
+  $("loadMessage").textContent = "The 3D engine could not load. Check your internet connection or content blocker, then reload.";
+  $("launch").disabled = true;
+  $("launch").textContent = "Engine unavailable";
+  console.error("Engine import failed:", error);
+  throw error;
+}
+
+requestAnimationFrame(() => {
+  try {
+    initGame();
+  } catch (error) {
+    $("loadMessage").textContent = "The game could not initialize. See the browser console.";
+    $("launch").disabled = true;
+    console.error("Game initialization failed:", error);
+  }
+});
+
+function initGame() {
+  (() => {
       const stage = document.getElementById("stage");
       const controls = document.getElementById("fallback");
       const phoneLayout = window.matchMedia("(max-width: 600px)");
@@ -214,7 +239,7 @@ window.addEventListener('load', () => {
       catch (error) { $("loadMessage").textContent = "WebGL unavailable."; return; }
 
       renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.domElement.style.touchAction = "none";
       stage.insertBefore(renderer.domElement, stage.firstChild);
 
@@ -233,6 +258,14 @@ window.addEventListener('load', () => {
       const cockpitRig = new THREE.Group(); cockpitRig.visible = false; scene.add(cockpitRig);
       const cockpitModel = new THREE.Group(); cockpitRig.add(cockpitModel);
       
+      const explosionParticles = [];
+      const particleGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const particleMaterials = [
+        new THREE.MeshStandardMaterial({ color: "#ff4400", emissive: "#ff2200" }),
+        new THREE.MeshStandardMaterial({ color: "#ffcc00", emissive: "#ffaa00" }),
+        new THREE.MeshStandardMaterial({ color: "#333333" })
+      ];
+
       const position = new THREE.Vector3(), velocity = new THREE.Vector3(), quaternion = new THREE.Quaternion(), wind = new THREE.Vector3();
       const pilotEye = new THREE.Vector3(), eyeOffset = new THREE.Vector3();
       const keys = new Set(), raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
@@ -275,6 +308,39 @@ window.addEventListener('load', () => {
         wheel.rotation.z = Math.PI / 2; wheel.position.set(x,-1.2,z); plane.add(wheel);
       }
 
+      function createExplosion(pos) {
+        for (let i = 0; i < 150; i++) {
+          const mat = particleMaterials[Math.floor(Math.random() * particleMaterials.length)];
+          const mesh = new THREE.Mesh(particleGeometry, mat);
+          mesh.position.copy(pos);
+          const size = Math.random() * 2 + 0.5;
+          mesh.scale.set(size, size, size);
+          const vel = new THREE.Vector3(
+            (Math.random() - 0.5) * 40, (Math.random() - 0.5) * 40 + 10, (Math.random() - 0.5) * 40
+          );
+          scene.add(mesh);
+          explosionParticles.push({ mesh, vel, life: 1.0 });
+        }
+      }
+
+      function updateExplosion(dt) {
+        for (let i = explosionParticles.length - 1; i >= 0; i--) {
+          const p = explosionParticles[i];
+          p.mesh.position.addScaledVector(p.vel, dt);
+          p.vel.y -= 9.8 * dt;
+          p.life -= dt * 0.8;
+          if (p.mesh.material === particleMaterials[2]) p.mesh.position.y += dt * 5;
+          p.mesh.scale.multiplyScalar(1 - dt * 0.5);
+          p.mesh.rotation.x += dt * 2; p.mesh.rotation.y += dt * 2;
+          if (p.life <= 0) { scene.remove(p.mesh); explosionParticles.splice(i, 1); }
+        }
+      }
+
+      function clearExplosion() {
+        for (const particle of explosionParticles) { scene.remove(particle.mesh); }
+        explosionParticles.length = 0;
+      }
+
       function disposeScenery() {
         const geometries = new Set(), materials = new Set();
         scenery.traverse(object => {
@@ -307,7 +373,6 @@ window.addEventListener('load', () => {
         for (let i=0; i<25; i++) {
           const mx = (Math.random() - 0.5) * 8000;
           const mz = (Math.random() - 0.5) * 8000;
-          // Don't spawn on the runway
           if (Math.abs(mx) < 500 && Math.abs(mz) < airport.length) continue; 
           
           const h = 100 + Math.random() * 300;
@@ -401,7 +466,7 @@ window.addEventListener('load', () => {
 
       const manager = new THREE.LoadingManager();
       manager.onError = url => { cockpitNotice = "A cockpit asset failed to load."; showLoadMessage(); };
-      const loader = new THREE.GLTFLoader(manager);
+      const loader = new GLTFLoader(manager);
 
       loader.load(
         assetBase + "cockpit.glb",
@@ -462,6 +527,7 @@ window.addEventListener('load', () => {
       function updateButtons() { $("camera").textContent = chase ? "Camera: CHASE" : "Camera: COCKPIT"; $("flaps").textContent = flaps ? "Flaps: DOWN" : "Flaps: UP"; $("brakes").textContent = brakes ? "Brakes: ON" : "Brakes: OFF"; $("pause").textContent = state === "paused" ? "Resume" : "Pause"; }
 
       function start() {
+        clearExplosion();
         flightTime = 0;
         airport = settings[$("airport").value]; buildAirport();
         pitch = bank = yaw = 0; pitchRate = bankRate = 0; quaternion.identity(); landed = false; alpha = 0;
@@ -481,6 +547,7 @@ window.addEventListener('load', () => {
       }
 
       function setup() {
+        clearExplosion();
         state = "menu"; clearControls(); plane.visible = false; cockpitRig.visible = false;
         $("menu").classList.remove("hidden"); $("fallback").hidden = true; $("status").textContent = "Choose a starting position.";
         updateButtons();
@@ -498,6 +565,7 @@ window.addEventListener('load', () => {
         clearControls(); 
         message = "CRASH: " + reason + " (Flight Time: " + flightTime.toFixed(1) + "s)"; 
         plane.visible = false;
+        createExplosion(position); 
       }
 
       function onRunway() { return Math.abs(position.x) <= airport.width/2 && Math.abs(position.z) <= airport.length/2; }
@@ -721,11 +789,12 @@ window.addEventListener('load', () => {
         const dt=Math.min((now-previous)/1000,.05); previous=now;
         if (state==="playing") { const steps=Math.max(1,Math.ceil(dt/.008)); for (let i=0;i<steps;i++) physics(dt/steps); }
         if (state!=="menu") { updateAircraft(dt); updateCamera(dt); hud(); }
+        updateExplosion(dt);
         renderer.render(scene,camera); requestAnimationFrame(frame);
       }
       requestAnimationFrame(frame);
     })();
-});
+}
 </script>
 </body>
 </html>
