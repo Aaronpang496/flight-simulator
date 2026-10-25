@@ -85,14 +85,9 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
 }
 </style>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
+<!-- LOAD THREE.JS GLOBALLY (STREAMLIT CANNOT BLOCK THIS) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 
 <body>
@@ -188,37 +183,19 @@ small { display: block; color: #adbbcf; font-size: 12px; line-height: 1.6; margi
   </div>
 </div>
 
-<script type="module">
+<script>
 "use strict";
-
 const $ = id => document.getElementById(id);
 
-let THREE;
-let GLTFLoader;
+// Wait for the scripts in the <head> to load before starting
+window.addEventListener('load', () => {
+    if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
+        $("loadMessage").textContent = "3D engine failed to load. Check internet.";
+        $("launch").textContent = "Engine unavailable";
+        return;
+    }
 
-try {
-  THREE = await import("three");
-  ({ GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js"));
-} catch (error) {
-  $("loadMessage").textContent = "The 3D engine could not load. Check your internet connection or content blocker, then reload.";
-  $("launch").disabled = true;
-  $("launch").textContent = "Engine unavailable";
-  console.error("Engine import failed:", error);
-  throw error;
-}
-
-requestAnimationFrame(() => {
-  try {
-    initGame();
-  } catch (error) {
-    $("loadMessage").textContent = "The game could not initialize. See the browser console.";
-    $("launch").disabled = true;
-    console.error("Game initialization failed:", error);
-  }
-});
-
-function initGame() {
-  (() => {
+    (() => {
       const stage = document.getElementById("stage");
       const controls = document.getElementById("fallback");
       const phoneLayout = window.matchMedia("(max-width: 600px)");
@@ -242,7 +219,7 @@ function initGame() {
       catch (error) { $("loadMessage").textContent = "WebGL unavailable."; return; }
 
       renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.outputEncoding = THREE.sRGBEncoding; 
       renderer.domElement.style.touchAction = "none";
       stage.insertBefore(renderer.domElement, stage.firstChild);
 
@@ -500,7 +477,7 @@ function initGame() {
 
       const manager = new THREE.LoadingManager();
       manager.onError = url => { cockpitNotice = "A cockpit asset failed to load."; showLoadMessage(); };
-      const loader = new GLTFLoader(manager);
+      const loader = new THREE.GLTFLoader(manager);
 
       loader.load(
         assetBase + "cockpit.glb",
@@ -919,7 +896,7 @@ function initGame() {
       }
       requestAnimationFrame(frame);
     })();
-}
+});
 </script>
 </body>
 </html>
