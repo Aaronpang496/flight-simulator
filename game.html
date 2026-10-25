@@ -350,7 +350,7 @@ function initGame() {
             list.forEach(mat => materials.add(mat));
           }
         });
-        geometries.forEach(item => item.dispose()); materials.forEach(item => materials.dispose());
+        geometries.forEach(item => item.dispose()); materials.forEach(item => item.dispose());
         scene.remove(scenery); scenery = new THREE.Group(); scene.add(scenery);
       }
 
@@ -369,21 +369,37 @@ function initGame() {
         box(scenery,125,24,-180,16,48,16,building); 
         box(scenery,125,51,-180,30,10,30,dark.clone());
 
-        // Procedural Mountains
-        for (let i=0; i<25; i++) {
-          const mx = (Math.random() - 0.5) * 8000;
-          const mz = (Math.random() - 0.5) * 8000;
-          if (Math.abs(mx) < 500 && Math.abs(mz) < airport.length) continue; 
-          
-          const h = 100 + Math.random() * 300;
-          box(scenery, mx, h/2 - 2, mz, 400 + Math.random()*300, h, 400 + Math.random()*300, mountain);
-        }
-
-        // Procedural Buildings
-        for (let i=0; i<55; i++) {
-          const side = i%2 ? -1 : 1; 
-          const h = 15 + Math.random() * (airport === settings.kaitak ? 110 : 45);
-          box(scenery, side * (400 + Math.random()*2200), h/2 - 2, (Math.random()-.5)*6500, 30 + Math.random()*50, h, 30 + Math.random()*50, building);
+        // Map Styles
+        if (airport === settings.heathrow) {
+          // Huge Urban City
+          for (let i=0; i<150; i++) {
+            const side = i%2 ? -1 : 1; 
+            const h = 50 + Math.random() * 200;
+            box(scenery, side * (300 + Math.random()*3000), h/2 - 2, (Math.random()-.5)*8000, 40 + Math.random()*60, h, 40 + Math.random()*60, building);
+          }
+        } else if (airport === settings.kaitak) {
+          // Mountains & Old City
+          for (let i=0; i<30; i++) {
+            const mx = (Math.random() - 0.5) * 8000;
+            const mz = (Math.random() - 0.5) * 8000;
+            if (Math.abs(mx) < 500 && Math.abs(mz) < airport.length) continue; 
+            const h = 150 + Math.random() * 400;
+            box(scenery, mx, h/2 - 2, mz, 500 + Math.random()*400, h, 500 + Math.random()*400, mountain);
+          }
+          for (let i=0; i<50; i++) {
+            const side = i%2 ? -1 : 1; 
+            const h = 15 + Math.random() * 80;
+            box(scenery, side * (400 + Math.random()*1500), h/2 - 2, (Math.random()-.5)*5000, 30 + Math.random()*40, h, 30 + Math.random()*40, building);
+          }
+        } else {
+          // Coastal Island
+          for (let i=0; i<20; i++) {
+            const mx = (Math.random() - 0.5) * 6000;
+            const mz = (Math.random() - 0.5) * 6000;
+            if (Math.abs(mx) < 500 && Math.abs(mz) < airport.length) continue; 
+            const h = 50 + Math.random() * 100;
+            box(scenery, mx, h/2 - 2, mz, 200 + Math.random()*200, h, 200 + Math.random()*200, mountain);
+          }
         }
       }
 
