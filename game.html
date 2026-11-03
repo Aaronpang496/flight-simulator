@@ -3,446 +3,375 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover">
+ content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Island Flight</title>
 
 <style>
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: #101827;
-  color: #edf2f7;
-  font-family: system-ui, sans-serif;
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101827;color:#edf2f7;
+ font-family:system-ui,sans-serif
 }
-.wrap { max-width: 1200px; margin: auto; padding: 8px; }
-.version {
-  text-align: center;
-  color: #86efac;
-  padding: 5px;
-  font-size: 11px;
+.wrap{max-width:1200px;margin:auto;padding:8px}
+.version{text-align:center;color:#86efac;font-size:11px;padding:5px}
+[hidden]{display:none!important}
+#stage{
+ position:relative;height:540px;overflow:hidden;
+ border-radius:12px;background:#99ccec
 }
-#stage {
-  position: relative;
-  height: 540px;
-  overflow: hidden;
-  border-radius: 12px;
-  background: #99ccec;
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#notice{
+ position:absolute;z-index:30;top:6px;left:8px;right:8px;
+ padding:6px 8px;border-radius:6px;background:#0a1322df;
+ color:#fde68a;font-size:10px;pointer-events:none
 }
-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
-[hidden] { display: none !important; }
-
-#menu {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  overflow: auto;
-  padding: 65px 16px 16px;
-  background: rgba(10,19,34,.96);
+#badge{
+ position:absolute;top:57px;left:10px;color:white;
+ font-size:11px;text-shadow:0 1px 4px black;pointer-events:none
 }
-.menuInner { max-width: 470px; margin: auto; }
-h2 { color: #a5f3fc; margin: 0 0 10px; }
-label { display: block; font-size: 12px; margin: 8px 0; }
-select {
-  width: 100%;
-  display: block;
-  padding: 8px;
-  margin-top: 4px;
-  background: #24344d;
-  color: white;
-  border: 1px solid #64748b;
-  border-radius: 7px;
-  font: inherit;
+#menu{
+ position:absolute;inset:0;z-index:20;overflow:auto;
+ padding:58px 16px 16px;background:#0a1322f5
 }
-button {
-  min-height: 40px;
-  padding: 8px;
-  border: 0;
-  border-radius: 8px;
-  background: #a5f3fc;
-  color: #083344;
-  font: bold 12px system-ui;
-  cursor: pointer;
-  touch-action: manipulation;
+.menuInner{max-width:480px;margin:auto}
+h2{color:#a5f3fc;margin:0 0 10px}
+label{display:block;font-size:12px;margin:8px 0}
+select{
+ display:block;width:100%;margin-top:4px;padding:8px;
+ background:#24344d;color:white;border:1px solid #64748b;
+ border-radius:7px;font:inherit
 }
-button:disabled { opacity: .5; }
-#launch { width: 100%; margin-top: 10px; }
-
-#notice {
-  position: absolute;
-  z-index: 30;
-  top: 6px;
-  left: 8px;
-  right: 8px;
-  padding: 6px 8px;
-  background: rgba(10,19,34,.85);
-  border-radius: 6px;
-  color: #fde68a;
-  font-size: 10px;
-  pointer-events: none;
+input[type=range]{width:100%;display:block}
+button{
+ min-height:40px;padding:8px;border:0;border-radius:8px;
+ background:#a5f3fc;color:#083344;font:bold 12px system-ui;
+ cursor:pointer;touch-action:manipulation
 }
-#mapBadge {
-  position: absolute;
-  top: 65px;
-  left: 10px;
-  color: white;
-  text-shadow: 0 1px 4px black;
-  font-size: 11px;
-  pointer-events: none;
+button:disabled{opacity:.5}
+#launch{width:100%;margin-top:10px}
+.buttons{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.buttons button{flex:1;min-width:80px}
+#controls{
+ position:absolute;z-index:10;bottom:0;left:0;right:0;
+ display:flex;justify-content:space-between;gap:8px;
+ padding:8px;pointer-events:none
 }
-
-#controls {
-  position: absolute;
-  z-index: 10;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px;
-  pointer-events: none;
+.panel{
+ pointer-events:auto;padding:6px;background:#0f172ae6;
+ border:1px solid #64748b;border-radius:12px
 }
-.controlPanel {
-  pointer-events: auto;
-  padding: 6px;
-  background: rgba(15,23,42,.88);
-  border: 1px solid #64748b;
-  border-radius: 12px;
+#yokePanel{width:180px}
+#powerPanel{width:142px}
+.title{
+ text-align:center;color:#a5f3fc;font-size:10px;
+ font-weight:bold;margin-bottom:5px
 }
-#yokePanel { width: 180px; }
-#powerPanel { width: 130px; }
-.panelTitle {
-  text-align: center;
-  color: #a5f3fc;
-  font-size: 10px;
-  font-weight: bold;
-  margin-bottom: 5px;
+#stick{
+ position:relative;height:145px;overflow:hidden;
+ border:1px solid #64748b;border-radius:10px;
+ background:#0f172acc;touch-action:none;
+ user-select:none;-webkit-user-select:none
 }
-#stick {
-  position: relative;
-  width: 100%;
-  height: 145px;
-  border: 1px solid #64748b;
-  border-radius: 10px;
-  background: rgba(15,23,42,.8);
-  touch-action: none;
-  overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
+#knob{
+ position:absolute;left:50%;top:50%;width:112px;height:76px;
+ margin:-38px 0 0 -56px;pointer-events:none
 }
-#knob {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 112px;
-  height: 76px;
-  margin: -38px 0 0 -56px;
-  pointer-events: none;
+#yoke{
+ width:112px;height:76px;transform-origin:50% 65%;
+ filter:drop-shadow(0 4px 3px #000)
 }
-#yokeWheel {
-  width: 112px;
-  height: 76px;
-  transform-origin: 50% 65%;
-  filter: drop-shadow(0 4px 3px #000);
+.guide{
+ position:absolute;top:5px;width:100%;text-align:center;
+ color:#bdcbe0;font-size:8px;pointer-events:none
 }
-.guide {
-  position: absolute;
-  width: 100%;
-  top: 5px;
-  text-align: center;
-  color: #bdcbe0;
-  font-size: 8px;
-  pointer-events: none;
+.guide.bottom{top:auto;bottom:5px}
+#lever{
+ position:relative;height:98px;overflow:hidden;
+ border:1px solid #64748b;border-radius:10px;
+ background:linear-gradient(90deg,#111827,#334155,#111827);
+ touch-action:none;user-select:none;-webkit-user-select:none
 }
-.guide.bottom { top: auto; bottom: 5px; }
-
-#lever {
-  position: relative;
-  height: 106px;
-  overflow: hidden;
-  border: 1px solid #64748b;
-  border-radius: 10px;
-  background: linear-gradient(90deg,#111827,#334155,#111827);
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
+.track{
+ position:absolute;top:20px;bottom:20px;left:calc(50% - 4px);
+ width:8px;background:#020617;border-radius:5px
 }
-.track {
-  position: absolute;
-  top: 20px;
-  bottom: 20px;
-  left: calc(50% - 4px);
-  width: 8px;
-  background: #020617;
-  border-radius: 5px;
+.leverLabel{
+ position:absolute;width:100%;text-align:center;
+ color:#cbd5e1;font-size:8px
 }
-.leverLabel {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  color: #cbd5e1;
-  font-size: 8px;
+.full{top:3px}.idle{bottom:3px}
+#grip{
+ position:absolute;left:50%;top:75%;width:78px;height:34px;
+ transform:translate(-50%,-50%);border:2px solid #94a3b8;
+ border-radius:9px;background:linear-gradient(#596579,#1e293b,#111827);
+ box-shadow:0 4px 5px #0008;pointer-events:none
 }
-.full { top: 3px; }
-.idle { bottom: 3px; }
-#grip {
-  position: absolute;
-  left: 50%;
-  top: 75%;
-  width: 78px;
-  height: 34px;
-  transform: translate(-50%,-50%);
-  border: 2px solid #94a3b8;
-  border-radius: 9px;
-  background: linear-gradient(#596579,#1e293b,#111827);
-  box-shadow: 0 4px 5px #0008;
-  pointer-events: none;
+.ridges{
+ height:6px;margin:4px 7px 0;opacity:.6;
+ background:repeating-linear-gradient(
+  90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 7px)
 }
-.ridges {
-  height: 6px;
-  margin: 4px 7px 0;
-  opacity: .6;
-  background: repeating-linear-gradient(
-    90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 7px
-  );
+#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:12px}
+.mini{display:flex;gap:4px;margin-top:5px}
+.mini button{flex:1;min-width:0;padding:4px 2px;font-size:9px}
+#gear{width:100%;min-height:30px;margin-top:4px;font-size:10px}
+#instruments{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:5px;margin:8px 0
 }
-#powerGrip { display: block; text-align: center; color: #a5f3fc; font-size: 12px; }
-.mini { display: flex; gap: 4px; margin-top: 5px; }
-.mini button { flex: 1; min-width: 0; font-size: 9px; padding: 4px 2px; }
-
-#instruments {
-  display: grid;
-  grid-template-columns: repeat(4,minmax(0,1fr));
-  gap: 5px;
-  margin: 8px 0;
+.instrument{
+ text-align:center;background:#1d293c;border-radius:8px;
+ padding:7px 2px;font-size:10px
 }
-.instrument {
-  text-align: center;
-  background: #1d293c;
-  border-radius: 8px;
-  padding: 7px 2px;
-  font-size: 10px;
+.instrument strong{display:block;color:#a5f3fc;font-size:15px}
+#status{
+ min-height:34px;padding:5px;color:#fde68a;
+ text-align:center;font-size:12px
 }
-.instrument strong { display: block; color: #a5f3fc; font-size: 16px; }
-#status {
-  min-height: 34px;
-  padding: 5px;
-  color: #fde68a;
-  text-align: center;
-  font-size: 12px;
+#landingHint{
+ padding:7px;border-radius:8px;background:#1d293c;
+ color:#b6c9dd;font-size:11px;text-align:center
 }
-.buttons { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
-.buttons button { flex: 1; min-width: 85px; }
-details {
-  background: #1d293c;
-  border-radius: 9px;
-  padding: 10px;
-  margin: 9px 0;
+details{background:#1d293c;border-radius:9px;padding:10px;margin:9px 0}
+summary{cursor:pointer;font-weight:bold;color:#a5f3fc}
+.grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:5px 12px
 }
-summary { cursor: pointer; font-weight: bold; color: #a5f3fc; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 5px 12px;
-}
-.grid input { display: block; width: 100%; }
-small { display: block; color: #adbbcf; font-size: 10px; line-height: 1.5; }
-#assetStatus { color: #86efac; white-space: pre-line; }
-
-@media(max-width:600px) {
-  #stage { height: 345px; }
-  #menu { padding: 60px 12px 12px; }
-  h2 { font-size: 20px; }
-  #controls.phone {
-    position: relative;
-    inset: auto;
-    padding: 6px 0;
-    align-items: stretch;
-  }
-  #controls.phone .controlPanel {
-    flex: 1;
-    min-width: 0;
-    width: auto;
-    background: #172235;
-  }
-  #stick { height: 123px; }
-  #lever { height: 84px; }
-  .instrument { font-size: 9px; }
-  .instrument strong { font-size: 12px; }
-  .grid { grid-template-columns: 1fr; }
+small{display:block;color:#adbbcf;font-size:10px;line-height:1.5}
+#assets{color:#86efac;white-space:pre-line}
+output{color:#a5f3fc}
+@media(max-width:600px){
+ #stage{height:345px}
+ #menu{padding:58px 12px 12px}
+ h2{font-size:20px}
+ #controls.phone{
+  position:relative;inset:auto;padding:6px 0;align-items:stretch
+ }
+ #controls.phone .panel{
+  flex:1;min-width:0;width:auto;background:#172235
+ }
+ #stick{height:142px}
+ #lever{height:83px}
+ .instrument{font-size:9px}
+ .instrument strong{font-size:12px}
+ .grid{grid-template-columns:1fr}
 }
 </style>
 
 <script type="importmap">
 {
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
+ "imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+ }
 }
 </script>
 </head>
 
 <body>
 <div class="wrap">
-  <div class="version">ISLAND FLIGHT · THREE STYLIZED ENVIRONMENTS</div>
+ <div class="version">
+  ISLAND FLIGHT · THREE MAP STYLES · ADJUSTABLE LANDINGS
+ </div>
 
-  <div id="stage">
-    <div id="menu">
-      <div class="menuInner">
-        <h2>✈️ ISLAND FLIGHT</h2>
+ <div id="stage">
+  <div id="menu">
+   <div class="menuInner">
+    <h2>✈️ ISLAND FLIGHT</h2>
 
-        <label>Environment
-          <select id="airport">
-            <option value="juliana">Princess Juliana — tropical island</option>
-            <option value="heathrow">Heathrow — countryside and city</option>
-            <option value="kaitak">Kai Tak — harbor and mountains</option>
-          </select>
-        </label>
+    <label>Environment
+     <select id="airport">
+      <option value="juliana">Princess Juliana — tropical island</option>
+      <option value="heathrow">Heathrow — countryside and city</option>
+      <option value="kaitak">Kai Tak — harbor and mountains</option>
+     </select>
+    </label>
 
-        <label>Starting position
-          <select id="startMode">
-            <option value="takeoff">On runway</option>
-            <option value="approach">Landing approach</option>
-          </select>
-        </label>
+    <label>Starting position
+     <select id="startMode">
+      <option value="takeoff">On runway</option>
+      <option value="approach">Landing approach</option>
+     </select>
+    </label>
 
-        <label>Weather
-          <select id="weather">
-            <option value="clear">Clear — calm</option>
-            <option value="crosswind">Crosswind — 8 knots</option>
-          </select>
-        </label>
+    <label>Weather
+     <select id="weather">
+      <option value="clear">Clear — calm</option>
+      <option value="crosswind">Crosswind — 8 knots</option>
+     </select>
+    </label>
 
-        <button id="launch" disabled>Loading engine...</button>
-      </div>
-    </div>
+    <label>Landing difficulty
+     <select id="difficulty">
+      <option value="easy">Easy — wider landing range</option>
+      <option value="standard">Standard — tighter landing range</option>
+     </select>
+    </label>
 
-    <div id="notice">Loading 3D engine...</div>
-    <div id="mapBadge"></div>
-
-    <div id="controls" hidden>
-      <div id="yokePanel" class="controlPanel">
-        <div class="panelTitle">GRAB THE YOKE</div>
-        <div id="stick">
-          <div class="guide">PUSH: NOSE DOWN</div>
-          <div id="knob">
-            <svg id="yokeWheel" viewBox="0 0 160 100" aria-hidden="true">
-              <path d="M68 58 L92 58 L98 98 L62 98 Z"
-                    fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-              <path d="M20 16 L39 16 L39 48 Q39 58 51 58
-                       L109 58 Q121 58 121 48 L121 16 L140 16
-                       L140 49 Q140 77 111 77 L49 77 Q20 77 20 49 Z"
-                    fill="#273345" stroke="#94a3b8" stroke-width="3"/>
-              <rect x="16" y="8" width="27" height="42" rx="10"
-                    fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
-              <rect x="117" y="8" width="27" height="42" rx="10"
-                    fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
-              <rect x="24" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
-              <rect x="125" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
-              <rect x="63" y="55" width="34" height="21" rx="5"
-                    fill="#0f172a" stroke="#94a3b8"/>
-              <text x="80" y="69" text-anchor="middle"
-                    fill="#e2e8f0" font-size="9">FLIGHT</text>
-            </svg>
-          </div>
-          <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
-        </div>
-      </div>
-
-      <div id="powerPanel" class="controlPanel">
-        <div class="panelTitle">THROTTLE</div>
-        <div id="lever">
-          <div class="leverLabel full">FULL</div>
-          <div class="track"></div>
-          <div id="grip">
-            <div class="ridges"></div>
-            <span id="powerGrip">0%</span>
-          </div>
-          <div class="leverLabel idle">IDLE</div>
-        </div>
-        <div class="mini">
-          <button id="flaps">Flaps DOWN</button>
-          <button id="brakes">Brake OFF</button>
-        </div>
-      </div>
-    </div>
+    <button id="launch" disabled>Loading engine...</button>
+   </div>
   </div>
 
-  <div id="instruments">
-    <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
-    <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
-    <div class="instrument">Vertical speed<strong id="vertical">0 ft/min</strong></div>
-    <div class="instrument">Heading<strong id="heading">000°</strong></div>
-    <div class="instrument">Power<strong id="power">0%</strong></div>
-    <div class="instrument">Air time<strong id="timer">0.0 s</strong></div>
-    <div class="instrument">State<strong id="flightState">READY</strong></div>
-    <div class="instrument">Flaps<strong id="flapState">DOWN</strong></div>
-  </div>
+  <div id="notice">Loading 3D engine...</div>
+  <div id="badge"></div>
 
-  <div id="status">Choose an environment and start.</div>
-
-  <div class="buttons">
-    <button id="camera" disabled>Camera: CHASE</button>
-    <button id="pause" disabled>Pause</button>
-    <button id="restart" disabled>Setup</button>
-  </div>
-
-  <details>
-    <summary>Camera and aircraft alignment</summary>
-    <div class="grid">
-      <label>Cockpit eye X
-        <input id="eyeX" type="range" min="-1.5" max="1.5" step=".01" value="0">
-      </label>
-      <label>Cockpit eye Y
-        <input id="eyeY" type="range" min="-1.5" max="1.5" step=".01" value="0">
-      </label>
-      <label>Cockpit eye Z
-        <input id="eyeZ" type="range" min="-3" max="3" step=".01" value="0">
-      </label>
-      <label>Look left / right
-        <input id="lookYaw" type="range" min="-180" max="180" step="1" value="0">
-      </label>
-      <label>Look up / down
-        <input id="lookPitch" type="range" min="-60" max="60" step="1" value="-5">
-      </label>
-      <label>Exterior nose direction
-        <select id="exteriorYaw">
-          <option value="0">0°</option>
-          <option value="90">90°</option>
-          <option value="180">180°</option>
-          <option value="270">270°</option>
-        </select>
-      </label>
+  <div id="controls" hidden>
+   <div id="yokePanel" class="panel">
+    <div class="title">GRAB THE YOKE</div>
+    <div id="stick">
+     <div class="guide">PUSH: NOSE DOWN</div>
+     <div id="knob">
+      <svg id="yoke" viewBox="0 0 160 100" aria-hidden="true">
+       <path d="M68 58 L92 58 L98 98 L62 98 Z"
+        fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+       <path d="M20 16 L39 16 L39 48 Q39 58 51 58
+        L109 58 Q121 58 121 48 L121 16 L140 16
+        L140 49 Q140 77 111 77 L49 77 Q20 77 20 49 Z"
+        fill="#273345" stroke="#94a3b8" stroke-width="3"/>
+       <rect x="16" y="8" width="27" height="42" rx="10"
+        fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
+       <rect x="117" y="8" width="27" height="42" rx="10"
+        fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
+       <rect x="24" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
+       <rect x="125" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
+       <rect x="63" y="55" width="34" height="21" rx="5"
+        fill="#0f172a" stroke="#94a3b8"/>
+       <text x="80" y="69" text-anchor="middle"
+        fill="#e2e8f0" font-size="9">FLIGHT</text>
+      </svg>
+     </div>
+     <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
     </div>
-    <div class="buttons">
-      <button id="glass">Window glass: HIDDEN</button>
-      <button id="turn">Turn cockpit 180°</button>
-      <button id="resetView">Reset cockpit view</button>
-    </div>
-  </details>
+   </div>
 
-  <small id="assetStatus"></small>
+   <div id="powerPanel" class="panel">
+    <div class="title">THROTTLE</div>
+    <div id="lever">
+     <div class="leverLabel full">FULL</div>
+     <div class="track"></div>
+     <div id="grip">
+      <div class="ridges"></div>
+      <span id="gripPower">0%</span>
+     </div>
+     <div class="leverLabel idle">IDLE</div>
+    </div>
+    <div class="mini">
+     <button id="flaps">Flaps DOWN</button>
+     <button id="brakes">Brake OFF</button>
+    </div>
+    <button id="gear">Gear DOWN</button>
+   </div>
+  </div>
+ </div>
+
+ <div id="instruments">
+  <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
+  <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
+  <div class="instrument">Vertical speed<strong id="vertical">0 ft/min</strong></div>
+  <div class="instrument">Heading<strong id="heading">000°</strong></div>
+  <div class="instrument">Power<strong id="power">0%</strong></div>
+  <div class="instrument">Air time<strong id="timer">0.0 s</strong></div>
+  <div class="instrument">Pitch<strong id="pitchValue">0°</strong></div>
+  <div class="instrument">Bank<strong id="bankValue">0°</strong></div>
+ </div>
+
+ <div id="status">Choose an environment and start.</div>
+ <div id="landingHint"></div>
+
+ <div class="buttons">
+  <button id="camera" disabled>Camera: CHASE</button>
+  <button id="pause" disabled>Pause</button>
+  <button id="restart" disabled>Setup</button>
+ </div>
+
+ <details>
+  <summary>Landing limits — adjustable</summary>
   <small>
-    Stylized scenery, not real navigation data. Simplified flight physics,
-    not a 737 training simulator. Buildings and hills do not have collision
-    detection. Keyboard: arrows = yoke, W/S = power, Q/E = rudder, P = pause.
+   These are touchdown acceptance limits, not flight-control limits.
+   Pitch is the nose angle above or below the horizon.
   </small>
+  <div class="grid">
+   <label>Minimum pitch: <output id="pitchMinOut"></output>
+    <input id="pitchMin" type="range" min="-15" max="0" step="1" value="-8">
+   </label>
+   <label>Maximum pitch: <output id="pitchMaxOut"></output>
+    <input id="pitchMax" type="range" min="2" max="25" step="1" value="18">
+   </label>
+   <label>Maximum bank either way: <output id="bankMaxOut"></output>
+    <input id="bankMax" type="range" min="3" max="30" step="1" value="18">
+   </label>
+   <label>Maximum descent: <output id="sinkMaxOut"></output>
+    <input id="sinkMax" type="range" min="2" max="10" step=".5" value="6">
+   </label>
+   <label>Maximum touchdown speed: <output id="speedMaxOut"></output>
+    <input id="speedMax" type="range" min="80" max="180" step="5" value="145">
+   </label>
+   <label>Maximum runway misalignment: <output id="yawMaxOut"></output>
+    <input id="yawMax" type="range" min="5" max="45" step="1" value="25">
+   </label>
+  </div>
+ </details>
+
+ <details>
+  <summary>Camera and aircraft alignment</summary>
+  <div class="grid">
+   <label>Cockpit eye X
+    <input id="eyeX" type="range" min="-1.5" max="1.5" step=".01" value="0">
+   </label>
+   <label>Cockpit eye Y
+    <input id="eyeY" type="range" min="-1.5" max="1.5" step=".01" value="0">
+   </label>
+   <label>Cockpit eye Z
+    <input id="eyeZ" type="range" min="-3" max="3" step=".01" value="0">
+   </label>
+   <label>Look left / right
+    <input id="lookYaw" type="range" min="-180" max="180" step="1" value="0">
+   </label>
+   <label>Look up / down
+    <input id="lookPitch" type="range" min="-60" max="60" step="1" value="-5">
+   </label>
+   <label>Exterior nose direction
+    <select id="exteriorYaw">
+     <option value="0">0°</option>
+     <option value="90">90°</option>
+     <option value="180">180°</option>
+     <option value="270">270°</option>
+    </select>
+   </label>
+  </div>
+  <div class="buttons">
+   <button id="glass">Window glass: HIDDEN</button>
+   <button id="turn">Turn cockpit 180°</button>
+   <button id="resetView">Reset cockpit view</button>
+  </div>
+ </details>
+
+ <small id="assets"></small>
+ <small>
+  Stylized environments, not real airport navigation data.
+  Simplified physics, not realistic 737 handling.
+  Buildings and hills are visual scenery without collision detection.
+  Keyboard: arrows = yoke, W/S = power, Q/E = rudder, G = gear,
+  F = flaps, B = brakes, P = pause.
+ </small>
 </div>
 
 <script>
-window.showFatal = message => {
-  document.getElementById("notice").textContent = message;
-  document.getElementById("status").textContent = message;
+window.fatalMessage = message => {
+ document.getElementById("notice").textContent = message;
+ document.getElementById("status").textContent = message;
 };
-window.addEventListener("error", event => {
-  window.showFatal("Game error: " + (event.message || "Unknown error"));
+window.addEventListener("error", e => {
+ window.fatalMessage("Game error: " + (e.message || "Unknown error"));
 });
-window.addEventListener("unhandledrejection", event => {
-  window.showFatal("Game error: " + (event.reason?.message || String(event.reason)));
+window.addEventListener("unhandledrejection", e => {
+ window.fatalMessage("Game error: " + (e.reason?.message || String(e.reason)));
 });
 window.startupTimer = setTimeout(() => {
-  window.showFatal("Engine startup is taking too long. Check your connection and reload.");
+ window.fatalMessage(
+  "Engine startup is taking too long. Check your connection and reload."
+ );
 }, 25000);
 </script>
 
@@ -450,1159 +379,1272 @@ window.startupTimer = setTimeout(() => {
 const $ = id => document.getElementById(id);
 
 try {
-  const THREE = await import("three");
-  const { GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js");
-  clearTimeout(window.startupTimer);
-  init(THREE, GLTFLoader);
-} catch (error) {
-  clearTimeout(window.startupTimer);
-  $("launch").textContent = "Unable to start";
-  window.showFatal("Startup failed: " + error.message);
-  console.error(error);
+ const T = await import("three");
+ const {GLTFLoader} = await import("three/addons/loaders/GLTFLoader.js");
+ clearTimeout(window.startupTimer);
+ init(T, GLTFLoader);
+} catch(error) {
+ clearTimeout(window.startupTimer);
+ $("launch").textContent = "Unable to start";
+ window.fatalMessage("Startup failed: " + error.message);
+ console.error(error);
 }
 
 function init(T, GLTFLoader) {
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const stage = $("stage");
-  const controls = $("controls");
-  const mobile = matchMedia("(max-width:600px)");
+ const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+ const deg = T.MathUtils.radToDeg;
+ const rad = T.MathUtils.degToRad;
+ const stage = $("stage");
+ const controls = $("controls");
+ const mobile = matchMedia("(max-width:600px)");
 
-  function layout() {
-    controls.classList.toggle("phone", mobile.matches);
-    if (mobile.matches) stage.insertAdjacentElement("afterend", controls);
-    else stage.appendChild(controls);
+ function layout() {
+  controls.classList.toggle("phone",mobile.matches);
+  if(mobile.matches) stage.insertAdjacentElement("afterend",controls);
+  else stage.appendChild(controls);
+ }
+ layout();
+ if(mobile.addEventListener) mobile.addEventListener("change",layout);
+ else mobile.addListener(layout);
+
+ const renderer = new T.WebGLRenderer({antialias:true});
+ renderer.setPixelRatio(Math.min(devicePixelRatio || 1,1.5));
+ renderer.outputColorSpace = T.SRGBColorSpace;
+ stage.insertBefore(renderer.domElement,stage.firstChild);
+
+ const scene = new T.Scene();
+ const camera = new T.PerspectiveCamera(65,1,.2,24000);
+ const hemisphere = new T.HemisphereLight(0xffffff,0x63764b,2.1);
+ const sun = new T.DirectionalLight(0xfff4df,2.3);
+ sun.position.set(-700,1200,500);
+ scene.add(hemisphere,sun);
+
+ let scenery = new T.Group();
+ scene.add(scenery);
+ const mapTextures = [];
+
+ const aircraft = new T.Group();
+ const placeholder = new T.Group();
+ const exteriorAnchor = new T.Group();
+ aircraft.add(placeholder,exteriorAnchor);
+ scene.add(aircraft);
+
+ const cockpitRig = new T.Group();
+ const cockpitModel = new T.Group();
+ cockpitRig.add(cockpitModel);
+ scene.add(cockpitRig);
+ aircraft.visible = cockpitRig.visible = false;
+
+ const position = new T.Vector3();
+ const velocity = new T.Vector3();
+ const rotation = new T.Quaternion();
+ const wind = new T.Vector3();
+ const pilotEye = new T.Vector3(0,1.2,-1.6);
+ const eyeOffset = new T.Vector3();
+ const raycaster = new T.Raycaster();
+ const pointer = new T.Vector2();
+ const keys = new Set();
+ const parts = [], glassMaterials = [], exteriorClips = [];
+
+ let state="menu",chase=true,cockpitReady=false;
+ let glassHidden=true,cockpitTurned=false;
+ let pitch=0,bank=0,yaw=0,pitchRate=0,bankRate=0;
+ let throttle=0,flaps=true,brakes=false,gearDown=true;
+ let grounded=true,landed=false,airspeed=0,alpha=0,airTime=0;
+ let stickX=0,stickY=0,stickDrag=null,leverDrag=null,cockpitDrag=null;
+ let message="Choose an environment and start.";
+ let cockpitStatus="Cockpit downloading...";
+ let exteriorStatus="Exterior downloading...";
+ let animationStatus="";
+ let exteriorObject=null,exteriorMixer=null;
+ let exteriorGear=1,exteriorFlaps=1;
+ let stopped=false;
+
+ const MASS=1100,AREA=16.2,G=9.81,GROUND=1.5;
+ const KNOTS=1.94384;
+
+ const airports={
+  heathrow:{
+   title:"HEATHROW · COUNTRYSIDE / CITY",
+   length:3900,width:50,heading:90,
+   sky:"#b4cadb",seed:127
+  },
+  juliana:{
+   title:"PRINCESS JULIANA · TROPICAL ISLAND",
+   length:2300,width:45,heading:100,
+   sky:"#8dd4f4",seed:591
+  },
+  kaitak:{
+   title:"KAI TAK · HARBOR / MOUNTAINS",
+   length:3390,width:55,heading:130,
+   sky:"#a7bdca",seed:973
   }
-  layout();
-  if (mobile.addEventListener) mobile.addEventListener("change", layout);
-  else mobile.addListener(layout);
+ };
+ let airportKey="juliana",airport=airports.juliana;
 
-  const renderer = new T.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-  renderer.outputColorSpace = T.SRGBColorSpace;
-  stage.insertBefore(renderer.domElement, stage.firstChild);
-
-  const scene = new T.Scene();
-  const camera = new T.PerspectiveCamera(65, 1, .2, 24000);
-  const hemisphere = new T.HemisphereLight(0xffffff, 0x63764b, 2.1);
-  const sun = new T.DirectionalLight(0xfff4df, 2.3);
-  sun.position.set(-700, 1200, 500);
-  scene.add(hemisphere, sun);
-
-  let scenery = new T.Group();
-  scene.add(scenery);
-
-  const aircraft = new T.Group();
-  const fallbackPlane = new T.Group();
-  const exteriorAnchor = new T.Group();
-  aircraft.add(fallbackPlane, exteriorAnchor);
-  scene.add(aircraft);
-
-  const cockpitRig = new T.Group();
-  const cockpitModel = new T.Group();
-  cockpitRig.add(cockpitModel);
-  scene.add(cockpitRig);
-  aircraft.visible = cockpitRig.visible = false;
-
-  const position = new T.Vector3();
-  const velocity = new T.Vector3();
-  const rotation = new T.Quaternion();
-  const wind = new T.Vector3();
-  const pilotEye = new T.Vector3(0, 1.2, -1.6);
-  const eyeOffset = new T.Vector3();
-  const raycaster = new T.Raycaster();
-  const pointer = new T.Vector2();
-  const keys = new Set();
-  const parts = [], glassMaterials = [];
-  const terrainResources = { textures: [] };
-
-  let state = "menu", chase = true, ready = false;
-  let glassHidden = true, cockpitTurned = false;
-  let pitch = 0, bank = 0, yaw = 0, pitchRate = 0, bankRate = 0;
-  let throttle = 0, flaps = true, brakes = false;
-  let grounded = true, landed = false, airspeed = 0, alpha = 0, airTime = 0;
-  let stickX = 0, stickY = 0, stickDrag = null, leverDrag = null, cockpitDrag = null;
-  let message = "Choose an environment and start.";
-  let exteriorObject = null;
-  let cockpitStatus = "Cockpit downloading...";
-  let exteriorStatus = "Exterior downloading...";
-  let failed = false;
-
-  const MASS = 1100, AREA = 16.2, G = 9.81, GROUND = 1.5;
-
-  const airports = {
-    heathrow: {
-      title: "HEATHROW · COUNTRYSIDE / CITY",
-      length: 3900, width: 50, heading: 90,
-      sky: "#b4cadb", fog: "#b4cadb", seed: 127
-    },
-    juliana: {
-      title: "PRINCESS JULIANA · TROPICAL ISLAND",
-      length: 2300, width: 45, heading: 100,
-      sky: "#8dd4f4", fog: "#9fdbea", seed: 591
-    },
-    kaitak: {
-      title: "KAI TAK · HARBOR / MOUNTAINS",
-      length: 3390, width: 55, heading: 130,
-      sky: "#a7bdca", fog: "#b3c4cc", seed: 973
-    }
+ function material(color,extra={}) {
+  return new T.MeshStandardMaterial({color,roughness:.85,...extra});
+ }
+ function box(parent,x,y,z,w,h,d,mat) {
+  const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),mat);
+  mesh.position.set(x,y,z);
+  parent.add(mesh);
+  return mesh;
+ }
+ function randomSeed(seed) {
+  return () => {
+   seed=(seed*1664525+1013904223)>>>0;
+   return seed/4294967296;
   };
-  let airportKey = "juliana", airport = airports.juliana;
+ }
 
-  function mat(color, extra = {}) {
-    return new T.MeshStandardMaterial({ color, roughness: .85, ...extra });
+ // Placeholder remains if the exterior asset cannot load.
+ const white=material("#e4eaf0");
+ const blue=material("#188ca2");
+ const dark=material("#263344");
+ box(placeholder,0,0,0,1,1,7,white);
+ box(placeholder,0,.1,-.2,10.5,.13,1.5,blue);
+ box(placeholder,0,.4,2.5,3.8,.12,.8,blue);
+ box(placeholder,0,1,2.5,.13,1.7,1.2,blue);
+
+ const placeholderGear=new T.Group();
+ placeholder.add(placeholderGear);
+ for(const x of [-1,1]) {
+  box(placeholderGear,x,-1.15,.6,.3,.5,.5,dark);
+ }
+ box(placeholderGear,0,-1.15,-2,.25,.5,.4,dark);
+
+ // Shared explosion resources.
+ const particles=[];
+ const particleGeometry=new T.BoxGeometry(1,1,1);
+ const particleMaterials=[
+  material("#ff4400",{emissive:"#ff2200"}),
+  material("#ffcc00",{emissive:"#ffaa00"}),
+  material("#333333")
+ ];
+ function clearExplosion() {
+  particles.forEach(p=>scene.remove(p.mesh));
+  particles.length=0;
+ }
+ function explosion() {
+  clearExplosion();
+  for(let i=0;i<85;i++) {
+   const mesh=new T.Mesh(
+    particleGeometry,
+    particleMaterials[Math.floor(Math.random()*3)]
+   );
+   mesh.position.copy(position);
+   mesh.scale.setScalar(.5+Math.random()*1.7);
+   scene.add(mesh);
+   particles.push({
+    mesh,life:1.8,
+    velocity:new T.Vector3(
+     (Math.random()-.5)*40,
+     5+Math.random()*25,
+     (Math.random()-.5)*40
+    )
+   });
   }
-  function box(parent, x, y, z, w, h, d, material) {
-    const mesh = new T.Mesh(new T.BoxGeometry(w, h, d), material);
-    mesh.position.set(x, y, z);
-    parent.add(mesh);
-    return mesh;
+ }
+ function updateExplosion(dt) {
+  if(state==="paused") return;
+  for(let i=particles.length-1;i>=0;i--) {
+   const p=particles[i];
+   p.velocity.y-=G*dt;
+   p.mesh.position.addScaledVector(p.velocity,dt);
+   p.mesh.rotation.x+=dt*2;
+   p.mesh.rotation.y+=dt;
+   p.mesh.scale.multiplyScalar(Math.exp(-dt*.5));
+   p.life-=dt;
+   if(p.life<=0) {
+    scene.remove(p.mesh);
+    particles.splice(i,1);
+   }
   }
-  function seeded(seed) {
-    return () => {
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      return seed / 4294967296;
-    };
+ }
+
+ function disposeMap() {
+  const geometries=new Set(),materials=new Set();
+  scenery.traverse(o=>{
+   if(o.geometry) geometries.add(o.geometry);
+   if(o.material) {
+    (Array.isArray(o.material)?o.material:[o.material])
+     .forEach(m=>materials.add(m));
+   }
+  });
+  geometries.forEach(g=>g.dispose());
+  materials.forEach(m=>m.dispose());
+  mapTextures.forEach(t=>t.dispose());
+  mapTextures.length=0;
+  scene.remove(scenery);
+  scenery=new T.Group();
+  scene.add(scenery);
+ }
+
+ function runwayNumber(number,z,turn) {
+  const canvas=document.createElement("canvas");
+  canvas.width=128;canvas.height=256;
+  const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#f8fafc";
+  ctx.font="bold 135px sans-serif";
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText(String(number).padStart(2,"0"),64,128);
+  const texture=new T.CanvasTexture(canvas);
+  texture.colorSpace=T.SRGBColorSpace;
+  mapTextures.push(texture);
+  const mesh=new T.Mesh(
+   new T.PlaneGeometry(15,30),
+   new T.MeshBasicMaterial({
+    map:texture,transparent:true,depthWrite:false,side:T.DoubleSide
+   })
+  );
+  mesh.rotation.set(-Math.PI/2,0,turn);
+  mesh.position.set(0,.075,z);
+  scenery.add(mesh);
+ }
+
+ function runway() {
+  const asphalt=material("#363c43");
+  const paint=material("#ecebdc");
+  const taxi=material("#5d6265");
+  const yellow=material("#dcc44e");
+  const half=airport.length/2;
+
+  box(scenery,0,-.07,0,airport.width,.14,airport.length,asphalt);
+  for(let z=-half+150;z<half-150;z+=95) {
+   box(scenery,0,.025,z,1.1,.025,32,paint);
+  }
+  for(const side of [-1,1]) {
+   box(scenery,side*(airport.width/2-1),.025,0,
+    .45,.025,airport.length-20,paint);
+  }
+  for(const end of [-1,1]) {
+   for(let i=-3;i<=3;i++) {
+    box(scenery,i*4,.035,end*(half-38),2,.025,24,paint);
+   }
+   for(const x of [-9,9]) {
+    box(scenery,x,.035,end*(half-330),5,.025,40,paint);
+   }
+  }
+  const number=Math.round(airport.heading/10)||36;
+  runwayNumber(number,half-100,0);
+  runwayNumber(((number+17)%36)+1,-half+100,Math.PI);
+
+  const tx=airport.width/2+70;
+  box(scenery,tx,-.04,0,22,.08,airport.length-180,taxi);
+  box(scenery,tx,.015,0,.3,.02,airport.length-200,yellow);
+  for(const z of [-half+180,0,half-180]) {
+   box(scenery,tx/2,-.04,z,tx,.08,22,taxi);
   }
 
-  // Lightweight placeholder, retained if the downloaded exterior fails.
-  const white = mat("#e4eaf0"), blue = mat("#188ca2"), dark = mat("#263344");
-  box(fallbackPlane, 0, 0, 0, 1, 1, 7, white);
-  box(fallbackPlane, 0, .1, -.2, 10.5, .13, 1.5, blue);
-  box(fallbackPlane, 0, .4, 2.5, 3.8, .12, .8, blue);
-  box(fallbackPlane, 0, 1, 2.5, .13, 1.7, 1.2, blue);
-  for (const x of [-1, 1]) {
-    box(fallbackPlane, x, -1.15, .6, .3, .5, .5, dark);
+  const light=new T.MeshBasicMaterial({color:"#fff3bd"});
+  const green=new T.MeshBasicMaterial({color:"#73ff8d"});
+  const blueLight=new T.MeshBasicMaterial({color:"#4c8eff"});
+  for(let z=-half+15;z<=half-15;z+=90) {
+   for(const side of [-1,1]) {
+    box(scenery,side*(airport.width/2+1),.5,z,.7,.7,.7,light);
+   }
+   box(scenery,tx+12,.4,z,.6,.6,.6,blueLight);
   }
-  box(fallbackPlane, 0, -1.15, -2, .25, .5, .4, dark);
+  for(let x=-18;x<=18;x+=6) {
+   box(scenery,x,.4,half-4,.8,.6,.8,green);
+  }
+  for(let i=1;i<=7;i++) {
+   for(const x of [-4,0,4]) {
+    box(scenery,x,.3,half+i*30,.7,.4,.7,light);
+   }
+  }
+ }
 
-  function disposeMap() {
-    const geometries = new Set(), materials = new Set();
-    scenery.traverse(o => {
-      if (o.geometry) geometries.add(o.geometry);
-      if (o.material) {
-        (Array.isArray(o.material) ? o.material : [o.material])
-          .forEach(m => materials.add(m));
-      }
-    });
-    geometries.forEach(g => g.dispose());
-    materials.forEach(m => m.dispose());
-    terrainResources.textures.forEach(t => t.dispose());
-    terrainResources.textures.length = 0;
-    scene.remove(scenery);
-    scenery = new T.Group();
-    scene.add(scenery);
+ function terminal(x,z) {
+  const wall=material("#c3c5bc");
+  const roof=material("#6a7981");
+  const windows=material("#427185",{roughness:.35});
+  box(scenery,x,-.15,z,230,.3,470,material("#70777a"));
+  box(scenery,x+60,12,z,55,24,330,wall);
+  box(scenery,x+60,24.5,z,60,1,337,roof);
+  box(scenery,x+31,14,z,1,7,310,windows);
+  for(let i=-2;i<=2;i++) {
+   box(scenery,x+6,7,z+i*58,50,5,9,wall);
+  }
+  box(scenery,x+140,23,z-220,12,46,12,wall);
+  box(scenery,x+140,48,z-220,25,8,25,windows);
+ }
+
+ function hill(x,z,radius,height,mat,random) {
+  const geometry=new T.SphereGeometry(1,18,10);
+  const p=geometry.attributes.position;
+  for(let i=0;i<p.count;i++) {
+   if(p.getY(i)>.05) {
+    const f=.94+random()*.12;
+    p.setXYZ(i,p.getX(i)*f,p.getY(i)*f,p.getZ(i)*f);
+   }
+  }
+  geometry.computeVertexNormals();
+  const mesh=new T.Mesh(geometry,mat);
+  mesh.scale.set(radius,height,radius*.8);
+  mesh.position.set(x,-10,z);
+  scenery.add(mesh);
+ }
+
+ function trees(random,count,palm,half) {
+  const trunk=material("#806a4d");
+  const leaves=material(palm?"#388b51":"#386347");
+  const crownGeometry=new T.ConeGeometry(5,12,6);
+  for(let i=0;i<count;i++) {
+   const x=palm
+    ?(i%2?-1:1)*(110+random()*380)
+    :-300-random()*300;
+   const z=palm?half+35+random()*65:(random()-.5)*7000;
+   const height=palm?12:9+random()*5;
+   box(scenery,x,height/2,z,1.2,height,1.2,trunk);
+   if(palm) {
+    for(let j=0;j<5;j++) {
+     const leaf=box(scenery,x,height,z,13,.5,2,leaves);
+     leaf.rotation.y=j*Math.PI/5;
+     leaf.rotation.z=.12;
+    }
+   } else {
+    const crown=new T.Mesh(crownGeometry,leaves);
+    crown.position.set(x,height+1,z);
+    scenery.add(crown);
+   }
+  }
+ }
+
+ function city(random,count,dense) {
+  const walls=[
+   material("#b8bdc2"),material("#c4bdb0"),
+   material("#86949e"),material("#aaa9a0")
+  ];
+  const windows=material("#427083");
+  for(let i=0;i<count;i++) {
+   const side=i%2?-1:1;
+   const x=side*(dense?950+random()*1700:750+random()*3300);
+   const z=(random()-.5)*6500;
+   const h=dense?35+random()*190:12+random()*90;
+   const w=25+random()*45,d=25+random()*50;
+   box(scenery,x,h/2-.5,z,w,h,d,walls[i%walls.length]);
+   if(dense) {
+    for(const f of [.33,.66]) {
+     box(scenery,x,h*f,z+d/2+.1,w*.8,2,.3,windows);
+    }
+   }
+  }
+ }
+
+ function ship(x,z,angle) {
+  const group=new T.Group();
+  scenery.add(group);
+  group.position.set(x,-3.5,z);
+  group.rotation.y=angle;
+  box(group,0,2,0,30,8,130,material("#334653"));
+  box(group,0,7,-5,25,2,110,material("#9a9f9b"));
+  box(group,0,16,40,22,18,22,material("#e5e7eb"));
+  const red=material("#b85741"),blue=material("#467f8e");
+  for(let i=-2;i<=2;i++) {
+   box(group,0,13,i*15-15,22,9,12,i%2?red:blue);
+  }
+ }
+
+ function clouds(random) {
+  const mat=new T.MeshBasicMaterial({
+   color:"#ffffff",transparent:true,opacity:.7,depthWrite:false
+  });
+  const geometry=new T.SphereGeometry(1,8,6);
+  for(let i=0;i<14;i++) {
+   const x=(random()-.5)*15000,z=(random()-.5)*15000;
+   const y=850+random()*650;
+   for(let j=0;j<3;j++) {
+    const mesh=new T.Mesh(geometry,mat);
+    mesh.position.set(x+j*160,y+random()*30,z);
+    mesh.scale.set(190+random()*130,45+random()*25,110);
+    scenery.add(mesh);
+   }
+  }
+ }
+
+ function buildMap() {
+  disposeMap();
+  const random=randomSeed(airport.seed);
+  const half=airport.length/2;
+  scene.background=new T.Color(airport.sky);
+  scene.fog=new T.Fog(airport.sky,3200,17000);
+  $("badge").textContent=airport.title;
+
+  if(airportKey==="heathrow") {
+   hemisphere.groundColor.set("#6f7955");
+   box(scenery,0,-2,0,27000,3,27000,material("#6f8c53"));
+   const fields=[
+    material("#8e9d61"),material("#72864c"),material("#a19b65")
+   ];
+   for(let i=0;i<60;i++) {
+    box(scenery,(i%2?-1:1)*(800+random()*9000),-.46,
+     (random()-.5)*18000,400+random()*600,.04,
+     450+random()*500,fields[i%3]);
+   }
+   const road=material("#525960");
+   for(const x of [-600,540]) {
+    box(scenery,x,-.35,0,18,.1,13000,road);
+   }
+   for(let z=-5000;z<6000;z+=1400) {
+    box(scenery,-1800,-.35,z,2400,.1,14,road);
+   }
+   terminal(260,-250);
+   city(random,110,false);
+   trees(random,50,false,half);
   }
 
-  function runwayNumber(number, x, z, turn) {
-    const canvas = document.createElement("canvas");
-    canvas.width = 128; canvas.height = 256;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#f8fafc";
-    ctx.font = "bold 150px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(String(number).padStart(2, "0"), 64, 128);
-    const texture = new T.CanvasTexture(canvas);
-    texture.colorSpace = T.SRGBColorSpace;
-    terrainResources.textures.push(texture);
-    const mesh = new T.Mesh(
-      new T.PlaneGeometry(15, 30),
-      new T.MeshBasicMaterial({
-        map: texture, transparent: true, depthWrite: false,
-        side: T.DoubleSide
-      })
+  if(airportKey==="juliana") {
+   hemisphere.groundColor.set("#6e9b70");
+   box(scenery,0,-12,0,30000,10,30000,
+    material("#127fa4",{roughness:.35}));
+   box(scenery,150,-7,-700,2600,1,6500,material("#36b7c3"));
+   box(scenery,150,-2.2,-780,1800,3,5300,material("#d5c493"));
+   box(scenery,150,-1.4,-850,1600,2,5100,material("#679b5c"));
+   box(scenery,0,-.32,half+65,1000,.08,150,material("#ead7a4"));
+   box(scenery,0,-.22,half+18,1000,.08,13,material("#66706d"));
+   terminal(260,-100);
+   const green=material("#4e8455");
+   for(let i=0;i<12;i++) {
+    hill((i%2?-1:1)*(900+random()*500),
+     -700-random()*2500,400+random()*350,
+     110+random()*230,green,random);
+   }
+   const hotel=material("#e8d8bd");
+   for(let i=0;i<22;i++) {
+    const h=10+random()*20;
+    box(scenery,(i%2?-1:1)*(300+random()*350),
+     h/2,half-400+random()*300,25,h,35,hotel);
+   }
+   trees(random,32,true,half);
+  }
+
+  if(airportKey==="kaitak") {
+   hemisphere.groundColor.set("#677d78");
+   box(scenery,0,-12,0,30000,10,30000,material("#3c7d91"));
+   box(scenery,0,-2,-100,330,3,airport.length+200,material("#9a9b86"));
+   box(scenery,0,-1.3,-100,285,2,airport.length+130,material("#7e956b"));
+   const land=material("#89918a");
+   box(scenery,0,-2,-half-2100,10000,3,4300,land);
+   box(scenery,-1900,-2,0,2200,3,7200,land);
+   box(scenery,1900,-2,-300,2200,3,6500,land);
+   terminal(260,-half+400);
+   city(random,180,true);
+   const green=material("#536f5c");
+   for(let i=0;i<13;i++) {
+    hill((i%2?-1:1)*(3000+random()*1800),
+     -2500-random()*2500,700+random()*650,
+     300+random()*500,green,random);
+   }
+   ship(-480,450,.2);
+   ship(500,half+550,-.4);
+   ship(-550,-700,.1);
+  }
+  runway();
+  clouds(random);
+ }
+
+ // Landing acceptance ranges.
+ function limits() {
+  return {
+   minPitch:+$("pitchMin").value,
+   maxPitch:+$("pitchMax").value,
+   bank:+$("bankMax").value,
+   sink:+$("sinkMax").value,
+   speed:+$("speedMax").value,
+   yaw:+$("yawMax").value
+  };
+ }
+ function showLimits() {
+  const l=limits();
+  $("pitchMinOut").textContent=l.minPitch+"°";
+  $("pitchMaxOut").textContent=l.maxPitch+"°";
+  $("bankMaxOut").textContent="±"+l.bank+"°";
+  $("sinkMaxOut").textContent=l.sink+" m/s";
+  $("speedMaxOut").textContent=l.speed+" kt";
+  $("yawMaxOut").textContent="±"+l.yaw+"°";
+ }
+ function preset() {
+  const easy=$("difficulty").value==="easy";
+  const values=easy?[-8,18,18,6,145,25]:[-3,12,10,3,100,12];
+  ["pitchMin","pitchMax","bankMax","sinkMax","speedMax","yawMax"]
+   .forEach((id,i)=>$(id).value=values[i]);
+  showLimits();
+ }
+ $("difficulty").onchange=preset;
+ ["pitchMin","pitchMax","bankMax","sinkMax","speedMax","yawMax"]
+  .forEach(id=>$(id).oninput=showLimits);
+ preset();
+
+ function assetText() {
+  $("assets").textContent=
+   cockpitStatus+"\n"+exteriorStatus+
+   (animationStatus?"\n"+animationStatus:"");
+ }
+ function normalize(v) {
+  return String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ }
+ function find(root,name) {
+  let result=null;
+  root.traverse(o=>{
+   if(!result&&normalize(o.name)===normalize(name)) result=o;
+  });
+  return result;
+ }
+
+ function calibrateEye() {
+  const oldP=cockpitRig.position.clone(),oldQ=cockpitRig.quaternion.clone();
+  cockpitRig.position.set(0,0,0);
+  cockpitRig.quaternion.identity();
+  cockpitRig.updateMatrixWorld(true);
+  const yoke=find(cockpitModel,"yoke.capt");
+  const bounds=new T.Box3().setFromObject(yoke||cockpitModel);
+  if(!bounds.isEmpty()) {
+   if(yoke) {
+    pilotEye.copy(bounds.getCenter(new T.Vector3()));
+    pilotEye.add(new T.Vector3(0,.5,.5));
+   } else {
+    const s=bounds.getSize(new T.Vector3());
+    pilotEye.set(bounds.min.x+s.x*.3,bounds.min.y+s.y*.65,
+     bounds.min.z+s.z*.65);
+   }
+  }
+  cockpitRig.position.copy(oldP);
+  cockpitRig.quaternion.copy(oldQ);
+  cockpitRig.updateMatrixWorld(true);
+ }
+
+ function installParts(root) {
+  const recognized=new Set();
+  for(const [name,control] of [
+   ["yoke.capt","yoke"],["yoke.FO","yoke"],
+   ["pd.n1","throttle"],["pd.n2","throttle"],
+   ["pd.flaps","flaps"],["pd.parking-brake","brakes"]
+  ]) {
+   const o=find(root,name);
+   if(!o?.parent) continue;
+   o.userData.flightControl=control;
+   recognized.add(control);
+   o.updateWorldMatrix(true,true);
+   const bounds=new T.Box3().setFromObject(o);
+   if(bounds.isEmpty()) continue;
+   const point=bounds.getCenter(new T.Vector3());
+   if(control!=="yoke") point.y=bounds.min.y;
+   const parent=o.parent;
+   parent.worldToLocal(point);
+   const pivot=new T.Group();
+   pivot.position.copy(point);
+   parent.add(pivot);
+   pivot.updateWorldMatrix(true,false);
+   pivot.attach(o);
+   const rigQ=cockpitRig.getWorldQuaternion(new T.Quaternion());
+   const inverse=pivot.getWorldQuaternion(new T.Quaternion()).invert();
+   const axis=(x,y,z)=>new T.Vector3(x,y,z)
+    .applyQuaternion(rigQ).applyQuaternion(inverse).normalize();
+   parts.push({
+    pivot,control,base:pivot.quaternion.clone(),
+    pitch:axis(1,0,0),roll:axis(0,0,1)
+   });
+  }
+  return [...recognized].join(", ")||"use on-screen handles";
+ }
+
+ function animateParts() {
+  const a=new T.Quaternion(),b=new T.Quaternion();
+  for(const p of parts) {
+   if(p.control==="yoke") {
+    a.setFromAxisAngle(p.pitch,stickY*.1);
+    b.setFromAxisAngle(p.roll,-stickX*.55);
+    p.pivot.quaternion.copy(p.base).multiply(a).multiply(b);
+   } else {
+    const angle=p.control==="throttle"?-throttle*.65:
+     p.control==="flaps"?(flaps?.45:0):(brakes?.45:0);
+    a.setFromAxisAngle(p.pitch,angle);
+    p.pivot.quaternion.copy(p.base).multiply(a);
+   }
+  }
+ }
+
+ function glassSetting() {
+  glassMaterials.forEach(item=>{
+   item.material.visible=glassHidden?false:item.visible;
+  });
+  $("glass").textContent="Window glass: "+(glassHidden?"HIDDEN":"SHOWN");
+ }
+ $("glass").onclick=()=>{glassHidden=!glassHidden;glassSetting();};
+ $("turn").onclick=()=>{
+  if(!cockpitReady) return;
+  cockpitTurned=!cockpitTurned;
+  cockpitModel.rotation.y=-Math.PI/2+(cockpitTurned?Math.PI:0);
+  calibrateEye();
+ };
+ function readEye() {
+  eyeOffset.set(+$("eyeX").value,+$("eyeY").value,+$("eyeZ").value);
+ }
+ ["eyeX","eyeY","eyeZ"].forEach(id=>$(id).oninput=readEye);
+ $("resetView").onclick=()=>{
+  ["eyeX","eyeY","eyeZ","lookYaw"].forEach(id=>$(id).value="0");
+  $("lookPitch").value="-5";
+  readEye();
+ };
+
+ function alignExterior() {
+  if(!exteriorObject) return;
+  const oldP=aircraft.position.clone(),oldQ=aircraft.quaternion.clone();
+  try {
+   aircraft.position.set(0,0,0);
+   aircraft.quaternion.identity();
+   exteriorAnchor.position.set(0,0,0);
+   exteriorAnchor.scale.setScalar(1);
+   exteriorAnchor.rotation.set(0,rad(+$("exteriorYaw").value),0);
+   aircraft.updateMatrixWorld(true);
+   let bounds=new T.Box3().setFromObject(exteriorAnchor);
+   const size=bounds.getSize(new T.Vector3());
+   const span=Math.max(size.x,size.z);
+   if(!Number.isFinite(span)||span<=0) throw new Error("Invalid exterior size.");
+   exteriorAnchor.scale.setScalar(10.5/span);
+   exteriorAnchor.updateMatrixWorld(true);
+   bounds=new T.Box3().setFromObject(exteriorAnchor);
+   const center=bounds.getCenter(new T.Vector3());
+   exteriorAnchor.position.set(-center.x,-GROUND-bounds.min.y,-center.z);
+  } finally {
+   aircraft.position.copy(oldP);
+   aircraft.quaternion.copy(oldQ);
+   aircraft.updateMatrixWorld(true);
+  }
+ }
+ $("exteriorYaw").onchange=()=>{
+  try {alignExterior();}
+  catch(e){exteriorStatus=e.message;assetText();}
+ };
+
+ // Only use existing, clearly named deploy/extend/retract animation clips.
+ // Unknown mesh pivots are not guessed.
+ function installExteriorAnimations(gltf) {
+  exteriorMixer=new T.AnimationMixer(gltf.scene);
+  for(const type of ["gear","flap"]) {
+   const candidates=gltf.animations.filter(clip=>{
+    const n=clip.name.toLowerCase();
+    return n.includes(type)&&
+     /(extend|deploy|retract)/.test(n)&&
+     !/(door|nose.only)/.test(n);
+   });
+   const clip=candidates.find(c=>/(extend|deploy)/i.test(c.name))
+    ||candidates[0];
+   if(!clip||clip.duration<=0) continue;
+   const action=exteriorMixer.clipAction(clip);
+   action.setLoop(T.LoopOnce,1);
+   action.clampWhenFinished=true;
+   action.play();
+   action.paused=true;
+   exteriorClips.push({
+    type,clip,action,
+    reverse:/retract/i.test(clip.name)&&!/(extend|deploy)/i.test(clip.name)
+   });
+  }
+  animationStatus=exteriorClips.length
+   ?"Exterior animation clips: "+
+     exteriorClips.map(c=>c.clip.name).join(", ")+
+     ". Direction still needs visual verification."
+   :"No clearly named gear/flap deployment clips found. "+
+     "Exterior gear/flaps remain as modeled; simulation controls still work.";
+ }
+
+ function updateExterior(dt,snap=false) {
+  const factor=snap?1:1-Math.exp(-dt*2);
+  exteriorGear+=(Number(gearDown)-exteriorGear)*factor;
+  exteriorFlaps+=(Number(flaps)-exteriorFlaps)*factor;
+  placeholderGear.visible=exteriorGear>.5;
+  if(!exteriorMixer) return;
+  for(const item of exteriorClips) {
+   let value=item.type==="gear"?exteriorGear:exteriorFlaps;
+   if(item.reverse) value=1-value;
+   item.action.time=value*item.clip.duration;
+  }
+  exteriorMixer.update(0);
+ }
+
+ function syncControls() {
+  const percentage=Math.round(throttle*100)+"%";
+  $("power").textContent=$("gripPower").textContent=percentage;
+  const h=$("lever").clientHeight;
+  if(h) $("grip").style.top=(h-21-throttle*(h-42))+"px";
+  const stick=$("stick"),knob=$("knob");
+  const dx=Math.max(0,(stick.clientWidth-knob.offsetWidth)/2-2);
+  const dy=Math.max(0,(stick.clientHeight-knob.offsetHeight)/2-2);
+  knob.style.transform=`translate(${stickX*dx}px,${stickY*dy}px)`;
+  $("yoke").style.transform=`rotate(${stickX*25}deg)`;
+ }
+ function clearControls() {
+  keys.clear();
+  stickX=stickY=0;
+  stickDrag=leverDrag=cockpitDrag=null;
+  syncControls();
+ }
+ function buttons() {
+  $("camera").textContent=chase?"Camera: CHASE":"Camera: COCKPIT";
+  $("pause").textContent=state==="paused"?"Resume":"Pause";
+  $("pause").disabled=!["playing","paused"].includes(state);
+  $("flaps").textContent=flaps?"Flaps DOWN":"Flaps UP";
+  $("brakes").textContent=brakes?"Brake ON":"Brake OFF";
+  $("gear").textContent=gearDown?"Gear DOWN":"Gear UP";
+ }
+ function orient() {
+  rotation.setFromEuler(new T.Euler(pitch,yaw,bank,"YXZ"));
+ }
+ function onRunway() {
+  return Math.abs(position.x)<=airport.width/2&&
+   Math.abs(position.z)<=airport.length/2;
+ }
+ function alignmentError() {
+  // Both runway directions are accepted.
+  return deg(Math.acos(clamp(Math.abs(Math.cos(yaw)),0,1)));
+ }
+
+ function start() {
+  clearExplosion();
+  clearControls();
+  airportKey=$("airport").value;
+  airport=airports[airportKey];
+  buildMap();
+  pitch=bank=yaw=pitchRate=bankRate=0;
+  rotation.identity();
+  alpha=airTime=0;
+  landed=false;
+  const approach=$("startMode").value==="approach";
+  position.set(0,approach?105:GROUND,
+   airport.length/2+(approach?1150:-120));
+  velocity.set(0,approach?-2.2:0,approach?-38:0);
+  wind.set($("weather").value==="crosswind"?4.115:0,0,0);
+  airspeed=velocity.clone().sub(wind).length();
+  grounded=!approach;
+  throttle=approach?.35:0;
+  flaps=true;brakes=false;gearDown=true;
+  updateExterior(0,true);
+  state="playing";
+  $("menu").hidden=true;
+  controls.hidden=false;
+  message=approach
+   ?"Align with the runway. Stay within the landing ranges below."
+   :"Push the throttle up. Pull the yoke gently as speed builds.";
+  buttons();updateAircraft();updateCamera(1,true);hud();
+ }
+ function setup() {
+  clearExplosion();
+  state="menu";
+  clearControls();
+  aircraft.visible=cockpitRig.visible=false;
+  controls.hidden=true;
+  $("menu").hidden=false;
+  message="Choose an environment and start.";
+  buttons();hud();
+ }
+ function pause() {
+  if(state==="playing"){state="paused";clearControls();}
+  else if(state==="paused") state="playing";
+  buttons();
+ }
+ function crash(reason) {
+  if(state!=="playing") return;
+  state="crashed";
+  clearControls();
+  message="CRASH: "+reason+" Select Setup to try again.";
+  explosion();
+  buttons();
+ }
+ function toggleGear() {
+  if(state!=="playing") return;
+  if(grounded) {
+   message="Gear cannot be retracted while on the runway.";
+   return;
+  }
+  gearDown=!gearDown;
+  buttons();
+ }
+
+ function physics(dt) {
+  if(state!=="playing") return;
+  if(!grounded) airTime+=dt;
+
+  const p=clamp(stickY+Number(keys.has("ArrowDown"))-
+   Number(keys.has("ArrowUp")),-1,1);
+  const r=clamp(stickX+Number(keys.has("ArrowRight"))-
+   Number(keys.has("ArrowLeft")),-1,1);
+  const rudder=Number(keys.has("q"))-Number(keys.has("e"));
+
+  if(keys.has("w")) throttle=Math.min(1,throttle+dt*.3);
+  if(keys.has("s")) throttle=Math.max(0,throttle-dt*.3);
+
+  const authority=clamp(airspeed/32,.15,1.4);
+  pitchRate+=(p*.85*authority-pitchRate*3.2)*dt;
+  bankRate+=(-r*2.1*authority-bankRate*3.5)*dt;
+  pitch=clamp(pitch+pitchRate*dt,-.65,.65);
+  bank=clamp(bank+bankRate*dt,-1.15,1.15);
+
+  if(grounded) {
+   bank*=Math.exp(-dt*8);
+   pitch=clamp(pitch,0,airspeed>25?.22:.035);
+   yaw+=(rudder-r)*.22*clamp(velocity.length()/12,0,1)*dt;
+  } else {
+   yaw+=(Math.tan(bank)*G/Math.max(airspeed,20)+rudder*.12)*dt;
+  }
+  orient();
+
+  const forward=new T.Vector3(0,0,-1).applyQuaternion(rotation);
+  const right=new T.Vector3(1,0,0).applyQuaternion(rotation);
+  const up=new T.Vector3(0,1,0).applyQuaternion(rotation);
+  const airflow=velocity.clone().sub(wind);
+  airspeed=airflow.length();
+  const direction=airspeed>.1
+   ?airflow.clone().divideScalar(airspeed):forward.clone();
+  alpha=airspeed>5
+   ?Math.atan2(-airflow.dot(up),Math.max(.1,airflow.dot(forward))):0;
+  const density=1.225*Math.exp(-Math.max(0,position.y)/8500);
+  const pressure=.5*density*airspeed*airspeed;
+  let cl=clamp(.25+4.5*alpha+(flaps?.4:0),-1.2,flaps?1.8:1.5);
+  const stalled=Math.abs(alpha)>.27;
+  if(stalled) cl*=Math.max(.25,1-(Math.abs(alpha)-.27)*2);
+  const cd=.032+.055*cl*cl+(flaps?.045:0)+
+   (stalled?.16:0)+(gearDown?0:.0);
+  const lift=right.clone().cross(direction).normalize();
+  const force=new T.Vector3(0,-MASS*G,0);
+  force.addScaledVector(forward,throttle*3300*clamp(density/1.225,.5,1));
+  force.addScaledVector(lift,pressure*AREA*cl);
+  force.addScaledVector(direction,-pressure*AREA*cd);
+  velocity.addScaledVector(force,dt/MASS);
+
+  if(grounded) {
+   const h=new T.Vector3(velocity.x,0,velocity.z);
+   const speed=h.length();
+   if(speed>.001) {
+    const loss=Math.min(speed,(brakes?4.2:.18)*dt);
+    velocity.x-=h.x/speed*loss;
+    velocity.z-=h.z/speed*loss;
+   }
+   const flatRight=new T.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+   velocity.addScaledVector(flatRight,
+    -velocity.dot(flatRight)*Math.min(1,dt*7));
+   if(force.y>MASS*.2&&airspeed>25) {
+    grounded=false;
+    message="Airborne! Ease the yoke toward center.";
+   } else velocity.y=0;
+  }
+
+  position.addScaledVector(velocity,dt);
+
+  if(!grounded&&position.y<=GROUND) {
+   const sink=Math.max(0,-velocity.y);
+   position.y=GROUND;
+   const l=limits();
+   const pitchDegrees=deg(pitch),bankDegrees=Math.abs(deg(bank));
+   const reasons=[];
+
+   if(!onRunway()) reasons.push("touchdown outside the runway");
+   if(!gearDown) reasons.push("landing gear is UP");
+   if(pitchDegrees<l.minPitch||pitchDegrees>l.maxPitch) {
+    reasons.push(
+     "pitch "+pitchDegrees.toFixed(1)+"°; allowed "+
+     l.minPitch+"° to "+l.maxPitch+"°"
     );
-    mesh.rotation.set(-Math.PI / 2, 0, turn);
-    mesh.position.set(x, .075, z);
-    scenery.add(mesh);
+   }
+   if(bankDegrees>l.bank) {
+    reasons.push("bank "+bankDegrees.toFixed(1)+"° exceeds ±"+l.bank+"°");
+   }
+   if(sink>l.sink) {
+    reasons.push("descent "+sink.toFixed(1)+" m/s exceeds "+l.sink+" m/s");
+   }
+   if(airspeed*KNOTS>l.speed) {
+    reasons.push("speed exceeds "+l.speed+" kt");
+   }
+   if(alignmentError()>l.yaw) {
+    reasons.push("aircraft is not aligned closely enough with the runway");
+   }
+   if(reasons.length) {
+    crash(reasons.join("; ")+".");
+    return;
+   }
+
+   velocity.y=0;
+   grounded=landed=true;
+   pitchRate=bankRate=0;
+   // Settle gently after an accepted touchdown.
+   pitch=clamp(pitch,0,.18);
+   bank=0;
+   message="TOUCHDOWN ACCEPTED! Reduce power and apply brakes.";
   }
 
-  function makeRunway() {
-    const asphalt = mat("#363c43");
-    const paint = mat("#ecebdc");
-    const taxi = mat("#5d6265");
-    const yellow = mat("#dcc44e");
-    const half = airport.length / 2;
-
-    box(scenery, 0, -.07, 0, airport.width, .14, airport.length, asphalt);
-    for (let z = -half + 150; z < half - 150; z += 95) {
-      box(scenery, 0, .025, z, 1.1, .025, 32, paint);
-    }
-    for (const side of [-1, 1]) {
-      box(scenery, side * (airport.width / 2 - 1), .025, 0,
-          .45, .025, airport.length - 20, paint);
-    }
-    for (const end of [-1, 1]) {
-      for (let i = -3; i <= 3; i++) {
-        box(scenery, i * 4, .035, end * (half - 38),
-            2, .025, 24, paint);
-      }
-      for (const x of [-9, 9]) {
-        box(scenery, x, .035, end * (half - 330),
-            5, .025, 40, paint);
-      }
-    }
-
-    const number = Math.round(airport.heading / 10) || 36;
-    runwayNumber(number, 0, half - 100, 0);
-    runwayNumber(((number + 17) % 36) + 1, 0, -half + 100, Math.PI);
-
-    const tx = airport.width / 2 + 70;
-    box(scenery, tx, -.04, 0, 22, .08, airport.length - 180, taxi);
-    box(scenery, tx, .015, 0, .3, .02, airport.length - 200, yellow);
-    for (const z of [-half + 180, 0, half - 180]) {
-      box(scenery, tx / 2, -.04, z, tx, .08, 22, taxi);
-    }
-
-    const edgeLight = new T.MeshBasicMaterial({ color: "#fff3bd" });
-    const blueLight = new T.MeshBasicMaterial({ color: "#4c8eff" });
-    const greenLight = new T.MeshBasicMaterial({ color: "#73ff8d" });
-
-    for (let z = -half + 15; z <= half - 15; z += 90) {
-      for (const side of [-1, 1]) {
-        box(scenery, side * (airport.width / 2 + 1), .5, z,
-            .7, .7, .7, edgeLight);
-      }
-      box(scenery, tx + 12, .4, z, .6, .6, .6, blueLight);
-    }
-    for (let x = -18; x <= 18; x += 6) {
-      box(scenery, x, .4, half - 4, .8, .6, .8, greenLight);
-    }
-
-    // Approach lights are visual markers, not a certified lighting system.
-    for (let i = 1; i <= 7; i++) {
-      const z = half + i * 30;
-      for (const x of [-4, 0, 4]) {
-        box(scenery, x, .3, z, .7, .4, .7, edgeLight);
-      }
-    }
+  if(grounded) {
+   position.y=GROUND;
+   if(!onRunway()){crash("You left the runway.");return;}
+   if(landed&&velocity.length()<1) {
+    state="complete";
+    clearControls();
+    message="LANDING COMPLETE! Air time: "+airTime.toFixed(1)+" s.";
+    buttons();
+   }
   }
-
-  function terminal(x, z) {
-    const wall = mat("#c3c5bc");
-    const roof = mat("#6a7981");
-    const windows = mat("#427185", { metalness: .25, roughness: .35 });
-    box(scenery, x, -.15, z, 230, .3, 470, mat("#70777a"));
-    box(scenery, x + 60, 12, z, 55, 24, 330, wall);
-    box(scenery, x + 60, 24.5, z, 60, 1, 337, roof);
-    box(scenery, x + 31, 14, z, 1, 7, 310, windows);
-
-    for (let i = -2; i <= 2; i++) {
-      box(scenery, x + 6, 7, z + i * 58, 50, 5, 9, wall);
-    }
-    box(scenery, x + 140, 23, z - 220, 12, 46, 12, wall);
-    box(scenery, x + 140, 48, z - 220, 25, 8, 25, windows);
+  if(!grounded&&stalled&&airspeed<35) {
+   pitch=clamp(pitch-.12*dt,-.65,.65);
   }
-
-  function hill(x, z, radius, height, material, random) {
-    const geometry = new T.SphereGeometry(1, 18, 10);
-    const vertices = geometry.attributes.position;
-    for (let i = 0; i < vertices.count; i++) {
-      const y = vertices.getY(i);
-      if (y > .05) {
-        const factor = .94 + random() * .12;
-        vertices.setXYZ(i,
-          vertices.getX(i) * factor,
-          y * factor,
-          vertices.getZ(i) * factor);
-      }
-    }
-    geometry.computeVertexNormals();
-    const mesh = new T.Mesh(geometry, material);
-    mesh.scale.set(radius, height, radius * .8);
-    mesh.position.set(x, -10, z);
-    scenery.add(mesh);
+  if(![position.x,position.y,position.z,
+   velocity.x,velocity.y,velocity.z].every(Number.isFinite)) {
+   crash("Simulation error.");return;
   }
+  orient();
+ }
 
-  function tree(x, z, random, palm = false) {
-    const trunk = mat(palm ? "#86704f" : "#695342");
-    const leaves = mat(palm ? "#388b51" : "#386347");
-    const height = palm ? 12 : 9 + random() * 5;
-    box(scenery, x, height / 2, z, 1.2, height, 1.2, trunk);
-
-    if (palm) {
-      for (let i = 0; i < 5; i++) {
-        const leaf = box(scenery, x, height, z, 13, .5, 2, leaves);
-        leaf.rotation.y = i * Math.PI / 5;
-        leaf.rotation.z = .12;
-      }
-    } else {
-      const crown = new T.Mesh(new T.ConeGeometry(5, 12, 6), leaves);
-      crown.position.set(x, height + 1, z);
-      scenery.add(crown);
-    }
+ function updateAircraft() {
+  aircraft.position.copy(position);
+  aircraft.quaternion.copy(rotation);
+  aircraft.visible=chase&&!["menu","crashed"].includes(state);
+  cockpitRig.position.copy(position);
+  cockpitRig.quaternion.copy(rotation);
+  cockpitRig.visible=cockpitReady&&!chase&&
+   !["menu","crashed"].includes(state);
+  animateParts();
+ }
+ function updateCamera(dt,snap=false) {
+  if(state==="menu") return;
+  const forward=new T.Vector3(0,0,-1).applyQuaternion(rotation);
+  if(chase) {
+   const desired=position.clone().addScaledVector(forward,-25);
+   desired.y+=9;
+   if(snap) camera.position.copy(desired);
+   else camera.position.lerp(desired,1-Math.exp(-dt*5));
+   camera.up.set(0,1,0);
+   camera.lookAt(position.clone().addScaledVector(forward,50));
+  } else {
+   camera.position.copy(pilotEye.clone().add(eyeOffset)
+    .applyQuaternion(rotation).add(position));
+   const look=new T.Quaternion().setFromEuler(new T.Euler(
+    rad(+$("lookPitch").value),rad(+$("lookYaw").value),0,"YXZ"));
+   camera.quaternion.copy(rotation).multiply(look);
   }
-
-  function city(random, count, dense) {
-    const walls = [
-      mat("#b8bdc2"), mat("#c4bdb0"), mat("#86949e"),
-      mat("#c0c8ca"), mat("#aaa9a0")
-    ];
-    const windows = mat("#427083", { roughness: .4 });
-    for (let i = 0; i < count; i++) {
-      const side = i % 2 ? -1 : 1;
-      const x = side * (dense ? 650 + random() * 1900 : 650 + random() * 3300);
-      const z = (random() - .5) * 6500;
-      const h = dense ? 35 + random() * 190 : 12 + random() * 90;
-      const w = 25 + random() * 45;
-      const d = 25 + random() * 50;
-
-      box(scenery, x, h / 2 - .5, z, w, h, d,
-          walls[Math.floor(random() * walls.length)]);
-      if (dense) {
-        box(scenery, x, h * .66, z + d / 2 + .1,
-            w * .8, 2, .3, windows);
-        box(scenery, x, h * .33, z + d / 2 + .1,
-            w * .8, 2, .3, windows);
-      }
-    }
+  const near=chase?.2:.02;
+  if(camera.near!==near) {
+   camera.near=near;camera.updateProjectionMatrix();
   }
+ }
 
-  function ship(x, z, angle) {
-    const group = new T.Group();
-    scenery.add(group);
-    group.position.set(x, -3.5, z);
-    group.rotation.y = angle;
-    box(group, 0, 2, 0, 30, 8, 130, mat("#334653"));
-    box(group, 0, 7, -5, 25, 2, 110, mat("#9a9f9b"));
-    box(group, 0, 16, 40, 22, 18, 22, mat("#e5e7eb"));
-    for (let i = -2; i <= 2; i++) {
-      box(group, 0, 13, i * 15 - 15, 22, 9, 12,
-          mat(i % 2 ? "#b85741" : "#467f8e"));
-    }
+ function hud() {
+  syncControls();
+  $("speed").textContent=Math.round(airspeed*KNOTS)+" kt";
+  $("altitude").textContent=
+   Math.max(0,Math.round((position.y-GROUND)*3.28084))+" ft";
+  $("vertical").textContent=Math.round(velocity.y*196.85)+" ft/min";
+  const heading=((airport.heading-deg(yaw))%360+360)%360;
+  $("heading").textContent=String(Math.round(heading)%360).padStart(3,"0")+"°";
+  $("timer").textContent=airTime.toFixed(1)+" s";
+  $("pitchValue").textContent=deg(pitch).toFixed(1)+"°";
+  $("bankValue").textContent=deg(bank).toFixed(1)+"°";
+
+  const l=limits();
+  const ok=deg(pitch)>=l.minPitch&&deg(pitch)<=l.maxPitch&&
+   Math.abs(deg(bank))<=l.bank&&Math.max(0,-velocity.y)<=l.sink&&
+   airspeed*KNOTS<=l.speed&&alignmentError()<=l.yaw&&gearDown;
+
+  $("landingHint").textContent=
+   "Landing: pitch "+l.minPitch+"° to +"+l.maxPitch+"°"+
+   " · bank ±"+l.bank+"° · descent ≤"+l.sink+" m/s"+
+   " · speed ≤"+l.speed+" kt · gear "+(gearDown?"DOWN":"UP")+
+   (state==="playing"&&!grounded?
+    " · "+(ok?"Within touchdown limits — runway position still matters":
+     "Outside one or more touchdown limits"):"");
+  $("landingHint").style.color=ok?"#86efac":"#fde68a";
+
+  let prefix="";
+  if(state==="paused") prefix="PAUSED — ";
+  if(state==="playing"&&!grounded&&Math.abs(alpha)>.27) prefix="STALL — ";
+  $("status").textContent=prefix+message;
+ }
+
+ const primary=e=>e.pointerType!=="mouse"||e.button===0;
+ const stick=$("stick"),lever=$("lever");
+
+ stick.onpointerdown=e=>{
+  if(state!=="playing"||stickDrag||cockpitDrag||!primary(e)) return;
+  e.preventDefault();
+  stickDrag={id:e.pointerId,x:e.clientX,y:e.clientY};
+  stick.setPointerCapture(e.pointerId);
+ };
+ stick.onpointermove=e=>{
+  if(stickDrag?.id!==e.pointerId||state!=="playing") return;
+  e.preventDefault();
+  stickX=clamp((e.clientX-stickDrag.x)/Math.max(35,stick.clientWidth*.3),-1,1);
+  stickY=clamp((e.clientY-stickDrag.y)/Math.max(30,stick.clientHeight*.3),-1,1);
+  syncControls();
+ };
+ lever.onpointerdown=e=>{
+  if(state!=="playing"||leverDrag||
+   cockpitDrag?.control==="throttle"||!primary(e)) return;
+  e.preventDefault();
+  leverDrag={id:e.pointerId,y:e.clientY,power:throttle};
+  lever.setPointerCapture(e.pointerId);
+ };
+ lever.onpointermove=e=>{
+  if(leverDrag?.id!==e.pointerId||state!=="playing") return;
+  e.preventDefault();
+  throttle=clamp(leverDrag.power+
+   (leverDrag.y-e.clientY)/Math.max(35,lever.clientHeight-42),0,1);
+  syncControls();
+ };
+
+ function hitControl(e) {
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.set((e.clientX-rect.left)/rect.width*2-1,
+   -(e.clientY-rect.top)/rect.height*2+1);
+  scene.updateMatrixWorld(true);
+  camera.updateMatrixWorld(true);
+  raycaster.setFromCamera(pointer,camera);
+  for(const hit of raycaster.intersectObject(cockpitModel,true)) {
+   let o=hit.object;
+   const mats=Array.isArray(o.material)?o.material:[o.material];
+   if(mats.every(m=>m&&!m.visible)) continue;
+   while(o&&o!==cockpitRig) {
+    if(o.userData.flightControl) return o.userData.flightControl;
+    o=o.parent;
+   }
+   return null;
   }
-
-  function clouds(random) {
-    const cloudMat = new T.MeshBasicMaterial({
-      color: "#ffffff", transparent: true, opacity: .7, depthWrite: false
-    });
-    const geometry = new T.SphereGeometry(1, 8, 6);
-    for (let i = 0; i < 16; i++) {
-      const cx = (random() - .5) * 15000;
-      const cz = (random() - .5) * 15000;
-      const cy = 850 + random() * 650;
-      for (let j = 0; j < 3; j++) {
-        const mesh = new T.Mesh(geometry, cloudMat);
-        mesh.position.set(cx + j * 160, cy + random() * 30, cz);
-        mesh.scale.set(190 + random() * 130, 45 + random() * 25, 110);
-        scenery.add(mesh);
-      }
-    }
+  return null;
+ }
+ renderer.domElement.onpointerdown=e=>{
+  if(state!=="playing"||chase||!cockpitReady||
+   cockpitDrag||stickDrag||!primary(e)) return;
+  const control=hitControl(e);
+  if(!control||(control==="throttle"&&leverDrag)) return;
+  e.preventDefault();
+  if(control==="flaps"){flaps=!flaps;buttons();return;}
+  if(control==="brakes"){brakes=!brakes;buttons();return;}
+  cockpitDrag={
+   id:e.pointerId,control,x:e.clientX,y:e.clientY,power:throttle
+  };
+  renderer.domElement.setPointerCapture(e.pointerId);
+ };
+ renderer.domElement.onpointermove=e=>{
+  const drag=cockpitDrag;
+  if(drag?.id!==e.pointerId||state!=="playing") return;
+  e.preventDefault();
+  const rect=renderer.domElement.getBoundingClientRect();
+  if(drag.control==="yoke") {
+   const travel=Math.max(50,Math.min(rect.width,rect.height)*.2);
+   stickX=clamp((e.clientX-drag.x)/travel,-1,1);
+   stickY=clamp((e.clientY-drag.y)/travel,-1,1);
+  } else {
+   throttle=clamp(drag.power-
+    (e.clientY-drag.y)/Math.max(100,rect.height*.5),0,1);
   }
+ };
+ for(const name of ["pointerup","pointercancel","lostpointercapture"]) {
+  stick.addEventListener(name,e=>{
+   if(stickDrag?.id===e.pointerId) {
+    stickDrag=null;stickX=stickY=0;syncControls();
+   }
+  });
+  lever.addEventListener(name,e=>{
+   if(leverDrag?.id===e.pointerId) leverDrag=null;
+  });
+  renderer.domElement.addEventListener(name,e=>{
+   if(cockpitDrag?.id!==e.pointerId) return;
+   if(cockpitDrag.control==="yoke") stickX=stickY=0;
+   cockpitDrag=null;
+  });
+ }
 
-  function buildMap() {
-    disposeMap();
-    const random = seeded(airport.seed);
-    scene.background = new T.Color(airport.sky);
-    scene.fog = new T.Fog(airport.fog, 3200, 17000);
-    $("mapBadge").textContent = airport.title;
-
-    const half = airport.length / 2;
-
-    if (airportKey === "heathrow") {
-      hemisphere.groundColor.set("#6f7955");
-      const grass = mat("#6f8c53");
-      box(scenery, 0, -2, 0, 27000, 3, 27000, grass);
-
-      const fields = [mat("#8e9d61"), mat("#72864c"), mat("#a19b65")];
-      for (let i = 0; i < 65; i++) {
-        const x = (i % 2 ? -1 : 1) * (800 + random() * 9000);
-        box(scenery, x, -.46, (random() - .5) * 18000,
-            400 + random() * 600, .04, 450 + random() * 500,
-            fields[i % 3]);
-      }
-      const road = mat("#525960");
-      for (const x of [-600, 540]) {
-        box(scenery, x, -.35, 0, 18, .1, 13000, road);
-      }
-      for (let z = -5000; z < 6000; z += 1400) {
-        box(scenery, -1800, -.35, z, 2400, .1, 14, road);
-      }
-      terminal(260, -250);
-      city(random, 130, false);
-      for (let i = 0; i < 65; i++) {
-        tree(-300 - random() * 300, (random() - .5) * 7000, random);
-      }
-    }
-
-    if (airportKey === "juliana") {
-      hemisphere.groundColor.set("#6e9b70");
-      box(scenery, 0, -12, 0, 30000, 10, 30000,
-          mat("#127fa4", { roughness: .35 }));
-      box(scenery, 150, -7, -700, 2600, 1, 6500,
-          mat("#36b7c3", { roughness: .45 }));
-      box(scenery, 150, -2.2, -780, 1800, 3, 5300, mat("#d5c493"));
-      box(scenery, 150, -1.4, -850, 1600, 2, 5100, mat("#679b5c"));
-
-      // Beach and road immediately before the approach end.
-      box(scenery, 0, -.32, half + 65, 1000, .08, 150, mat("#ead7a4"));
-      box(scenery, 0, -.22, half + 18, 1000, .08, 13, mat("#66706d"));
-      terminal(260, -100);
-
-      const green = mat("#4e8455");
-      for (let i = 0; i < 12; i++) {
-        hill(
-          (i % 2 ? -1 : 1) * (850 + random() * 500),
-          -700 - random() * 2500,
-          400 + random() * 350,
-          110 + random() * 230,
-          green, random
-        );
-      }
-
-      const hotel = mat("#e8d8bd");
-      for (let i = 0; i < 22; i++) {
-        const x = (i % 2 ? -1 : 1) * (300 + random() * 350);
-        const z = half - 400 + random() * 300;
-        const h = 10 + random() * 20;
-        box(scenery, x, h / 2, z, 25, h, 35, hotel);
-      }
-      for (let i = 0; i < 40; i++) {
-        const x = (i % 2 ? -1 : 1) * (110 + random() * 380);
-        tree(x, half + 35 + random() * 65, random, true);
-      }
-    }
-
-    if (airportKey === "kaitak") {
-      hemisphere.groundColor.set("#677d78");
-      box(scenery, 0, -12, 0, 30000, 10, 30000,
-          mat("#3c7d91", { roughness: .45 }));
-
-      // A runway peninsula surrounded by harbor water.
-      box(scenery, 0, -2, -100, 330, 3, airport.length + 200, mat("#9a9b86"));
-      box(scenery, 0, -1.3, -100, 285, 2, airport.length + 130, mat("#7e956b"));
-      box(scenery, 0, -2, -half - 2100, 10000, 3, 4300, mat("#89918a"));
-      box(scenery, -1900, -2, 0, 2200, 3, 7200, mat("#89918a"));
-      box(scenery, 1900, -2, -300, 2200, 3, 6500, mat("#89918a"));
-
-      terminal(260, -half + 400);
-      city(random, 210, true);
-
-      const green = mat("#536f5c");
-      for (let i = 0; i < 13; i++) {
-        hill(
-          (i % 2 ? -1 : 1) * (3000 + random() * 1800),
-          -2500 - random() * 2500,
-          700 + random() * 650,
-          300 + random() * 500,
-          green, random
-        );
-      }
-      ship(-480, 450, .2);
-      ship(500, half + 550, -.4);
-      ship(-550, -700, .1);
-    }
-
-    makeRunway();
-    clouds(random);
+ $("launch").onclick=start;
+ $("restart").onclick=setup;
+ $("pause").onclick=pause;
+ $("gear").onclick=toggleGear;
+ $("camera").onclick=()=>{
+  if(chase&&!cockpitReady) {
+   message="Cockpit is not available yet. Exterior view remains active.";
+   $("status").textContent=message;
+   return;
   }
+  clearControls();chase=!chase;
+  buttons();updateAircraft();updateCamera(1,true);
+ };
+ $("flaps").onclick=()=>{
+  if(state==="playing"){flaps=!flaps;buttons();}
+ };
+ $("brakes").onclick=()=>{
+  if(state==="playing"){brakes=!brakes;buttons();}
+ };
 
-  function assetText() {
-    $("assetStatus").textContent = cockpitStatus + "\n" + exteriorStatus;
+ window.addEventListener("keydown",e=>{
+  if(["INPUT","SELECT","TEXTAREA","BUTTON","SUMMARY"].includes(e.target?.tagName)) return;
+  const key=e.key.length===1?e.key.toLowerCase():e.key;
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","q","e","w","s"].includes(key)) {
+   if(state==="playing"){e.preventDefault();keys.add(key);}
   }
-  function normalize(v) {
-    return String(v || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  if(!e.repeat) {
+   if(key==="p") pause();
+   if(key==="g") toggleGear();
+   if(key==="f"&&state==="playing"){flaps=!flaps;buttons();}
+   if(key==="b"&&state==="playing"){brakes=!brakes;buttons();}
   }
-  function find(root, name) {
-    let result = null;
-    root.traverse(o => {
-      if (!result && normalize(o.name) === normalize(name)) result = o;
-    });
-    return result;
-  }
+ });
+ window.addEventListener("keyup",e=>{
+  keys.delete(e.key.length===1?e.key.toLowerCase():e.key);
+ });
+ function suspend() {
+  clearControls();
+  if(state==="playing") pause();
+ }
+ window.addEventListener("blur",suspend);
+ document.addEventListener("visibilitychange",()=>{
+  if(document.hidden) suspend();
+ });
+ renderer.domElement.addEventListener("webglcontextlost",e=>{
+  e.preventDefault();stopped=true;suspend();
+  window.fatalMessage("The browser lost its graphics context. Reload the app.");
+ });
 
-  function calibrateEye() {
-    const oldP = cockpitRig.position.clone();
-    const oldQ = cockpitRig.quaternion.clone();
-    cockpitRig.position.set(0, 0, 0);
+ function resize() {
+  const w=stage.clientWidth,h=stage.clientHeight;
+  if(!w||!h) return;
+  renderer.setSize(w,h);
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+  syncControls();
+ }
+ const observer=new ResizeObserver(resize);
+ observer.observe(stage);
+ window.addEventListener("resize",resize);
+
+ readEye();buildMap();resize();
+ camera.position.set(130,100,airport.length/2+220);
+ camera.lookAt(0,0,airport.length/2-500);
+ $("launch").disabled=$("camera").disabled=$("restart").disabled=false;
+ $("launch").textContent="Start flight";
+ $("notice").textContent=
+  "Game ready. Aircraft assets are downloading; you can start now.";
+ buttons();hud();assetText();
+
+ let previous=performance.now();
+ function frame(now) {
+  if(stopped) return;
+  try {
+   const dt=clamp((now-previous)/1000,0,.05);
+   previous=now;
+   if(state==="playing") {
+    const steps=Math.max(1,Math.ceil(dt/.008));
+    for(let i=0;i<steps;i++) physics(dt/steps);
+    updateExterior(dt);
+   }
+   if(state!=="menu") {
+    updateAircraft();updateCamera(dt);hud();
+   }
+   updateExplosion(dt);
+   renderer.render(scene,camera);
+   requestAnimationFrame(frame);
+  } catch(error) {
+   stopped=true;suspend();
+   window.fatalMessage("Game stopped: "+error.message+". Reload to restart.");
+   console.error(error);
+  }
+ }
+ requestAnimationFrame(frame);
+
+ const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
+ let textureFailure=false;
+ const manager=new T.LoadingManager();
+ manager.onError=url=>{
+  textureFailure=true;console.warn("Cockpit asset failed:",url);
+ };
+
+ new GLTFLoader(manager).load(
+  base+"cockpit.glb",
+  gltf=>{
+   const oldP=cockpitRig.position.clone(),oldQ=cockpitRig.quaternion.clone();
+   try {
+    cockpitRig.position.set(0,0,0);
     cockpitRig.quaternion.identity();
+    const model=gltf.scene;
+    cockpitModel.add(model);
+    cockpitModel.rotation.set(0,-Math.PI/2,0);
     cockpitRig.updateMatrixWorld(true);
-    const yoke = find(cockpitModel, "yoke.capt");
-    const bounds = new T.Box3().setFromObject(yoke || cockpitModel);
-    if (!bounds.isEmpty()) {
-      const size = bounds.getSize(new T.Vector3());
-      if (yoke) {
-        pilotEye.copy(bounds.getCenter(new T.Vector3()));
-        pilotEye.add(new T.Vector3(0, .5, .5));
-      } else {
-        pilotEye.set(
-          bounds.min.x + size.x * .3,
-          bounds.min.y + size.y * .65,
-          bounds.min.z + size.z * .65
-        );
+    const bounds=new T.Box3().setFromObject(cockpitModel);
+    if(bounds.isEmpty()) throw new Error("Empty cockpit.");
+    const center=bounds.getCenter(new T.Vector3());
+    cockpitModel.position.x-=center.x;
+    cockpitModel.position.y+=-1.2-bounds.min.y;
+    cockpitRig.updateMatrixWorld(true);
+    const seen=new Set();
+    model.traverse(o=>{
+     if(!o.isMesh||!o.material) return;
+     const list=Array.isArray(o.material)?o.material:[o.material];
+     list.forEach(m=>{
+      if(seen.has(m)) return;
+      seen.add(m);
+      const image=m.map?.image;
+      const names=[m.name,m.map?.name,image?.currentSrc||image?.src].join(" ");
+      if(/window[-_ ]?trans/i.test(names)) {
+       glassMaterials.push({material:m,visible:m.visible});
       }
-    }
+     });
+    });
+    glassSetting();calibrateEye();
+    const found=installParts(model);
+    cockpitReady=true;
+    cockpitStatus="Cockpit loaded. Controls: "+found+
+     (textureFailure?" — some textures failed.":".");
+    $("notice").textContent="Cockpit ready. Use Camera to switch views.";
+   } catch(error) {
+    cockpitReady=false;
+    cockpitStatus="Cockpit setup failed; exterior flight remains available.";
+    $("notice").textContent=cockpitStatus;
+    console.error(error);
+   } finally {
     cockpitRig.position.copy(oldP);
     cockpitRig.quaternion.copy(oldQ);
     cockpitRig.updateMatrixWorld(true);
+    assetText();
+   }
+  },
+  undefined,
+  error=>{
+   cockpitStatus="Cockpit download failed. Check cockpit.glb and its textures.";
+   $("notice").textContent="Cockpit unavailable. Exterior flight still works.";
+   assetText();console.error(error);
   }
+ );
 
-  function installParts(root) {
-    const recognized = new Set();
-    for (const [name, control] of [
-      ["yoke.capt", "yoke"], ["yoke.FO", "yoke"],
-      ["pd.n1", "throttle"], ["pd.n2", "throttle"],
-      ["pd.flaps", "flaps"], ["pd.parking-brake", "brakes"]
-    ]) {
-      const o = find(root, name);
-      if (!o?.parent) continue;
-      o.userData.flightControl = control;
-      recognized.add(control);
-
-      o.updateWorldMatrix(true, true);
-      const bounds = new T.Box3().setFromObject(o);
-      if (bounds.isEmpty()) continue;
-      const point = bounds.getCenter(new T.Vector3());
-      if (control !== "yoke") point.y = bounds.min.y;
-      const parent = o.parent;
-      parent.worldToLocal(point);
-      const pivot = new T.Group();
-      pivot.position.copy(point);
-      parent.add(pivot);
-      pivot.updateWorldMatrix(true, false);
-      pivot.attach(o);
-
-      const rigQ = cockpitRig.getWorldQuaternion(new T.Quaternion());
-      const inverse = pivot.getWorldQuaternion(new T.Quaternion()).invert();
-      const axis = (x, y, z) => new T.Vector3(x, y, z)
-        .applyQuaternion(rigQ).applyQuaternion(inverse).normalize();
-
-      parts.push({
-        pivot, control, base: pivot.quaternion.clone(),
-        pitch: axis(1, 0, 0), roll: axis(0, 0, 1)
-      });
-    }
-    return [...recognized].join(", ") || "use the on-screen handles";
+ let exteriorTextureFailure=false;
+ const exteriorManager=new T.LoadingManager();
+ exteriorManager.onError=()=>{exteriorTextureFailure=true;};
+ new GLTFLoader(exteriorManager).load(
+  base+"737_max_lion_air.glb",
+  gltf=>{
+   try {
+    exteriorObject=gltf.scene;
+    exteriorAnchor.add(exteriorObject);
+    // Measure the original deployed/bind pose before animation.
+    alignExterior();
+    installExteriorAnimations(gltf);
+    updateExterior(0,true);
+    placeholder.visible=false;
+    exteriorStatus="737 exterior loaded."+
+     (exteriorTextureFailure?" Some textures failed.":"")+
+     " Adjust Exterior nose direction if needed.";
+   } catch(error) {
+    exteriorAnchor.clear();
+    exteriorObject=null;
+    exteriorMixer=null;
+    exteriorClips.length=0;
+    placeholder.visible=true;
+    exteriorStatus="Exterior setup failed; placeholder retained.";
+    console.error(error);
+   }
+   assetText();
+  },
+  undefined,
+  error=>{
+   exteriorStatus="737 exterior download failed; placeholder retained.";
+   assetText();console.error(error);
   }
-
-  function animateParts() {
-    const a = new T.Quaternion(), b = new T.Quaternion();
-    for (const p of parts) {
-      if (p.control === "yoke") {
-        a.setFromAxisAngle(p.pitch, stickY * .1);
-        b.setFromAxisAngle(p.roll, -stickX * .55);
-        p.pivot.quaternion.copy(p.base).multiply(a).multiply(b);
-      } else {
-        const angle = p.control === "throttle" ? -throttle * .65
-          : p.control === "flaps" ? (flaps ? .45 : 0)
-          : (brakes ? .45 : 0);
-        a.setFromAxisAngle(p.pitch, angle);
-        p.pivot.quaternion.copy(p.base).multiply(a);
-      }
-    }
-  }
-
-  function glassSetting() {
-    glassMaterials.forEach(item => {
-      item.material.visible = glassHidden ? false : item.visible;
-    });
-    $("glass").textContent = "Window glass: " + (glassHidden ? "HIDDEN" : "SHOWN");
-  }
-
-  $("glass").onclick = () => {
-    glassHidden = !glassHidden;
-    glassSetting();
-  };
-  $("turn").onclick = () => {
-    if (!ready) return;
-    cockpitTurned = !cockpitTurned;
-    cockpitModel.rotation.y = -Math.PI / 2 + (cockpitTurned ? Math.PI : 0);
-    calibrateEye();
-  };
-
-  function readEye() {
-    eyeOffset.set(+$("eyeX").value, +$("eyeY").value, +$("eyeZ").value);
-  }
-  ["eyeX", "eyeY", "eyeZ"].forEach(id => {
-    $(id).oninput = readEye;
-  });
-  $("resetView").onclick = () => {
-    ["eyeX", "eyeY", "eyeZ", "lookYaw"].forEach(id => $(id).value = "0");
-    $("lookPitch").value = "-5";
-    readEye();
-  };
-
-  function alignExterior() {
-    if (!exteriorObject) return;
-    exteriorAnchor.position.set(0, 0, 0);
-    exteriorAnchor.scale.setScalar(1);
-    exteriorAnchor.rotation.set(0, T.MathUtils.degToRad(+$("exteriorYaw").value), 0);
-    exteriorAnchor.updateMatrixWorld(true);
-
-    // Measure in an identity aircraft frame, even if it is currently flying.
-    const oldP = aircraft.position.clone(), oldQ = aircraft.quaternion.clone();
-    aircraft.position.set(0, 0, 0);
-    aircraft.quaternion.identity();
-    aircraft.updateMatrixWorld(true);
-
-    let bounds = new T.Box3().setFromObject(exteriorAnchor);
-    let size = bounds.getSize(new T.Vector3());
-    const span = Math.max(size.x, size.z);
-    if (!Number.isFinite(span) || span <= 0) {
-      aircraft.position.copy(oldP);
-      aircraft.quaternion.copy(oldQ);
-      throw new Error("Exterior dimensions are invalid.");
-    }
-
-    // Match the existing prototype's visual scale, not full-size 737 dimensions.
-    exteriorAnchor.scale.setScalar(10.5 / span);
-    exteriorAnchor.updateMatrixWorld(true);
-    bounds = new T.Box3().setFromObject(exteriorAnchor);
-    const center = bounds.getCenter(new T.Vector3());
-    exteriorAnchor.position.set(-center.x, -GROUND - bounds.min.y, -center.z);
-
-    aircraft.position.copy(oldP);
-    aircraft.quaternion.copy(oldQ);
-    aircraft.updateMatrixWorld(true);
-  }
-  $("exteriorYaw").onchange = () => {
-    try { alignExterior(); }
-    catch (error) { exteriorStatus = error.message; assetText(); }
-  };
-
-  function syncControls() {
-    const percentage = Math.round(throttle * 100) + "%";
-    $("power").textContent = $("powerGrip").textContent = percentage;
-    const height = $("lever").clientHeight;
-    if (height) {
-      $("grip").style.top = (height - 21 - throttle * (height - 42)) + "px";
-    }
-    const stick = $("stick"), knob = $("knob");
-    const dx = Math.max(0, (stick.clientWidth - knob.offsetWidth) / 2 - 2);
-    const dy = Math.max(0, (stick.clientHeight - knob.offsetHeight) / 2 - 2);
-    knob.style.transform = `translate(${stickX * dx}px,${stickY * dy}px)`;
-    $("yokeWheel").style.transform = `rotate(${stickX * 25}deg)`;
-  }
-
-  function clearControls() {
-    keys.clear();
-    stickX = stickY = 0;
-    stickDrag = leverDrag = cockpitDrag = null;
-    syncControls();
-  }
-  function buttons() {
-    $("camera").textContent = chase ? "Camera: CHASE" : "Camera: COCKPIT";
-    $("pause").textContent = state === "paused" ? "Resume" : "Pause";
-    $("pause").disabled = !["playing", "paused"].includes(state);
-    $("flaps").textContent = flaps ? "Flaps DOWN" : "Flaps UP";
-    $("brakes").textContent = brakes ? "Brake ON" : "Brake OFF";
-    $("flapState").textContent = flaps ? "DOWN" : "UP";
-  }
-  function orient() {
-    rotation.setFromEuler(new T.Euler(pitch, yaw, bank, "YXZ"));
-  }
-  function onRunway() {
-    return Math.abs(position.x) <= airport.width / 2 &&
-           Math.abs(position.z) <= airport.length / 2;
-  }
-
-  function start() {
-    clearControls();
-    airportKey = $("airport").value;
-    airport = airports[airportKey];
-    buildMap();
-    pitch = bank = yaw = pitchRate = bankRate = 0;
-    rotation.identity();
-    alpha = airTime = 0;
-    landed = false;
-    const approach = $("startMode").value === "approach";
-    position.set(0, approach ? 105 : GROUND,
-      airport.length / 2 + (approach ? 1150 : -120));
-    velocity.set(0, approach ? -2.2 : 0, approach ? -38 : 0);
-    wind.set($("weather").value === "crosswind" ? 4.115 : 0, 0, 0);
-    airspeed = velocity.clone().sub(wind).length();
-    grounded = !approach;
-    throttle = approach ? .35 : 0;
-    flaps = true; brakes = false;
-    state = "playing";
-    $("menu").hidden = true;
-    controls.hidden = false;
-    message = approach
-      ? "Align with the runway. Adjust pitch and power for a gentle descent."
-      : "Push the throttle up. Pull the yoke gently as speed builds.";
-    buttons();
-    updateAircraft();
-    updateCamera(1, true);
-    hud();
-  }
-
-  function setup() {
-    state = "menu";
-    clearControls();
-    aircraft.visible = cockpitRig.visible = false;
-    controls.hidden = true;
-    $("menu").hidden = false;
-    message = "Choose an environment and start.";
-    buttons();
-    hud();
-  }
-  function pause() {
-    if (state === "playing") { state = "paused"; clearControls(); }
-    else if (state === "paused") state = "playing";
-    buttons();
-  }
-  function crash(reason) {
-    if (state !== "playing") return;
-    state = "crashed";
-    clearControls();
-    message = "CRASH: " + reason + " Select Setup to try again.";
-    buttons();
-  }
-
-  function physics(dt) {
-    if (state !== "playing") return;
-    if (!grounded) airTime += dt;
-
-    const p = clamp(stickY + Number(keys.has("ArrowDown")) -
-      Number(keys.has("ArrowUp")), -1, 1);
-    const r = clamp(stickX + Number(keys.has("ArrowRight")) -
-      Number(keys.has("ArrowLeft")), -1, 1);
-    const rudder = Number(keys.has("q")) - Number(keys.has("e"));
-
-    if (keys.has("w")) throttle = Math.min(1, throttle + dt * .3);
-    if (keys.has("s")) throttle = Math.max(0, throttle - dt * .3);
-
-    const authority = clamp(airspeed / 32, .15, 1.4);
-    pitchRate += (p * .85 * authority - pitchRate * 3.2) * dt;
-    bankRate += (-r * 2.1 * authority - bankRate * 3.5) * dt;
-    pitch = clamp(pitch + pitchRate * dt, -.65, .65);
-    bank = clamp(bank + bankRate * dt, -1.15, 1.15);
-
-    if (grounded) {
-      bank *= Math.exp(-dt * 8);
-      pitch = clamp(pitch, 0, airspeed > 25 ? .22 : .035);
-      yaw += (rudder - r) * .22 * clamp(velocity.length() / 12, 0, 1) * dt;
-    } else {
-      yaw += (Math.tan(bank) * G / Math.max(airspeed, 20) + rudder * .12) * dt;
-    }
-    orient();
-
-    const forward = new T.Vector3(0, 0, -1).applyQuaternion(rotation);
-    const right = new T.Vector3(1, 0, 0).applyQuaternion(rotation);
-    const up = new T.Vector3(0, 1, 0).applyQuaternion(rotation);
-    const airflow = velocity.clone().sub(wind);
-    airspeed = airflow.length();
-    const direction = airspeed > .1
-      ? airflow.clone().divideScalar(airspeed) : forward.clone();
-
-    alpha = airspeed > 5
-      ? Math.atan2(-airflow.dot(up), Math.max(.1, airflow.dot(forward))) : 0;
-    const density = 1.225 * Math.exp(-Math.max(0, position.y) / 8500);
-    const pressure = .5 * density * airspeed * airspeed;
-    let cl = clamp(.25 + 4.5 * alpha + (flaps ? .4 : 0),
-      -1.2, flaps ? 1.8 : 1.5);
-    const stalled = Math.abs(alpha) > .27;
-    if (stalled) cl *= Math.max(.25, 1 - (Math.abs(alpha) - .27) * 2);
-    const cd = .032 + .055 * cl * cl + (flaps ? .045 : 0) + (stalled ? .16 : 0);
-
-    const lift = right.clone().cross(direction).normalize();
-    const force = new T.Vector3(0, -MASS * G, 0);
-    force.addScaledVector(forward, throttle * 3300 * clamp(density / 1.225, .5, 1));
-    force.addScaledVector(lift, pressure * AREA * cl);
-    force.addScaledVector(direction, -pressure * AREA * cd);
-    velocity.addScaledVector(force, dt / MASS);
-
-    if (grounded) {
-      const h = new T.Vector3(velocity.x, 0, velocity.z);
-      const speed = h.length();
-      if (speed > .001) {
-        const loss = Math.min(speed, (brakes ? 4.2 : .18) * dt);
-        velocity.x -= h.x / speed * loss;
-        velocity.z -= h.z / speed * loss;
-      }
-      const flatRight = new T.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-      velocity.addScaledVector(flatRight,
-        -velocity.dot(flatRight) * Math.min(1, dt * 7));
-      if (force.y > MASS * .2 && airspeed > 25) {
-        grounded = false;
-        message = "Airborne! Ease the yoke toward center.";
-      } else velocity.y = 0;
-    }
-
-    position.addScaledVector(velocity, dt);
-
-    if (!grounded && position.y <= GROUND) {
-      const sink = Math.max(0, -velocity.y);
-      position.y = GROUND;
-      if (!onRunway()) { crash("Touchdown outside the runway."); return; }
-      if (sink > 3 || Math.abs(bank) > .18 ||
-          Math.abs(pitch) > .25 || airspeed > 52) {
-        crash("Touchdown too hard, fast, or tilted."); return;
-      }
-      velocity.y = 0;
-      grounded = landed = true;
-      pitchRate = bankRate = 0;
-      message = "Touchdown! Reduce power and apply brakes.";
-    }
-
-    if (grounded) {
-      position.y = GROUND;
-      if (!onRunway()) { crash("You left the runway."); return; }
-      if (landed && velocity.length() < 1) {
-        state = "complete";
-        clearControls();
-        message = "LANDING COMPLETE! Select Setup for another flight.";
-        buttons();
-      }
-    }
-    if (!grounded && stalled && airspeed < 35) {
-      pitch = clamp(pitch - .12 * dt, -.65, .65);
-    }
-    if (![position.x, position.y, position.z,
-          velocity.x, velocity.y, velocity.z].every(Number.isFinite)) {
-      crash("Simulation error."); return;
-    }
-    orient();
-  }
-
-  function updateAircraft() {
-    aircraft.position.copy(position);
-    aircraft.quaternion.copy(rotation);
-    aircraft.visible = chase && !["menu", "crashed"].includes(state);
-    cockpitRig.position.copy(position);
-    cockpitRig.quaternion.copy(rotation);
-    cockpitRig.visible = ready && !chase && !["menu", "crashed"].includes(state);
-    animateParts();
-  }
-  function updateCamera(dt, snap = false) {
-    if (state === "menu") return;
-    const forward = new T.Vector3(0, 0, -1).applyQuaternion(rotation);
-    if (chase) {
-      const desired = position.clone().addScaledVector(forward, -25);
-      desired.y += 9;
-      if (snap) camera.position.copy(desired);
-      else camera.position.lerp(desired, 1 - Math.exp(-dt * 5));
-      camera.up.set(0, 1, 0);
-      camera.lookAt(position.clone().addScaledVector(forward, 50));
-    } else {
-      camera.position.copy(pilotEye.clone().add(eyeOffset)
-        .applyQuaternion(rotation).add(position));
-      const look = new T.Quaternion().setFromEuler(new T.Euler(
-        T.MathUtils.degToRad(+$("lookPitch").value),
-        T.MathUtils.degToRad(+$("lookYaw").value), 0, "YXZ"));
-      camera.quaternion.copy(rotation).multiply(look);
-    }
-    const near = chase ? .2 : .02;
-    if (camera.near !== near) {
-      camera.near = near;
-      camera.updateProjectionMatrix();
-    }
-  }
-
-  function hud() {
-    syncControls();
-    $("speed").textContent = Math.round(airspeed * 1.94384) + " kt";
-    $("altitude").textContent =
-      Math.max(0, Math.round((position.y - GROUND) * 3.28084)) + " ft";
-    $("vertical").textContent = Math.round(velocity.y * 196.85) + " ft/min";
-    const heading = ((airport.heading - yaw * 180 / Math.PI) % 360 + 360) % 360;
-    $("heading").textContent = String(Math.round(heading) % 360).padStart(3, "0") + "°";
-    $("timer").textContent = airTime.toFixed(1) + " s";
-    let label = grounded ? "RUNWAY" : "FLYING";
-    if (state === "menu") label = "READY";
-    if (state === "paused") label = "PAUSED";
-    if (state === "crashed") label = "CRASHED";
-    if (state === "complete") label = "STOPPED";
-    if (state === "playing" && !grounded && Math.abs(alpha) > .27) label = "STALL!";
-    $("flightState").textContent = label;
-    $("flightState").style.color =
-      ["STALL!", "CRASHED"].includes(label) ? "#fb7185" : "#a5f3fc";
-    $("status").textContent = state === "paused" ? "Paused." : message;
-  }
-
-  const primary = e => e.pointerType !== "mouse" || e.button === 0;
-  const stick = $("stick"), lever = $("lever");
-
-  stick.onpointerdown = e => {
-    if (state !== "playing" || stickDrag || cockpitDrag || !primary(e)) return;
-    e.preventDefault();
-    stickDrag = { id: e.pointerId, x: e.clientX, y: e.clientY };
-    stick.setPointerCapture(e.pointerId);
-  };
-  stick.onpointermove = e => {
-    if (stickDrag?.id !== e.pointerId || state !== "playing") return;
-    e.preventDefault();
-    stickX = clamp((e.clientX - stickDrag.x) / Math.max(35, stick.clientWidth * .3), -1, 1);
-    stickY = clamp((e.clientY - stickDrag.y) / Math.max(30, stick.clientHeight * .3), -1, 1);
-    syncControls();
-  };
-  lever.onpointerdown = e => {
-    if (state !== "playing" || leverDrag ||
-        cockpitDrag?.control === "throttle" || !primary(e)) return;
-    e.preventDefault();
-    leverDrag = { id: e.pointerId, y: e.clientY, power: throttle };
-    lever.setPointerCapture(e.pointerId);
-  };
-  lever.onpointermove = e => {
-    if (leverDrag?.id !== e.pointerId || state !== "playing") return;
-    e.preventDefault();
-    throttle = clamp(leverDrag.power +
-      (leverDrag.y - e.clientY) / Math.max(35, lever.clientHeight - 42), 0, 1);
-    syncControls();
-  };
-
-  function hitControl(e) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    pointer.set((e.clientX - rect.left) / rect.width * 2 - 1,
-      -(e.clientY - rect.top) / rect.height * 2 + 1);
-    scene.updateMatrixWorld(true);
-    camera.updateMatrixWorld(true);
-    raycaster.setFromCamera(pointer, camera);
-    for (const hit of raycaster.intersectObject(cockpitModel, true)) {
-      let o = hit.object;
-      const materials = Array.isArray(o.material) ? o.material : [o.material];
-      if (materials.every(m => m && !m.visible)) continue;
-      while (o && o !== cockpitRig) {
-        if (o.userData.flightControl) return o.userData.flightControl;
-        o = o.parent;
-      }
-      return null;
-    }
-    return null;
-  }
-
-  renderer.domElement.onpointerdown = e => {
-    if (state !== "playing" || chase || !ready ||
-        cockpitDrag || stickDrag || !primary(e)) return;
-    const control = hitControl(e);
-    if (!control || (control === "throttle" && leverDrag)) return;
-    e.preventDefault();
-    if (control === "flaps") { flaps = !flaps; buttons(); return; }
-    if (control === "brakes") { brakes = !brakes; buttons(); return; }
-    cockpitDrag = {
-      id: e.pointerId, control, x: e.clientX, y: e.clientY, power: throttle
-    };
-    renderer.domElement.setPointerCapture(e.pointerId);
-  };
-  renderer.domElement.onpointermove = e => {
-    const drag = cockpitDrag;
-    if (drag?.id !== e.pointerId || state !== "playing") return;
-    e.preventDefault();
-    const rect = renderer.domElement.getBoundingClientRect();
-    if (drag.control === "yoke") {
-      const travel = Math.max(50, Math.min(rect.width, rect.height) * .2);
-      stickX = clamp((e.clientX - drag.x) / travel, -1, 1);
-      stickY = clamp((e.clientY - drag.y) / travel, -1, 1);
-    } else {
-      throttle = clamp(drag.power -
-        (e.clientY - drag.y) / Math.max(100, rect.height * .5), 0, 1);
-    }
-  };
-
-  for (const name of ["pointerup", "pointercancel", "lostpointercapture"]) {
-    stick.addEventListener(name, e => {
-      if (stickDrag?.id === e.pointerId) {
-        stickDrag = null; stickX = stickY = 0; syncControls();
-      }
-    });
-    lever.addEventListener(name, e => {
-      if (leverDrag?.id === e.pointerId) leverDrag = null;
-    });
-    renderer.domElement.addEventListener(name, e => {
-      if (cockpitDrag?.id !== e.pointerId) return;
-      if (cockpitDrag.control === "yoke") stickX = stickY = 0;
-      cockpitDrag = null;
-    });
-  }
-
-  $("launch").onclick = start;
-  $("restart").onclick = setup;
-  $("pause").onclick = pause;
-  $("camera").onclick = () => {
-    if (chase && !ready) {
-      message = "Cockpit is not available yet. Exterior view remains active.";
-      $("status").textContent = message;
-      return;
-    }
-    clearControls(); chase = !chase;
-    buttons(); updateAircraft(); updateCamera(1, true);
-  };
-  $("flaps").onclick = () => {
-    if (state === "playing") { flaps = !flaps; buttons(); }
-  };
-  $("brakes").onclick = () => {
-    if (state === "playing") { brakes = !brakes; buttons(); }
-  };
-
-  window.addEventListener("keydown", e => {
-    if (["INPUT", "SELECT", "TEXTAREA", "BUTTON", "SUMMARY"].includes(e.target?.tagName)) return;
-    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "q", "e", "w", "s"].includes(key)) {
-      if (state === "playing") { e.preventDefault(); keys.add(key); }
-    }
-    if (key === "p" && !e.repeat) pause();
-  });
-  window.addEventListener("keyup", e => {
-    keys.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key);
-  });
-  function suspend() {
-    clearControls();
-    if (state === "playing") pause();
-  }
-  window.addEventListener("blur", suspend);
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) suspend();
-  });
-  renderer.domElement.addEventListener("webglcontextlost", e => {
-    e.preventDefault();
-    failed = true;
-    suspend();
-    window.showFatal("The browser lost its graphics context. Reload the app.");
-  });
-
-  function resize() {
-    const w = stage.clientWidth, h = stage.clientHeight;
-    if (!w || !h) return;
-    renderer.setSize(w, h);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    syncControls();
-  }
-  const observer = new ResizeObserver(resize);
-  observer.observe(stage);
-  window.addEventListener("resize", resize);
-
-  readEye();
-  buildMap();
-  resize();
-  camera.position.set(130, 100, airport.length / 2 + 220);
-  camera.lookAt(0, 0, airport.length / 2 - 500);
-  $("launch").disabled = $("camera").disabled = $("restart").disabled = false;
-  $("launch").textContent = "Start flight";
-  $("notice").textContent =
-    "Game ready. Aircraft assets are downloading; you can start now.";
-  buttons();
-  hud();
-  assetText();
-
-  let previous = performance.now();
-  function frame(now) {
-    if (failed) return;
-    try {
-      const dt = clamp((now - previous) / 1000, 0, .05);
-      previous = now;
-      if (state === "playing") {
-        const steps = Math.max(1, Math.ceil(dt / .008));
-        for (let i = 0; i < steps; i++) physics(dt / steps);
-      }
-      if (state !== "menu") {
-        updateAircraft(); updateCamera(dt); hud();
-      }
-      renderer.render(scene, camera);
-      requestAnimationFrame(frame);
-    } catch (error) {
-      failed = true;
-      suspend();
-      window.showFatal("Game stopped: " + error.message + ". Reload to restart.");
-      console.error(error);
-    }
-  }
-  requestAnimationFrame(frame);
-
-  const base = "https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
-
-  let textureFailure = false;
-  const manager = new T.LoadingManager();
-  manager.onError = url => {
-    textureFailure = true;
-    console.warn("Cockpit asset failed:", url);
-  };
-
-  new GLTFLoader(manager).load(
-    base + "cockpit.glb",
-    gltf => {
-      const oldP = cockpitRig.position.clone(), oldQ = cockpitRig.quaternion.clone();
-      try {
-        cockpitRig.position.set(0, 0, 0);
-        cockpitRig.quaternion.identity();
-        const model = gltf.scene;
-        cockpitModel.add(model);
-        cockpitModel.rotation.set(0, -Math.PI / 2, 0);
-        cockpitRig.updateMatrixWorld(true);
-
-        const bounds = new T.Box3().setFromObject(cockpitModel);
-        if (bounds.isEmpty()) throw new Error("Empty cockpit model.");
-        const center = bounds.getCenter(new T.Vector3());
-        cockpitModel.position.x -= center.x;
-        cockpitModel.position.y += -1.2 - bounds.min.y;
-        cockpitRig.updateMatrixWorld(true);
-
-        const seen = new Set();
-        model.traverse(o => {
-          if (!o.isMesh || !o.material) return;
-          const materials = Array.isArray(o.material) ? o.material : [o.material];
-          materials.forEach(m => {
-            if (seen.has(m)) return;
-            seen.add(m);
-            const image = m.map?.image;
-            const names = [m.name, m.map?.name, image?.currentSrc || image?.src].join(" ");
-            if (/window[-_ ]?trans/i.test(names)) {
-              glassMaterials.push({ material: m, visible: m.visible });
-            }
-          });
-        });
-
-        glassSetting();
-        calibrateEye();
-        const found = installParts(model);
-        ready = true;
-        cockpitStatus = "Cockpit loaded. Controls: " + found +
-          (textureFailure ? " — some textures failed." : ".");
-        $("notice").textContent =
-          "Cockpit ready. Choose Camera to switch between inside and outside.";
-      } catch (error) {
-        ready = false;
-        cockpitStatus = "Cockpit setup failed; exterior flight remains available.";
-        $("notice").textContent = cockpitStatus;
-        console.error(error);
-      } finally {
-        cockpitRig.position.copy(oldP);
-        cockpitRig.quaternion.copy(oldQ);
-        cockpitRig.updateMatrixWorld(true);
-        assetText();
-      }
-    },
-    undefined,
-    error => {
-      cockpitStatus = "Cockpit download failed. Check cockpit.glb and its textures.";
-      $("notice").textContent = "Cockpit unavailable. Exterior flight still works.";
-      assetText();
-      console.error(error);
-    }
-  );
-
-  let exteriorTextureFailure = false;
-  const exteriorManager = new T.LoadingManager();
-  exteriorManager.onError = () => { exteriorTextureFailure = true; };
-
-  new GLTFLoader(exteriorManager).load(
-    base + "737_max_lion_air.glb",
-    gltf => {
-      try {
-        exteriorObject = gltf.scene;
-        exteriorAnchor.add(exteriorObject);
-        alignExterior();
-        fallbackPlane.visible = false;
-        exteriorStatus = "737 exterior loaded." +
-          (exteriorTextureFailure ? " Some textures failed." : "") +
-          " If it faces sideways or backward, change Exterior nose direction.";
-      } catch (error) {
-        exteriorAnchor.clear();
-        exteriorObject = null;
-        fallbackPlane.visible = true;
-        exteriorStatus = "Exterior setup failed; placeholder retained.";
-        console.error(error);
-      }
-      assetText();
-    },
-    undefined,
-    error => {
-      exteriorStatus =
-        "737 exterior download failed; placeholder retained. Check filename.";
-      assetText();
-      console.error(error);
-    }
-  );
+ );
 }
 </script>
 </body>
