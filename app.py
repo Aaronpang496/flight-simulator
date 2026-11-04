@@ -21,12 +21,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-path = Path(__file__).resolve().with_name("game.html")
+game_file = Path(__file__).resolve().with_name("game.html")
 
 try:
-    html = path.read_text(encoding="utf-8")
+    html = game_file.read_text(encoding="utf-8")
 except (OSError, UnicodeError) as error:
-    st.error(f"Could not read game.html: {error}")
+    st.error(
+        "Could not read game.html. Keep it beside app.py. "
+        f"Details: {error}"
+    )
     st.stop()
 
-components.html(html, height=1250, scrolling=True)
+components.html(
+    html,
+    height=1250,
+    scrolling=True,
+)
