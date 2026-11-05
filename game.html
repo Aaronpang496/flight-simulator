@@ -8,31 +8,23 @@
 
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;background:#101827;color:#edf2f7;
- font-family:system-ui,sans-serif
-}
+body{margin:0;background:#101827;color:#edf2f7;font-family:system-ui,sans-serif}
 [hidden]{display:none!important}
 .wrap{max-width:1400px;margin:auto;padding:6px}
-.version{
- text-align:center;font-size:10px;color:#86efac;padding:4px
-}
+.version{text-align:center;font-size:10px;color:#86efac;padding:4px}
 #stage{
  position:relative;height:620px;overflow:hidden;
  border-radius:12px;background:#a4cfe8
 }
-#stage>canvas.world{
- display:block;width:100%;height:100%;touch-action:none
-}
+#stage>canvas.world{display:block;width:100%;height:100%;touch-action:none}
 #rain{
  position:absolute;inset:0;width:100%;height:100%;
  z-index:3;pointer-events:none
 }
 #notice{
- position:absolute;top:6px;left:8px;right:8px;
- z-index:30;padding:6px 8px;border-radius:6px;
- background:#0a1322d9;color:#fde68a;font-size:10px;
- pointer-events:none
+ position:absolute;top:6px;left:8px;right:8px;z-index:30;
+ padding:6px 8px;border-radius:6px;background:#0a1322d9;
+ color:#fde68a;font-size:10px;pointer-events:none
 }
 #menu{
  position:absolute;inset:0;z-index:20;overflow:auto;
@@ -55,8 +47,8 @@ button{
 button:disabled{opacity:.5}
 #launch{width:100%;margin-top:12px}
 #mapLabel{
- position:absolute;top:50px;left:10px;z-index:4;
- color:white;font-size:10px;text-shadow:0 1px 4px #000;
+ position:absolute;top:50px;left:10px;z-index:4;color:white;
+ font-size:10px;text-shadow:0 1px 4px #000;
  pointer-events:none;max-width:55%
 }
 #weatherLabel{
@@ -64,17 +56,15 @@ button:disabled{opacity:.5}
  font-size:11px;text-shadow:0 1px 4px #000;pointer-events:none
 }
 #radarPanel{
- position:absolute;top:46px;right:8px;z-index:5;
- width:150px;padding:5px;border:1px solid #76e8c477;
- border-radius:12px;background:#071e25cc;pointer-events:none
+ position:absolute;top:46px;right:8px;z-index:5;width:150px;
+ padding:5px;border:1px solid #76e8c477;border-radius:12px;
+ background:#071e25cc;pointer-events:none
 }
 #radar{display:block;width:100%;aspect-ratio:1}
-#radarText{
- text-align:center;font-size:9px;color:#a7f3d0;line-height:1.4
-}
+#radarText{text-align:center;font-size:9px;color:#a7f3d0;line-height:1.4}
 #guidance{
- position:absolute;top:115px;left:10px;z-index:5;
- width:160px;text-align:center;background:#0a1926bd;
+ position:absolute;top:115px;left:10px;z-index:5;width:160px;
+ text-align:center;background:#0a1926bd;
  border:1px solid #7dd3fc55;border-radius:12px;
  padding:6px;pointer-events:none
 }
@@ -83,10 +73,7 @@ button:disabled{opacity:.5}
  color:#b9ffff;filter:drop-shadow(0 0 8px #00eaff);
  transform-origin:center
 }
-#navText{
- font-size:10px;color:#cffafe;line-height:1.45;
- white-space:pre-line
-}
+#navText{font-size:10px;color:#cffafe;line-height:1.45;white-space:pre-line}
 #controls{
  position:absolute;bottom:0;left:0;right:0;z-index:8;
  display:flex;justify-content:space-between;gap:8px;
@@ -123,8 +110,8 @@ button:disabled{opacity:.5}
 #lever{
  position:relative;height:94px;overflow:hidden;
  background:linear-gradient(90deg,#111827,#334155,#111827);
- border:1px solid #64748b;border-radius:10px;touch-action:none;
- user-select:none;-webkit-user-select:none
+ border:1px solid #64748b;border-radius:10px;
+ touch-action:none;user-select:none;-webkit-user-select:none
 }
 .track{
  position:absolute;top:20px;bottom:20px;left:calc(50% - 4px);
@@ -146,15 +133,11 @@ button:disabled{opacity:.5}
  background:repeating-linear-gradient(
   90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 7px)
 }
-#gripPower{
- display:block;text-align:center;color:#a5f3fc;font-size:12px
-}
+#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:12px}
 .mini{display:flex;gap:4px;margin-top:5px}
 .mini button{flex:1;min-width:0;padding:4px 2px;font-size:9px}
 #gear{width:100%;min-height:30px;margin-top:4px;font-size:10px}
-#autopilotPanel{
- width:150px;text-align:center;align-self:center
-}
+#autopilotPanel{width:150px;text-align:center;align-self:center}
 #autopilotPanel button{
  width:100%;margin:3px 0;font-size:10px;min-height:38px
 }
@@ -162,8 +145,7 @@ button:disabled{opacity:.5}
 #assistButton{background:#25465b;color:#e0f2fe}
 #goAroundButton{background:#fde68a;color:#422006}
 #autopilotPanel button.engaged{
- background:#86efac;color:#052e16;
- box-shadow:0 0 10px #22c55e66
+ background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66
 }
 #autopilotInfo{
  margin-top:5px;color:#cbd5e1;font-size:10px;
@@ -188,13 +170,10 @@ button:disabled{opacity:.5}
 }
 .buttons{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0}
 .buttons button{flex:1;min-width:85px}
-details{
- background:#1d293c;border-radius:9px;padding:10px;margin:9px 0
-}
+details{background:#1d293c;border-radius:9px;padding:10px;margin:9px 0}
 summary{cursor:pointer;font-weight:bold;color:#a5f3fc}
 .grid{
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
- gap:5px 12px
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 12px
 }
 small{display:block;color:#adbbcf;font-size:10px;line-height:1.5}
 #assets{color:#86efac;white-space:pre-line}
@@ -220,12 +199,9 @@ output{color:#a5f3fc}
  #menu{padding:60px 12px 12px}
  h2{font-size:20px}
  #controls.phone{
-  position:relative;inset:auto;padding:6px 0;
-  align-items:stretch;gap:5px
+  position:relative;inset:auto;padding:6px 0;align-items:stretch;gap:5px
  }
- #controls.phone .panel{
-  flex:1;min-width:0;width:auto;background:#172235
- }
+ #controls.phone .panel{flex:1;min-width:0;width:auto;background:#172235}
  #controls.phone #autopilotPanel{
   flex:0 0 88px;width:88px;padding:4px;align-self:stretch
  }
@@ -252,20 +228,16 @@ output{color:#a5f3fc}
 }
 </script>
 </head>
-
 <body>
 <div class="wrap" id="game">
  <div class="version">
-  ISLAND FLIGHT · 737 / LEARJET / F-20 · TWO AIRPORTS
+  ISLAND FLIGHT · 737 / LEARJET / F-20 · LEARJET HEIGHT ADJUSTMENT
  </div>
-
  <div id="stage">
   <canvas id="rain"></canvas>
-
   <div id="menu">
    <div class="menuInner">
     <h2>✈️ ISLAND FLIGHT</h2>
-
     <label>World
      <select id="airport">
       <option value="juliana">Princess Juliana — tropical island</option>
@@ -273,7 +245,6 @@ output{color:#a5f3fc}
       <option value="kaitak">Kai Tak — harbor and mountains</option>
      </select>
     </label>
-
     <label>Aircraft
      <select id="aircraftChoice">
       <option value="boeing737">Boeing 737</option>
@@ -281,7 +252,6 @@ output{color:#a5f3fc}
       <option value="f20">F-20</option>
      </select>
     </label>
-
     <label>Flight difficulty
      <select id="difficulty">
       <option value="easy">Easy — speed and descent assistance</option>
@@ -289,30 +259,26 @@ output{color:#a5f3fc}
       <option value="hard">Hard — manual landing</option>
      </select>
     </label>
-
     <small>
      Take off, fly to the other airport, land, and fly back.
      Autopilot is available after takeoff in every mode.
      Easy approach assistance helps with speed and descent:
      you still steer toward the runway.
      Medium assists speed only. Hard landing is manual.
-     All aircraft currently share the existing cockpit and flight physics.
-     Mountains have collision detection. Buildings are decorative.
+     Aircraft share the cockpit, but have different weight,
+     thrust and agility. Mountains have collision detection.
+     Buildings are decorative.
     </small>
-
     <button id="launch" disabled>Loading engine...</button>
    </div>
   </div>
-
   <div id="notice">Loading 3D engine...</div>
   <div id="mapLabel"></div>
   <div id="weatherLabel"></div>
-
   <div id="radarPanel">
    <canvas id="radar" width="280" height="280"></canvas>
    <div id="radarText">RADAR · HEADING UP</div>
   </div>
-
   <div id="guidance">
    <svg id="navArrow" viewBox="0 0 64 64" aria-hidden="true">
     <path d="M32 5 L54 31 L39 27 L39 57 L25 57 L25 27 L10 31 Z"
@@ -320,7 +286,6 @@ output{color:#a5f3fc}
    </svg>
    <div id="navText">Runway ready</div>
   </div>
-
   <div id="controls" hidden>
    <div class="panel" id="yokePanel">
     <div class="panelTitle">GRAB THE YOKE</div>
@@ -349,7 +314,6 @@ output{color:#a5f3fc}
      <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
     </div>
    </div>
-
    <div class="panel" id="autopilotPanel">
     <div class="panelTitle">FLIGHT ASSIST</div>
     <button id="autopilotButton" aria-pressed="false">AUTOPILOT OFF</button>
@@ -357,7 +321,6 @@ output{color:#a5f3fc}
     <button id="goAroundButton">GO AROUND</button>
     <div id="autopilotInfo">Take off manually first.</div>
    </div>
-
    <div class="panel" id="powerPanel">
     <div class="panelTitle">THROTTLE</div>
     <div id="lever">
@@ -376,7 +339,6 @@ output{color:#a5f3fc}
    </div>
   </div>
  </div>
-
  <div id="instruments">
   <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
   <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
@@ -387,10 +349,8 @@ output{color:#a5f3fc}
   <div class="instrument">Pitch<strong id="pitchValue">0°</strong></div>
   <div class="instrument">Bank<strong id="bankValue">0°</strong></div>
  </div>
-
  <div id="status">Choose a world and start.</div>
  <div id="landingHint"></div>
-
  <div class="buttons">
   <button id="camera" disabled>Camera: CHASE</button>
   <button id="pause" disabled>Pause</button>
@@ -399,7 +359,6 @@ output{color:#a5f3fc}
   <button id="fullscreen">Fullscreen</button>
   <button id="restart" disabled>New flight</button>
  </div>
-
  <details>
   <summary>Plane size and camera</summary>
   <div class="grid">
@@ -421,6 +380,16 @@ output{color:#a5f3fc}
     <input id="exteriorPitch" type="range"
      min="-180" max="180" step="1" value="0">
    </label>
+   <label>Learjet: lower model
+    <output id="learjetLowerOut">0.00</output>
+    <input id="learjetLower" type="range"
+     min="0" max="3" step="0.01" value="0">
+   </label>
+   <small>
+    Learjet only: move right to lower the visible model.
+    Adjust on the runway using a side view.
+    This does not change flight altitude or the 737.
+   </small>
    <label>Cockpit eye X
     <input id="eyeX" type="range" min="-1.5" max="1.5" step=".01" value="0">
    </label>
@@ -443,7 +412,6 @@ output{color:#a5f3fc}
    <button id="resetView">Reset cockpit view</button>
   </div>
  </details>
-
  <details>
   <summary>Landing limits</summary>
   <div class="grid">
@@ -467,11 +435,10 @@ output{color:#a5f3fc}
    </label>
   </div>
  </details>
-
  <small id="assets"></small>
  <small>
   Stylized game physics, not a training simulator.
-  Boeing 737, Learjet, and F-20 share the existing cockpit and flight handling.
+  Aircraft share the cockpit, with aircraft-specific weight, thrust and agility.
   The second airport is fictional. Radar is navigation only.
   Mountains use swept ellipsoid collision checks with a small clearance margin;
   buildings and trees remain decorative.
@@ -519,27 +486,20 @@ function initialize(T,GLTFLoader){
  const rad=T.MathUtils.degToRad,deg=T.MathUtils.radToDeg;
  const approach=(v,target,dt,tau)=>v+(target-v)*(1-Math.exp(-dt/tau));
  const wrapAngle=a=>Math.atan2(Math.sin(a),Math.cos(a));
-
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
  const aircraftOptions={
   boeing737:{
-   name:"Boeing 737",
-   file:"737_max_lion_air.glb",
-   defaultYaw:180,
-   defaultPitch:0
+   name:"Boeing 737",file:"737_max_lion_air.glb",
+   defaultYaw:180,defaultPitch:0
   },
   learjet:{
-   name:"Learjet",
-   file:"learjet.glb",
-   defaultYaw:180,
-   defaultPitch:0
+   name:"Learjet",file:"learjet.glb",
+   defaultYaw:180,defaultPitch:15
   },
   f20:{
-   name:"F-20",
-   file:"F-20.glb",
-   defaultYaw:90,
-   defaultPitch:0
+   name:"F-20",file:"F-20.glb",
+   defaultYaw:90,defaultPitch:0
   }
  };
  let exteriorRequest=0,loadedAircraftKey=null,loadingAircraftKey=null;
@@ -568,11 +528,9 @@ function initialize(T,GLTFLoader){
  const sun=new T.DirectionalLight(0xfff4df,2.4);
  sun.position.set(-700,1200,500);
  scene.add(hemi,sun);
-
  let scenery=new T.Group();
  scene.add(scenery);
  const textures=[],mountainColliders=[];
-
  const weatherClouds=new T.Group();
  scene.add(weatherClouds);
  const cloudMaterial=new T.MeshStandardMaterial({
@@ -599,7 +557,6 @@ function initialize(T,GLTFLoader){
  exteriorAnchor.add(exteriorYaw);
  aircraft.add(placeholder,exteriorAnchor);
  scene.add(aircraft);
-
  const cockpitRig=new T.Group(),cockpitModel=new T.Group();
  cockpitRig.add(cockpitModel);
  scene.add(cockpitRig);
@@ -610,7 +567,6 @@ function initialize(T,GLTFLoader){
  const pilotEye=new T.Vector3(0,1.2,-1.6),eyeOffset=new T.Vector3();
  const raycaster=new T.Raycaster(),pointer=new T.Vector2();
  const keys=new Set(),parts=[],glassMaterials=[],exteriorClips=[];
-
  let state="menu",chase=true,cockpitReady=false;
  let glassHidden=true,cockpitTurned=false;
  let pitch=0,bank=0,yaw=0,pitchRate=0,bankRate=0;
@@ -620,16 +576,15 @@ function initialize(T,GLTFLoader){
  let stickDrag=null,leverDrag=null,cockpitDrag=null,lookDrag=null;
  let orbitYaw=0,orbitPitch=.22,headYaw=0,headPitch=0;
  let message="Choose a world and start.",stopped=false;
-
  let cockpitStatus="Cockpit downloading...";
  let exteriorStatus="Aircraft downloading...";
  let animationStatus="",exteriorObject=null,exteriorMixer=null,exteriorFit=null;
  let exteriorGear=1,exteriorFlaps=1;
+ let learjetGroundFitPending=false;
  let autopilot=false,approachAssist=false,goAroundTime=0;
  let apTargetSpeed=0,apTargetHeight=0;
-
- let MASS=65000,AREA=124.6,MAX_THRUST=240000;
- let aircraftAgility=1;
+ let MASS=65000,AREA=124.6,MAX_THRUST=240000,aircraftAgility=1;
+ const G=9.81,GROUND=1.5,KNOTS=1.94384;
 
  function setAircraftHandling(){
   const settings={
@@ -638,13 +593,9 @@ function initialize(T,GLTFLoader){
    f20:{mass:7000,area:19,thrust:80000,agility:1.7}
   };
   const selected=settings[$("aircraftChoice").value]||settings.boeing737;
-  MASS=selected.mass;
-  AREA=selected.area;
-  MAX_THRUST=selected.thrust;
-  aircraftAgility=selected.agility;
+  MASS=selected.mass;AREA=selected.area;
+  MAX_THRUST=selected.thrust;aircraftAgility=selected.agility;
  }
-
- const G=9.81,GROUND=1.5,KNOTS=1.94384;
 
  const airports={
   juliana:{
@@ -669,7 +620,6 @@ function initialize(T,GLTFLoader){
  };
  let groundedAirport=0,departureAirport=0,destinationAirport=1;
  let route=[],routeIndex=0,legStart={x:0,z:0,alt:0};
-
  function mode(){return $("difficulty").value;}
  function airportName(i){
   return i===0?airport.title.split(" · ")[0]:destinationNames[airportKey];
@@ -688,10 +638,7 @@ function initialize(T,GLTFLoader){
   mesh.position.set(x,y,z);parent.add(mesh);return mesh;
  }
  function seeded(seed){
-  return()=>{
-   seed=(seed*1664525+1013904223)>>>0;
-   return seed/4294967296;
-  };
+  return()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
  }
 
  const white=mat("#e4eaf0"),blue=mat("#188ca2"),dark=mat("#263344");
@@ -704,7 +651,6 @@ function initialize(T,GLTFLoader){
  for(const x of [-1,1])box(placeholderGear,x,-1.15,.6,.3,.5,.5,dark);
  box(placeholderGear,0,-1.15,-2,.25,.5,.4,dark);
 
- // Explosion.
  const particles=[],particleGeometry=new T.BoxGeometry(1,1,1);
  const particleMaterials=[
   mat("#ff4400",{emissive:"#ff2200"}),
@@ -719,8 +665,7 @@ function initialize(T,GLTFLoader){
    const mesh=new T.Mesh(
     particleGeometry,particleMaterials[Math.floor(Math.random()*3)]
    );
-   mesh.position.copy(position);
-   mesh.scale.setScalar(.6+Math.random()*2);
+   mesh.position.copy(position);mesh.scale.setScalar(.6+Math.random()*2);
    scene.add(mesh);
    particles.push({
     mesh,life:1.8,v:new T.Vector3(
@@ -739,7 +684,6 @@ function initialize(T,GLTFLoader){
   }
  }
 
- // World generation.
  function disposeMap(){
   const gs=new Set(),ms=new Set();
   scenery.traverse(o=>{
@@ -815,10 +759,8 @@ function initialize(T,GLTFLoader){
  }
  function hill(x,z,r,h,material){
   const mesh=new T.Mesh(new T.SphereGeometry(1,18,10),material);
-  mesh.scale.set(r,h,r*.8);
-  mesh.position.set(x,-10,z);
-  mesh.userData.mountain=true;
-  scenery.add(mesh);
+  mesh.scale.set(r,h,r*.8);mesh.position.set(x,-10,z);
+  mesh.userData.mountain=true;scenery.add(mesh);
  }
  function trees(random,count,palm){
   const trunk=mat("#806a4d"),leaves=mat(palm?"#388b51":"#386347");
@@ -863,8 +805,7 @@ function initialize(T,GLTFLoader){
  }
  function addSecondAirport(){
   const original=scenery,group=new T.Group();
-  const random=seeded(airport.seed+737);
-  scenery=group;
+  const random=seeded(airport.seed+737);scenery=group;
   try{
    if(airportKey==="juliana"){
     box(scenery,150,-7,-150,2800,1,airport.length+2200,mat("#36b7c3"));
@@ -900,8 +841,7 @@ function initialize(T,GLTFLoader){
   original.add(group);
  }
  function collectMountains(){
-  mountainColliders.length=0;
-  scenery.updateMatrixWorld(true);
+  mountainColliders.length=0;scenery.updateMatrixWorld(true);
   scenery.traverse(o=>{
    if(!o.userData.mountain)return;
    const c=o.getWorldPosition(new T.Vector3());
@@ -921,8 +861,7 @@ function initialize(T,GLTFLoader){
    if(C<=0){earliest=0;continue;}
    const A=dx*dx+dy*dy+dz*dz;
    if(A<1e-16)continue;
-   const B=2*(x*dx+y*dy+z*dz);
-   const discriminant=B*B-4*A*C;
+   const B=2*(x*dx+y*dy+z*dz),discriminant=B*B-4*A*C;
    if(discriminant<0)continue;
    const t=(-B-Math.sqrt(discriminant))/(2*A);
    if(t>=0&&t<=1)earliest=Math.min(earliest,t);
@@ -986,7 +925,6 @@ function initialize(T,GLTFLoader){
   $("mapLabel").textContent=airportName(0)+" ↔ "+airportName(1);
  }
 
- // Difficulty and landing limits.
  function limits(){
   return{
    minPitch:+$("pitchMin").value,maxPitch:+$("pitchMax").value,
@@ -1019,7 +957,6 @@ function initialize(T,GLTFLoader){
   .forEach(id=>$(id).oninput=showLimits);
  difficulty();
 
- // Gradual automatic weather.
  const weather={
   time:0,next:100,kind:"Clear",dark:0,rain:0,strength:2,
   direction:.4,targetDark:0,targetRain:0,targetStrength:2,targetDirection:.4
@@ -1056,15 +993,14 @@ function initialize(T,GLTFLoader){
   weather.next=weather.time+100+Math.random()*100;
  }
  function updateWeather(dt){
-  weather.time+=dt;
-  if(weather.time>weather.next)chooseWeather();
+  weather.time+=dt;if(weather.time>weather.next)chooseWeather();
   weather.dark=approach(weather.dark,weather.targetDark,dt,22);
   weather.rain=approach(weather.rain,weather.targetRain,dt,18);
   weather.strength=approach(weather.strength,weather.targetStrength,dt,25);
   weather.direction=approach(weather.direction,weather.targetDirection,dt,30);
   const t=weather.time;
   const gust=1+.16*Math.sin(t*.63)+.1*Math.sin(t*1.41);
-  const difficultyScale=mode()==="easy" ? .45 : mode()==="medium" ? .75 : 1;
+  const difficultyScale=mode()==="easy"?.45:mode()==="medium"?.75:1;
   const strength=weather.strength*gust*difficultyScale;
   const dir=weather.direction+.08*Math.sin(t*.29);
   wind.set(
@@ -1081,8 +1017,7 @@ function initialize(T,GLTFLoader){
   scene.fog.color.copy(scene.background);
   scene.fog.near=3200-weather.dark*1800;
   scene.fog.far=22000-weather.dark*15000;
-  sun.intensity=2.4-weather.dark*1.7;
-  hemi.intensity=2.1-weather.dark*.6;
+  sun.intensity=2.4-weather.dark*1.7;hemi.intensity=2.1-weather.dark*.6;
   cloudMaterial.color.copy(whiteCloud).lerp(grayCloud,weather.dark);
   cloudMaterial.opacity=.72+.22*weather.dark;
   const count=Math.round(12+weather.dark*53);
@@ -1094,8 +1029,7 @@ function initialize(T,GLTFLoader){
     c.z+Math.cos(weather.direction)*weather.time*4
    );
   });
-  $("weatherLabel").textContent=
-   weather.kind+" · effective wind "+
+  $("weatherLabel").textContent=weather.kind+" · effective wind "+
    Math.round(Math.hypot(wind.x,wind.z)*KNOTS)+" kt";
  }
  function drawRain(dt){
@@ -1108,11 +1042,9 @@ function initialize(T,GLTFLoader){
   for(let i=0;i<Math.floor(110*r);i++){
    const d=drops[i];
    if(dt>0){
-    d.y+=dt*(.45+d.speed*3);
-    d.x+=dt*.08*Math.sin(weather.direction);
+    d.y+=dt*(.45+d.speed*3);d.x+=dt*.08*Math.sin(weather.direction);
     if(d.y>1.1){d.y=-.1;d.x=Math.random();}
-    if(d.x>1.1)d.x=-.1;
-    if(d.x<-.1)d.x=1.1;
+    if(d.x>1.1)d.x=-.1;if(d.x<-.1)d.x=1.1;
    }
    const x=d.x*w,y=d.y*h;
    rainCtx.moveTo(x,y);
@@ -1125,18 +1057,15 @@ function initialize(T,GLTFLoader){
     d.y+=dt*d.speed*.2;
     if(d.y>1.05){d.y=-.05;d.x=Math.random();}
    }
-   const x=d.x*w,y=d.y*h;
    rainCtx.beginPath();
-   rainCtx.ellipse(x,y,d.r,d.r*1.8,0,0,Math.PI*2);
+   rainCtx.ellipse(d.x*w,d.y*h,d.r,d.r*1.8,0,0,Math.PI*2);
    rainCtx.fillStyle=`rgba(180,215,235,${r*.11})`;rainCtx.fill();
    rainCtx.strokeStyle=`rgba(225,245,255,${r*.35})`;rainCtx.stroke();
   }
  }
 
- // Route and landing geometry.
  function resetRoute(){
-  departureAirport=groundedAirport;
-  destinationAirport=1-groundedAirport;
+  departureAirport=groundedAirport;destinationAirport=1-groundedAirport;
   const from=airportSites[departureAirport],to=airportSites[destinationAirport];
   const h=airport.length/2,direction=Math.cos(yaw)>=0?-1:1;
   route=[
@@ -1156,8 +1085,7 @@ function initialize(T,GLTFLoader){
   legStart={x:position.x,z:position.z,alt:Math.max(0,position.y-GROUND)};
  }
  function routeHeight(){
-  const t=navTarget();
-  if(!t)return 350;
+  const t=navTarget();if(!t)return 350;
   const x=t.x-legStart.x,z=t.z-legStart.z,length=x*x+z*z;
   const f=length>1?clamp(
    ((position.x-legStart.x)*x+(position.z-legStart.z)*z)/length,0,1
@@ -1166,23 +1094,18 @@ function initialize(T,GLTFLoader){
  }
  function finalData(){
   const s=airportSites[destinationAirport];
-  const threshold=s.z+airport.length/2;
-  const touchdown=threshold-220;
-  const remaining=position.z-touchdown;
-  const x=position.x-s.x;
+  const threshold=s.z+airport.length/2,touchdown=threshold-220;
+  const remaining=position.z-touchdown,x=position.x-s.x;
   const height=Math.max(0,position.y-GROUND);
   const targetHeight=Math.max(0,remaining*Math.tan(rad(3)));
   return{
    site:s,threshold,touchdown,remaining,x,height,targetHeight,
-   headingError:deg(wrapAngle(yaw)),
-   outsideThreshold:position.z>threshold,
-   corridor:
-    remaining>0&&remaining<10000&&Math.abs(x)<1000&&
+   headingError:deg(wrapAngle(yaw)),outsideThreshold:position.z>threshold,
+   corridor:remaining>0&&remaining<10000&&Math.abs(x)<1000&&
     Math.abs(deg(wrapAngle(yaw)))<40,
    aligned:Math.abs(x)<100&&Math.abs(deg(wrapAngle(yaw)))<8
   };
  }
-
  const approachPath=new T.Group();scene.add(approachPath);
  const pathMaterial=new T.LineBasicMaterial({
   color:"#68f9dc",transparent:true,opacity:.65,depthTest:true
@@ -1192,25 +1115,20 @@ function initialize(T,GLTFLoader){
   const y=d*Math.tan(rad(3));
   const w=clamp(d*.025,24,95),h=clamp(d*.012,12,45);
   pathPoints.push(
-   -w,y-h,d,w,y-h,d,
-   w,y-h,d,w,y+h,d,
-   w,y+h,d,-w,y+h,d,
-   -w,y+h,d,-w,y-h,d
+   -w,y-h,d,w,y-h,d,w,y-h,d,w,y+h,d,
+   w,y+h,d,-w,y+h,d,-w,y+h,d,-w,y-h,d
   );
  }
  const pathGeometry=new T.BufferGeometry();
  pathGeometry.setAttribute("position",new T.Float32BufferAttribute(pathPoints,3));
  approachPath.add(new T.LineSegments(pathGeometry,pathMaterial));
-
  const targetMarker=new T.Mesh(
   new T.RingGeometry(10,13,32),
   new T.MeshBasicMaterial({
    color:"#85ffb8",side:T.DoubleSide,transparent:true,opacity:.8
   })
  );
- targetMarker.rotation.x=-Math.PI/2;
- approachPath.add(targetMarker);
-
+ targetMarker.rotation.x=-Math.PI/2;approachPath.add(targetMarker);
  function updateApproachPath(){
   const s=airportSites[destinationAirport];
   approachPath.position.set(s.x,GROUND,s.z+airport.length/2-220);
@@ -1222,25 +1140,22 @@ function initialize(T,GLTFLoader){
   $("autopilotButton").textContent=autopilot?"AUTOPILOT ON":"AUTOPILOT OFF";
   $("assistButton").classList.toggle("engaged",approachAssist);
   $("assistButton").setAttribute("aria-pressed",String(approachAssist));
-  $("assistButton").textContent=mode()==="hard"
-   ?"ASSIST: HARD / OFF"
-   :approachAssist?"APPROACH ASSIST ON":"APPROACH ASSIST";
-  $("autopilotInfo").textContent=grounded
-   ?"Take off manually."
-   :goAroundTime>0?"GO AROUND\nPower + climb assist"
-   :autopilot?"ROUTE TRACKING\nPrepare to steer on final"
-   :approachAssist
-    ?mode()==="easy"?"YOU STEER\nSpeed + descent assisted":"YOU STEER\nSpeed assisted only"
-    :routeIndex===4?"FINAL APPROACH\nYou have control"
-    :"Autopilot available\nLanding assist near runway";
+  $("assistButton").textContent=mode()==="hard"?"ASSIST: HARD / OFF":
+   approachAssist?"APPROACH ASSIST ON":"APPROACH ASSIST";
+  $("autopilotInfo").textContent=grounded?"Take off manually.":
+   goAroundTime>0?"GO AROUND\nPower + climb assist":
+   autopilot?"ROUTE TRACKING\nPrepare to steer on final":
+   approachAssist?(mode()==="easy"
+    ?"YOU STEER\nSpeed + descent assisted":"YOU STEER\nSpeed assisted only"):
+   routeIndex===4?"FINAL APPROACH\nYou have control":
+   "Autopilot available\nLanding assist near runway";
  }
  function disconnectAutopilot(reason="",announce=true){
   const wasOn=autopilot;autopilot=false;
   if(wasOn&&announce&&reason)message=reason;
  }
  function manualControl(kind){
-  disconnectAutopilot("Autopilot OFF — you have control.");
-  goAroundTime=0;
+  disconnectAutopilot("Autopilot OFF — you have control.");goAroundTime=0;
   if(kind==="throttle"&&approachAssist){
    approachAssist=false;
    message="Approach assistance OFF — manual throttle selected.";
@@ -1313,11 +1228,9 @@ function initialize(T,GLTFLoader){
  }
  function updateNavigation(){
   if(grounded||!route.length)return;
-  const target=navTarget();
-  const dx=target.x-position.x,dz=target.z-position.z;
+  const target=navTarget(),dx=target.x-position.x,dz=target.z-position.z;
   const distance=Math.hypot(dx,dz);
-  const vx=target.x-legStart.x,vz=target.z-legStart.z;
-  const len=Math.hypot(vx,vz);
+  const vx=target.x-legStart.x,vz=target.z-legStart.z,len=Math.hypot(vx,vz);
   const passed=len>1&&
    ((position.x-target.x)*vx+(position.z-target.z)*vz)>0&&
    Math.abs((position.x-legStart.x)*vz-(position.z-legStart.z)*vx)/len<600;
@@ -1335,14 +1248,12 @@ function initialize(T,GLTFLoader){
      airspeed*KNOTS>=130&&airspeed*KNOTS<=170&&
      Math.abs(f.height-f.targetHeight)<100&&velocity.y>-6;
     if(f.remaining<6500&&f.remaining>4000&&stable){
-     disconnectAutopilot("",false);
-     approachAssist=mode()!=="hard";
+     disconnectAutopilot("",false);approachAssist=mode()!=="hard";
      message=approachAssist
       ?"YOU HAVE CONTROL. Steer along the glowing path. Approach assistance is ON."
       :"YOU HAVE CONTROL. Hard mode: manage speed and descent manually.";
     }else if(f.remaining<4000&&!stable){
-     goAround();
-     message="Approach was not lined up safely. GO AROUND assistance started.";
+     goAround();message="Approach was not lined up safely. GO AROUND assistance started.";
     }
    }
    if(f.remaining< -airport.length){
@@ -1356,82 +1267,45 @@ function initialize(T,GLTFLoader){
   }
  }
 
- // Aircraft-specific speed assistance.
  function speedAssist(dt,targetKnots,targetVS=0){
   const speed=Math.max(airspeed,1);
   const density=1.225*Math.exp(-Math.max(0,position.y)/8500);
   const q=.5*density*speed*speed;
-
-  let cl=clamp(
-   .25+4.7*alpha+(flaps ? .65 : 0),
-   -1,
-   flaps ? 2.25 : 1.55
-  );
-
-  const stallAngle=rad(flaps?17:15);
-  const stalled=Math.abs(alpha)>stallAngle;
-
-  if(stalled){
-   cl*=Math.max(.25,1-(Math.abs(alpha)-stallAngle)*3.5);
-  }
-
-  const cd=.022+.045*cl*cl+
-   (flaps ? .035 : 0)+
-   (gearDown ? .018 : 0)+
-   (stalled ? .12 : 0);
-
+  let cl=clamp(.25+4.7*alpha+(flaps?.65:0),-1,flaps?2.25:1.55);
+  const stallAngle=rad(flaps?17:15),stalled=Math.abs(alpha)>stallAngle;
+  if(stalled)cl*=Math.max(.25,1-(Math.abs(alpha)-stallAngle)*3.5);
+  const cd=.022+.045*cl*cl+(flaps?.035:0)+
+   (gearDown?.018:0)+(stalled?.12:0);
   const drag=q*AREA*cd;
-
-  const availableThrust=MAX_THRUST*
-   clamp(density/1.225,.3,1)*
+  const availableThrust=MAX_THRUST*clamp(density/1.225,.3,1)*
    clamp(1-speed/600,.65,1);
-
-  const targetSpeed=targetKnots/KNOTS;
-  const speedError=targetSpeed-speed;
-  const desiredAcceleration=clamp(speedError*.12,-2,2);
+  const desiredAcceleration=clamp((targetKnots/KNOTS-speed)*.12,-2,2);
   const climbFraction=clamp(targetVS/speed,-.25,.25);
-
-  const requiredThrust=
-   drag+
-   MASS*G*climbFraction+
-   MASS*desiredAcceleration;
-
-  const desired=clamp(
-   requiredThrust/Math.max(1,availableThrust),
-   0,
-   1
+  const requiredThrust=drag+MASS*G*climbFraction+MASS*desiredAcceleration;
+  throttle=approach(
+   throttle,clamp(requiredThrust/Math.max(1,availableThrust),0,1),dt,1.3
   );
-
-  throttle=approach(throttle,desired,dt,1.3);
  }
-
  function pitchCommand(targetPitch,authority){
-  return clamp(
-   (targetPitch-pitch)*1.8/Math.max(.04,.15*authority),-1,1
-  );
+  return clamp((targetPitch-pitch)*1.8/Math.max(.04,.15*authority),-1,1);
  }
  function trimPitch(targetVS){
   const rho=1.225*Math.exp(-Math.max(0,position.y)/8500);
   const q=.5*rho*airspeed*airspeed;
   const required=MASS*G/Math.max(1,q*AREA*Math.cos(bank));
-  const alphaTrim=clamp(
-   (required-.25-(flaps ? .65 : 0))/4.7,rad(-2),rad(10)
-  );
+  const alphaTrim=clamp((required-.25-(flaps?.65:0))/4.7,rad(-2),rad(10));
   return clamp(
    Math.atan2(targetVS,Math.max(airspeed,55))+alphaTrim+
    (targetVS-velocity.y)*.006,rad(-5),rad(13)
   );
  }
  function autopilotCommands(dt,authority){
-  const t=steeringTarget();
-  const dx=t.x-position.x,dz=t.z-position.z;
-  const distance=Math.max(1,Math.hypot(dx,dz));
-  const gs=Math.max(airspeed,70);
+  const t=steeringTarget(),dx=t.x-position.x,dz=t.z-position.z;
+  const distance=Math.max(1,Math.hypot(dx,dz)),gs=Math.max(airspeed,70);
   const desiredYaw=Math.atan2(
    -(dx/distance*gs-wind.x),-(dz/distance*gs-wind.z)
   );
-  const error=wrapAngle(desiredYaw-yaw);
-  const targetBank=clamp(error*.7,rad(-22),rad(22));
+  const targetBank=clamp(wrapAngle(desiredYaw-yaw)*.7,rad(-22),rad(22));
   apTargetHeight=routeIndex===4
    ?Math.max(180,finalData().targetHeight):Math.max(150,routeHeight());
   const targetVS=clamp((apTargetHeight-(position.y-GROUND))*.035,-4.5,7);
@@ -1439,12 +1313,10 @@ function initialize(T,GLTFLoader){
   const slow=airspeed*KNOTS<(flaps?130:150);
   if(slow)targetPitch=Math.min(targetPitch,rad(3));
   apTargetSpeed=routeIndex>=2?(flaps?150:180):(flaps?165:210);
-  speedAssist(dt,apTargetSpeed,targetVS);
-  if(slow)throttle=1;
+  speedAssist(dt,apTargetSpeed,targetVS);if(slow)throttle=1;
   return{pitchInput:pitchCommand(targetPitch,authority),targetBank};
  }
 
- // Navigation / radar.
  const radar=$("radar"),radarCtx=radar.getContext("2d");
  function landingAdvice(){
   const f=finalData();
@@ -1462,10 +1334,8 @@ function initialize(T,GLTFLoader){
  }
  function drawNavigation(){
   if(!route.length)return;
-  const t=steeringTarget();
-  const dx=t.x-position.x,dz=t.z-position.z;
-  const desiredYaw=Math.atan2(-dx,-dz);
-  const error=wrapAngle(yaw-desiredYaw),turn=deg(error);
+  const t=steeringTarget(),dx=t.x-position.x,dz=t.z-position.z;
+  const desiredYaw=Math.atan2(-dx,-dz),turn=deg(wrapAngle(yaw-desiredYaw));
   const heading=((airport.heading-deg(desiredYaw))%360+360)%360;
   const height=position.y-GROUND;
   const targetHeight=routeIndex===4?finalData().targetHeight:routeHeight();
@@ -1476,8 +1346,7 @@ function initialize(T,GLTFLoader){
   $("navText").textContent=grounded
    ?"Next: "+airportName(destinationAirport)+"\nTake off straight ahead"
    :(autopilot?"AUTOPILOT ON\n":approachAssist?"ASSIST ON — YOU STEER\n":"")+
-    turnText+"\nHeading "+
-    String(Math.round(heading)%360).padStart(3,"0")+"°\n"+
+    turnText+"\nHeading "+String(Math.round(heading)%360).padStart(3,"0")+"°\n"+
     (routeIndex===4?landingAdvice():
      height>targetHeight+40?"DESCEND GENTLY":
      height<targetHeight-40?"CLIMB GENTLY":"HOLD HEIGHT")+
@@ -1512,8 +1381,7 @@ function initialize(T,GLTFLoader){
   });
   ctx.stroke();ctx.setLineDash([]);
   for(const m of mountainColliders){
-   const q=point(m.x,m.z);
-   ctx.fillStyle="#b9936688";ctx.beginPath();
+   const q=point(m.x,m.z);ctx.fillStyle="#b9936688";ctx.beginPath();
    ctx.arc(q.x,q.y,Math.max(2,m.rx*scale),0,Math.PI*2);ctx.fill();
   }
   airportSites.forEach((s,i)=>{
@@ -1521,29 +1389,26 @@ function initialize(T,GLTFLoader){
    ctx.strokeStyle=i===destinationAirport?"#86efac":"#eeeecc";
    ctx.lineWidth=5;ctx.beginPath();
    ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-   const q=point(s.x,s.z);
-   ctx.fillStyle=ctx.strokeStyle;ctx.font="bold 13px sans-serif";
-   ctx.fillText(i===0?"A":"B",q.x+8,q.y);
+   const q=point(s.x,s.z);ctx.fillStyle=ctx.strokeStyle;
+   ctx.font="bold 13px sans-serif";ctx.fillText(i===0?"A":"B",q.x+8,q.y);
   });
-  const q=point(t.x,t.z);
-  ctx.fillStyle="#79ffff";ctx.beginPath();ctx.arc(q.x,q.y,5,0,Math.PI*2);ctx.fill();
-  ctx.restore();
+  const q=point(t.x,t.z);ctx.fillStyle="#79ffff";ctx.beginPath();
+  ctx.arc(q.x,q.y,5,0,Math.PI*2);ctx.fill();ctx.restore();
   ctx.fillStyle="#fff";ctx.beginPath();
   ctx.moveTo(cx,cy-11);ctx.lineTo(cx-7,cy+8);
   ctx.lineTo(cx,cy+4);ctx.lineTo(cx+7,cy+8);ctx.closePath();ctx.fill();
-  ctx.fillStyle="#b5fce6";ctx.font="12px sans-serif";
-  ctx.fillText("HEADING UP",10,18);
-  $("radarText").textContent=
-   "A/B AIRPORTS · GREEN DESTINATION · BROWN HILLS · "+
+  ctx.fillStyle="#b5fce6";ctx.font="12px sans-serif";ctx.fillText("HEADING UP",10,18);
+  $("radarText").textContent="A/B AIRPORTS · GREEN DESTINATION · BROWN HILLS · "+
    (range/1000).toFixed(1)+" km";
  }
 
- // Existing cockpit setup and clickable controls.
  function assetText(){
   $("assets").textContent=cockpitStatus+"\n"+exteriorStatus+
    (animationStatus?"\n"+animationStatus:"");
  }
- function normalize(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");}
+ function normalize(v){
+  return String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ }
  function find(root,name){
   let result=null;
   root.traverse(o=>{if(!result&&normalize(o.name)===normalize(name))result=o;});
@@ -1576,8 +1441,7 @@ function initialize(T,GLTFLoader){
    ["pd.n2","throttle"],["pd.flaps","flaps"],["pd.parking-brake","brakes"]
   ]){
    const o=find(root,name);if(!o?.parent)continue;
-   o.userData.flightControl=control;names.add(control);
-   o.updateWorldMatrix(true,true);
+   o.userData.flightControl=control;names.add(control);o.updateWorldMatrix(true,true);
    const bounds=new T.Box3().setFromObject(o);if(bounds.isEmpty())continue;
    const center=bounds.getCenter(new T.Vector3());
    if(control!=="yoke")center.y=bounds.min.y;
@@ -1598,14 +1462,12 @@ function initialize(T,GLTFLoader){
   const a=new T.Quaternion(),b=new T.Quaternion();
   for(const p of parts){
    if(p.control==="yoke"){
-    a.setFromAxisAngle(p.p,stickY*.1);
-    b.setFromAxisAngle(p.r,-stickX*.55);
+    a.setFromAxisAngle(p.p,stickY*.1);b.setFromAxisAngle(p.r,-stickX*.55);
     p.pivot.quaternion.copy(p.base).multiply(a).multiply(b);
    }else{
     const angle=p.control==="throttle"?-throttle*.65:
-     p.control==="flaps"?(flaps ? .45 : 0):(brakes ? .45 : 0);
-    a.setFromAxisAngle(p.p,angle);
-    p.pivot.quaternion.copy(p.base).multiply(a);
+     p.control==="flaps"?(flaps?.45:0):(brakes?.45:0);
+    a.setFromAxisAngle(p.p,angle);p.pivot.quaternion.copy(p.base).multiply(a);
    }
   }
  }
@@ -1617,8 +1479,7 @@ function initialize(T,GLTFLoader){
  $("turn").onclick=()=>{
   if(!cockpitReady)return;
   cockpitTurned=!cockpitTurned;
-  cockpitModel.rotation.y=-Math.PI/2+(cockpitTurned?Math.PI:0);
-  calibrateEye();
+  cockpitModel.rotation.y=-Math.PI/2+(cockpitTurned?Math.PI:0);calibrateEye();
  };
  function readEye(){eyeOffset.set(+$("eyeX").value,+$("eyeY").value,+$("eyeZ").value);}
  ["eyeX","eyeY","eyeZ"].forEach(id=>$(id).oninput=readEye);
@@ -1627,7 +1488,53 @@ function initialize(T,GLTFLoader){
   $("lookPitch").value="-5";headYaw=headPitch=0;readEye();
  };
 
- // Exterior fitting: direction and tilt affect the visual model only.
+ // Visual model placement, separate from the simulation position.
+ function isLearjetExterior(){
+  return (loadedAircraftKey||loadingAircraftKey)==="learjet";
+ }
+ function learjetPosedBounds(){
+  const bounds=new T.Box3(),vertex=new T.Vector3();
+  aircraft.updateMatrixWorld(true);
+  exteriorObject.traverse(o=>{
+   if(o.isSkinnedMesh&&o.skeleton)o.skeleton.update();
+  });
+  function visit(o){
+   if(!o.visible)return;
+   if(o.isMesh&&o.geometry){
+    const geometry=o.geometry,positions=geometry.getAttribute("position");
+    const materials=Array.isArray(o.material)?o.material:[o.material];
+    const visibleMaterial=materials.some(m=>
+     m&&m.visible!==false&&!(m.transparent&&m.opacity<=0));
+    if(positions&&visibleMaterial){
+     const index=geometry.getIndex(),count=index?index.count:positions.count;
+     const rangeStart=Math.max(0,geometry.drawRange.start||0);
+     const rangeCount=geometry.drawRange.count;
+     const rangeEnd=Math.min(count,
+      Number.isFinite(rangeCount)?rangeStart+rangeCount:count);
+     const groups=geometry.groups.length?geometry.groups:
+      [{start:0,count,materialIndex:0}];
+     for(const group of groups){
+      const material=Array.isArray(o.material)
+       ?o.material[group.materialIndex||0]:o.material;
+      if(!material||material.visible===false||
+       (material.transparent&&material.opacity<=0))continue;
+      const start=Math.max(rangeStart,group.start);
+      const end=Math.min(rangeEnd,group.start+group.count);
+      for(let i=start;i<end;i++){
+       o.getVertexPosition(index?index.getX(i):i,vertex);
+       vertex.applyMatrix4(o.matrixWorld);
+       if(Number.isFinite(vertex.x)&&Number.isFinite(vertex.y)&&
+        Number.isFinite(vertex.z))bounds.expandByPoint(vertex);
+      }
+     }
+    }
+   }
+   for(const child of o.children)visit(child);
+  }
+  visit(exteriorYaw);
+  if(bounds.isEmpty())bounds.setFromObject(exteriorYaw,true);
+  return bounds;
+ }
  function fitExterior(){
   if(!exteriorObject)return;
   const oldP=aircraft.position.clone(),oldQ=aircraft.quaternion.clone();
@@ -1637,9 +1544,11 @@ function initialize(T,GLTFLoader){
    exteriorYaw.rotation.y=rad(+$("exteriorYaw").value);
    exteriorTilt.rotation.x=rad(+$("exteriorPitch").value);
    aircraft.updateMatrixWorld(true);
-   const bounds=new T.Box3().setFromObject(exteriorYaw);
-   const s=bounds.getSize(new T.Vector3()),span=Math.max(s.x,s.z);
-   if(!Number.isFinite(span)||span<=0)throw new Error("Invalid exterior dimensions.");
+   const bounds=isLearjetExterior()?learjetPosedBounds():
+    new T.Box3().setFromObject(exteriorYaw);
+   const size=bounds.getSize(new T.Vector3()),span=Math.max(size.x,size.z);
+   if(!Number.isFinite(span)||span<=0||!Number.isFinite(bounds.min.y))
+    throw new Error("Invalid exterior dimensions.");
    exteriorFit={span,center:bounds.getCenter(new T.Vector3()),minY:bounds.min.y};
   }finally{
    aircraft.position.copy(oldP);aircraft.quaternion.copy(oldQ);
@@ -1655,32 +1564,39 @@ function initialize(T,GLTFLoader){
   if(!exteriorFit)return;
   const scale=size/exteriorFit.span;
   exteriorAnchor.scale.setScalar(scale);
+
+  const learjetLowering=isLearjetExterior()
+   ?Number($("learjetLower").value):0;
+
   exteriorAnchor.position.set(
-   -exteriorFit.center.x*scale,-GROUND-exteriorFit.minY*scale,
+   -exteriorFit.center.x*scale,
+   -GROUND-exteriorFit.minY*scale-learjetLowering,
    -exteriorFit.center.z*scale
   );
  }
+ $("learjetLower").oninput=()=>{
+  $("learjetLowerOut").textContent=Number($("learjetLower").value).toFixed(2);
+  planeSize();
+ };
  $("planeSize").oninput=planeSize;
- $("cameraDistance").oninput=()=>{$("distanceOut").textContent=$("cameraDistance").value;};
+ $("cameraDistance").oninput=()=>{
+  $("distanceOut").textContent=$("cameraDistance").value;
+ };
  $("exteriorYaw").onchange=()=>{
   const key=loadedAircraftKey||loadingAircraftKey||$("aircraftChoice").value;
   savedExteriorYaw[key]=+$("exteriorYaw").value;
-  if(!exteriorFit){
-   exteriorYaw.rotation.y=rad(+$("exteriorYaw").value);return;
-  }
+  if(!exteriorFit){exteriorYaw.rotation.y=rad(+$("exteriorYaw").value);return;}
+  if(isLearjetExterior()){fitExterior();return;}
   const angle=rad(+$("exteriorYaw").value);
   exteriorFit.center.applyAxisAngle(
-   new T.Vector3(0,1,0),angle-exteriorYaw.rotation.y
-  );
+   new T.Vector3(0,1,0),angle-exteriorYaw.rotation.y);
   exteriorYaw.rotation.y=angle;planeSize();
  };
  $("exteriorPitch").oninput=()=>{
   const key=loadedAircraftKey||loadingAircraftKey||$("aircraftChoice").value;
-  const angle=+$("exteriorPitch").value;
-  savedExteriorPitch[key]=angle;
+  const angle=+$("exteriorPitch").value;savedExteriorPitch[key]=angle;
   $("exteriorPitchOut").textContent=angle+"°";
-  exteriorTilt.rotation.x=rad(angle);
-  if(exteriorObject)fitExterior();
+  exteriorTilt.rotation.x=rad(angle);if(exteriorObject)fitExterior();
  };
  function installExteriorAnimations(gltf){
   exteriorMixer=new T.AnimationMixer(gltf.scene);
@@ -1699,24 +1615,33 @@ function initialize(T,GLTFLoader){
    });
   }
   animationStatus=exteriorClips.length
-   ?"Exterior animation clips: "+exteriorClips.map(c=>c.clip.name).join(", ")+". Verify visually."
+   ?"Exterior animation clips: "+exteriorClips.map(c=>c.clip.name).join(", ")+
+    ". Verify visually."
    :"No clearly named gear/flap deployment clips found; exterior remains as modeled.";
  }
  function updateExterior(dt,snap=false){
+  const previousGear=exteriorGear,previousFlaps=exteriorFlaps;
   const f=snap?1:1-Math.exp(-dt*2);
   exteriorGear+=(Number(gearDown)-exteriorGear)*f;
   exteriorFlaps+=(Number(flaps)-exteriorFlaps)*f;
   placeholderGear.visible=exteriorGear>.5;
-  if(!exteriorMixer)return;
-  exteriorClips.forEach(c=>{
-   let v=c.type==="gear"?exteriorGear:exteriorFlaps;
-   if(c.reverse)v=1-v;
-   c.action.time=v*c.clip.duration;
-  });
-  exteriorMixer.update(0);
+  if(isLearjetExterior()&&(snap||
+   Math.abs(exteriorGear-previousGear)>.00001||
+   Math.abs(exteriorFlaps-previousFlaps)>.00001))
+   learjetGroundFitPending=true;
+  if(exteriorMixer){
+   exteriorClips.forEach(c=>{
+    let v=c.type==="gear"?exteriorGear:exteriorFlaps;
+    if(c.reverse)v=1-v;c.action.time=v*c.clip.duration;
+   });
+   exteriorMixer.update(0);
+  }
+  if(isLearjetExterior()&&exteriorObject&&exteriorFit&&grounded&&gearDown&&
+   learjetGroundFitPending&&Math.abs(exteriorGear-1)<.001&&
+   Math.abs(exteriorFlaps-Number(flaps))<.001){
+   fitExterior();learjetGroundFitPending=false;
+  }
  }
-
- // Aircraft loader.
  function disposeModel(root){
   const gs=new Set(),ms=new Set(),ts=new Set();
   root.traverse(o=>{
@@ -1724,9 +1649,8 @@ function initialize(T,GLTFLoader){
    const list=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];
    for(const m of list){
     ms.add(m);
-    for(const value of Object.values(m)){
+    for(const value of Object.values(m))
      if(value&&value.isTexture)ts.add(value);
-    }
    }
   });
   gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());ts.forEach(t=>t.dispose());
@@ -1738,79 +1662,67 @@ function initialize(T,GLTFLoader){
   }
   exteriorClips.length=0;exteriorMixer=null;exteriorFit=null;
   if(exteriorObject){
-   exteriorTilt.remove(exteriorObject);
-   disposeModel(exteriorObject);
+   exteriorTilt.remove(exteriorObject);disposeModel(exteriorObject);
   }
   exteriorTilt.clear();exteriorObject=null;
-  placeholder.visible=true;animationStatus="";
+  placeholder.visible=true;animationStatus="";learjetGroundFitPending=false;
  }
  function loadSelectedAircraft(){
-  const key=$("aircraftChoice").value;
-  const option=aircraftOptions[key];
+  const key=$("aircraftChoice").value,option=aircraftOptions[key];
   if(!option)return;
   if(loadedAircraftKey===key&&exteriorObject)return;
   if(loadingAircraftKey===key)return;
-
   const request=++exteriorRequest;
-  loadingAircraftKey=key;loadedAircraftKey=null;
-  releaseExterior();
-
+  loadingAircraftKey=key;loadedAircraftKey=null;releaseExterior();
   const initialYaw=savedExteriorYaw[key]??option.defaultYaw;
   const initialPitch=savedExteriorPitch[key]??option.defaultPitch;
   $("exteriorYaw").value=String(initialYaw);
   $("exteriorPitch").value=String(initialPitch);
   $("exteriorPitchOut").textContent=initialPitch+"°";
-  exteriorYaw.rotation.y=rad(initialYaw);
-  exteriorTilt.rotation.x=rad(initialPitch);
-  planeSize();
-  exteriorStatus=option.name+" downloading...";
-  assetText();
-
+  exteriorYaw.rotation.y=rad(initialYaw);exteriorTilt.rotation.x=rad(initialPitch);
+  planeSize();exteriorStatus=option.name+" downloading...";assetText();
   let textureFailed=false;
   const manager=new T.LoadingManager();
   manager.onError=url=>{
    if(request!==exteriorRequest)return;
-   textureFailed=true;
-   console.warn(option.name+" asset failed:",url);
+   textureFailed=true;console.warn(option.name+" asset failed:",url);
    if(loadedAircraftKey===key){
     exteriorStatus=option.name+
-     " loaded, but an associated asset failed. Check textures.";
-    assetText();
+     " loaded, but an associated asset failed. Check textures.";assetText();
    }
   };
-
   new GLTFLoader(manager).load(base+option.file,gltf=>{
-   if(request!==exteriorRequest){
-    disposeModel(gltf.scene);return;
-   }
+   if(request!==exteriorRequest){disposeModel(gltf.scene);return;}
    try{
     exteriorObject=gltf.scene;exteriorTilt.add(exteriorObject);
-    fitExterior();installExteriorAnimations(gltf);updateExterior(0,true);
-    placeholder.visible=false;
-    loadedAircraftKey=key;loadingAircraftKey=null;
-    exteriorStatus=option.name+
-     " loaded. All aircraft use the shared cockpit and handling."+
+    if(key==="learjet"){
+     installExteriorAnimations(gltf);updateExterior(0,true);
+     fitExterior();learjetGroundFitPending=!grounded;
+    }else{
+     fitExterior();installExteriorAnimations(gltf);updateExterior(0,true);
+    }
+    placeholder.visible=false;loadedAircraftKey=key;loadingAircraftKey=null;
+    exteriorStatus=option.name+" loaded. Shared cockpit; aircraft-specific handling."+
      (textureFailed?" An associated asset failed.":"")+
-     " Adjust Exterior nose direction or Exterior nose tilt if needed.";
+     (key==="learjet"
+      ?" Tilt: "+$("exteriorPitch").value+
+       "°. Use Learjet: lower model to calibrate wheel contact."
+      :" Adjust Exterior nose direction or Exterior nose tilt if needed.");
    }catch(error){
-    releaseExterior();
-    loadedAircraftKey=loadingAircraftKey=null;
+    releaseExterior();loadedAircraftKey=loadingAircraftKey=null;
     exteriorStatus=option.name+" setup failed; placeholder retained. "+error.message;
     console.error(error);
    }
    assetText();
   },undefined,error=>{
    if(request!==exteriorRequest)return;
-   loadingAircraftKey=loadedAircraftKey=null;
-   placeholder.visible=true;
+   loadingAircraftKey=loadedAircraftKey=null;placeholder.visible=true;
    exteriorStatus=option.name+" download failed. Check "+option.file+
     " exists in the main branch with this exact filename.";
    assetText();console.error(error);
   });
  }
- $("aircraftChoice").onchange=()=>{
-  if(state==="menu")loadSelectedAircraft();
- };
+ $("aircraftChoice").onchange=()=>{if(state==="menu")loadSelectedAircraft();};
 
  function resetLook(){
   orbitYaw=0;orbitPitch=.22;headYaw=headPitch=0;lookDrag=null;
@@ -1847,8 +1759,7 @@ function initialize(T,GLTFLoader){
   $("pause").disabled=!["playing","paused"].includes(state);
   $("flaps").textContent=flaps?"Flaps DOWN":"Flaps UP";
   $("brakes").textContent=brakes?"Brake ON":"Brake OFF";
-  $("gear").textContent=gearDown?"Gear DOWN":"Gear UP";
-  assistDisplay();
+  $("gear").textContent=gearDown?"Gear DOWN":"Gear UP";assistDisplay();
  }
  function orient(){rotation.setFromEuler(new T.Euler(pitch,yaw,bank,"YXZ"));}
  function alignmentError(){
@@ -1859,8 +1770,7 @@ function initialize(T,GLTFLoader){
   autopilot=approachAssist=false;goAroundTime=0;
   clearExplosion();clearControls();resetLook();
   airportKey=$("airport").value;airport=airports[airportKey];buildMap();
-  loadSelectedAircraft();
-  setAircraftHandling();
+  loadSelectedAircraft();setAircraftHandling();
   pitch=bank=yaw=pitchRate=bankRate=0;rotation.identity();
   airTime=alpha=airspeed=0;landed=false;grounded=true;
   throttle=enginePower=0;flaps=true;brakes=false;gearDown=true;
@@ -1882,15 +1792,12 @@ function initialize(T,GLTFLoader){
  }
  function pause(){
   if(state==="playing"){state="paused";clearControls();}
-  else if(state==="paused")state="playing";
-  buttons();
+  else if(state==="paused")state="playing";buttons();
  }
  function crash(reason){
   if(state!=="playing")return;
-  autopilot=approachAssist=false;goAroundTime=0;
-  state="crashed";clearControls();
-  message="CRASH: "+reason+" Select New flight to restart.";
-  explode();buttons();
+  autopilot=approachAssist=false;goAroundTime=0;state="crashed";clearControls();
+  message="CRASH: "+reason+" Select New flight to restart.";explode();buttons();
  }
  function toggleGear(){
   if(state!=="playing")return;
@@ -1898,26 +1805,20 @@ function initialize(T,GLTFLoader){
   gearDown=!gearDown;buttons();
  }
 
- // Shared force-based flight model with optional assistance.
  function physics(dt){
   if(state!=="playing")return;
-  const previousPosition=position.clone();
-  if(!grounded)airTime+=dt;
-  let p=clamp(
-   stickY+Number(keys.has("ArrowDown"))-Number(keys.has("ArrowUp")),-1,1
-  );
-  const r=clamp(
-   stickX+Number(keys.has("ArrowRight"))-Number(keys.has("ArrowLeft")),-1,1
-  );
+  const previousPosition=position.clone();if(!grounded)airTime+=dt;
+  let p=clamp(stickY+Number(keys.has("ArrowDown"))-
+   Number(keys.has("ArrowUp")),-1,1);
+  const r=clamp(stickX+Number(keys.has("ArrowRight"))-
+   Number(keys.has("ArrowLeft")),-1,1);
   const rudder=Number(keys.has("q"))-Number(keys.has("e"));
   const flightMode=mode();
   if(keys.has("w"))throttle=Math.min(1,throttle+dt*.22);
   if(keys.has("s"))throttle=Math.max(0,throttle-dt*.22);
-
   airspeed=velocity.clone().sub(wind).length();
   const authority=clamp(airspeed/75,.08,1.25)*aircraftAgility;
   let command=null,assistedVS=null,assistActive=false;
-
   if(autopilot&&!grounded){
    command=autopilotCommands(dt,authority);p=command.pitchInput;
   }else if(goAroundTime>0&&!grounded){
@@ -1925,70 +1826,46 @@ function initialize(T,GLTFLoader){
    p=pitchCommand(airspeed*KNOTS<130?rad(3):rad(9),authority);
    command={targetBank:0};
   }else if(approachAssist&&!grounded){
-   const f=finalData();
-   assistActive=f.corridor&&routeIndex===4;
+   const f=finalData();assistActive=f.corridor&&routeIndex===4;
    if(assistActive){
     speedAssist(dt,f.height<12?140:145);
     if(flightMode==="easy"){
      const groundSpeed=Math.max(30,-velocity.z);
      assistedVS=clamp(
-      -groundSpeed*Math.tan(rad(3))+(f.targetHeight-f.height)*.045,-4.5,2
-     );
+      -groundSpeed*Math.tan(rad(3))+(f.targetHeight-f.height)*.045,-4.5,2);
      if(f.height<12)
       assistedVS=clamp(-.8+(f.targetHeight-f.height)*.06,-1.5,.5);
      const manualTrim=p;
      p=pitchCommand(
-      clamp(trimPitch(assistedVS)+manualTrim*rad(3),rad(-2),rad(11)),
-      authority
-     );
+      clamp(trimPitch(assistedVS)+manualTrim*rad(3),rad(-2),rad(11)),authority);
     }
    }
   }
-
   enginePower=approach(enginePower,throttle,dt,throttle>enginePower?4.5:3);
   pitchRate=approach(pitchRate,p*.15*authority,dt,1/2.2);
-
   if(command){
    bankRate=approach(
-    bankRate,clamp((command.targetBank-bank)*1.8,-rad(20),rad(20)),dt,.35
-   );
+    bankRate,clamp((command.targetBank-bank)*1.8,-rad(20),rad(20)),dt,.35);
   }else if(flightMode!=="hard"){
    const maxTurn=rad(
-    assistActive?15:
-    Math.min(60,(flightMode==="easy"?25:40)*aircraftAgility)
-   );
-   bankRate=approach(
-    bankRate,
-    clamp(
-     (-r*maxTurn-bank)*1.8*aircraftAgility,
-     -rad(22)*aircraftAgility,
-     rad(22)*aircraftAgility
-    ),
-    dt,.35/aircraftAgility
-   );
+    assistActive?15:Math.min(60,(flightMode==="easy"?25:40)*aircraftAgility));
+   bankRate=approach(bankRate,
+    clamp((-r*maxTurn-bank)*1.8*aircraftAgility,
+     -rad(22)*aircraftAgility,rad(22)*aircraftAgility),dt,.35/aircraftAgility);
   }else{
-   bankRate=approach(
-    bankRate,-r*.32*authority,dt,.5/aircraftAgility
-   );
+   bankRate=approach(bankRate,-r*.32*authority,dt,.5/aircraftAgility);
   }
-
   if(!grounded){
-   const scale=flightMode==="easy" ? .3 : flightMode==="medium" ? .65 : 1;
+   const scale=flightMode==="easy"?.3:flightMode==="medium"?.65:1;
    const turbulence=weather.dark*weather.strength/14*scale;
    pitchRate+=Math.sin(weather.time*1.7)*turbulence*.013*dt;
    bankRate+=(Math.sin(weather.time*1.1)+.4*Math.sin(weather.time*2.8))*
     turbulence*.025*dt;
   }
   pitch=clamp(pitch+pitchRate*dt,rad(-25),rad(30));
-  const bankLimit=rad(
-   command?30:
-   Math.min(
-    75,
-    (flightMode==="easy"?25:flightMode==="medium"?40:65)*aircraftAgility
-   )
-  );
+  const bankLimit=rad(command?30:Math.min(75,
+   (flightMode==="easy"?25:flightMode==="medium"?40:65)*aircraftAgility));
   bank=clamp(bank+bankRate*dt,-bankLimit,bankLimit);
-
   if(grounded){
    bank*=Math.exp(-dt*8);
    pitch=clamp(pitch,0,airspeed>65?rad(12):rad(1.5));
@@ -2005,31 +1882,25 @@ function initialize(T,GLTFLoader){
   const beta=airspeed>10?Math.asin(clamp(air.dot(right)/airspeed,-1,1)):0;
   const density=1.225*Math.exp(-Math.max(0,position.y)/8500);
   const q=.5*density*airspeed*airspeed;
-  let cl=clamp(.25+4.7*alpha+(flaps ? .65 : 0),-1,flaps?2.25:1.55);
+  let cl=clamp(.25+4.7*alpha+(flaps?.65:0),-1,flaps?2.25:1.55);
   const stallAngle=rad(flaps?17:15),stalled=Math.abs(alpha)>stallAngle;
   if(stalled)cl*=Math.max(.25,1-(Math.abs(alpha)-stallAngle)*3.5);
-  const cd=.022+.045*cl*cl+(flaps ? .035 : 0)+
-   (gearDown ? .018 : 0)+(stalled ? .12 : 0);
+  const cd=.022+.045*cl*cl+(flaps?.035:0)+(gearDown?.018:0)+(stalled?.12:0);
   const lift=up.clone().addScaledVector(direction,-up.dot(direction));
   if(lift.lengthSq()>.0001)lift.normalize();else lift.copy(up);
-
   const thrust=MAX_THRUST*enginePower*
    clamp(density/1.225,.3,1)*clamp(1-airspeed/600,.65,1);
   const force=new T.Vector3(0,-MASS*G,0);
   force.addScaledVector(forward,thrust);
-  const assistance=flightMode==="easy"?1:flightMode==="medium" ? .5 : 0;
+  const assistance=flightMode==="easy"?1:flightMode==="medium"?.5:0;
   const turnAssist=grounded?1:1+(1/Math.max(Math.cos(bank),.7)-1)*assistance;
   force.addScaledVector(lift,q*AREA*cl*turnAssist);
   force.addScaledVector(direction,-q*AREA*cd);
   force.addScaledVector(right,-q*AREA*.8*beta);
   if(assistedVS!==null){
-   const correction=clamp(
-    (assistedVS-velocity.y)*1.8-force.y/MASS,-5,6
-   );
-   force.y+=MASS*correction;
+   force.y+=MASS*clamp((assistedVS-velocity.y)*1.8-force.y/MASS,-5,6);
   }
   velocity.addScaledVector(force,dt/MASS);
-
   if(grounded){
    const h=new T.Vector3(velocity.x,0,velocity.z),speed=h.length();
    if(speed>.001){
@@ -2038,24 +1909,19 @@ function initialize(T,GLTFLoader){
     velocity.x-=h.x/speed*loss;velocity.z-=h.z/speed*loss;
    }
    const flatRight=new T.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
-   velocity.addScaledVector(
-    flatRight,-velocity.dot(flatRight)*Math.min(1,dt*6)
-   );
+   velocity.addScaledVector(flatRight,-velocity.dot(flatRight)*Math.min(1,dt*6));
    if(force.y>0&&airspeed>65&&pitch>rad(2)){
     grounded=false;landed=false;resetRoute();
     message="Airborne. Fly toward "+airportName(destinationAirport)+
      ". Autopilot is available above 165 ft.";
    }else velocity.y=0;
   }
-
   position.addScaledVector(velocity,dt);
-
   const hit=mountainHit(previousPosition,position);
   if(hit!==null){
    position.lerpVectors(previousPosition,position,Math.max(0,hit-.001));
    crash("Mountain impact. Watch the brown hills on radar and keep clear.");return;
   }
-
   if(!grounded&&position.y<=GROUND){
    const sink=Math.max(0,-velocity.y);position.y=GROUND;
    const l=limits(),reasons=[];
@@ -2069,21 +1935,18 @@ function initialize(T,GLTFLoader){
    if(airspeed*KNOTS>l.speed)reasons.push("touchdown too fast");
    if(alignmentError()>l.yaw)reasons.push("not aligned with runway");
    if(reasons.length){crash(reasons.join("; ")+".");return;}
-
    const reached=arrivedAt===destinationAirport;
    autopilot=approachAssist=false;goAroundTime=0;
    velocity.y=0;grounded=landed=true;pitchRate=bankRate=0;
    pitch=clamp(pitch,0,rad(8));bank=0;groundedAirport=arrivedAt;
    if(flightMode==="easy"){throttle=0;brakes=true;}
    resetRoute();
-   message=reached
-    ?"LANDED at "+airportName(arrivedAt)+"! "+
-     (flightMode==="easy"?"Brakes applied. ":"Idle thrust and brake. ")+
-     "Next: "+airportName(destinationAirport)+"."
-    :"Touchdown accepted. Next: "+airportName(destinationAirport)+".";
+   message=reached?"LANDED at "+airportName(arrivedAt)+"! "+
+    (flightMode==="easy"?"Brakes applied. ":"Idle thrust and brake. ")+
+    "Next: "+airportName(destinationAirport)+".":
+    "Touchdown accepted. Next: "+airportName(destinationAirport)+".";
    buttons();
   }
-
   if(grounded){
    position.y=GROUND;
    if(runwayAt(position.x,position.z,runwayMargin())<0){
@@ -2095,10 +1958,8 @@ function initialize(T,GLTFLoader){
      airportName(destinationAirport)+".";
   }
   if(!grounded&&stalled)pitchRate-=.08*dt;
-  if(![
-   position.x,position.y,position.z,velocity.x,velocity.y,velocity.z,
-   pitch,bank,yaw
-  ].every(Number.isFinite)){
+  if(![position.x,position.y,position.z,velocity.x,velocity.y,velocity.z,
+   pitch,bank,yaw].every(Number.isFinite)){
    crash("Simulation calculation error.");return;
   }
   orient();
@@ -2119,8 +1980,7 @@ function initialize(T,GLTFLoader){
    const offset=new T.Vector3(
     Math.sin(a)*Math.cos(orbitPitch)*distance,
     Math.sin(orbitPitch)*distance+3,
-    Math.cos(a)*Math.cos(orbitPitch)*distance
-   );
+    Math.cos(a)*Math.cos(orbitPitch)*distance);
    const desired=position.clone().add(offset);desired.y=Math.max(2,desired.y);
    if(snap||lookDrag)camera.position.copy(desired);
    else camera.position.lerp(desired,1-Math.exp(-dt*7));
@@ -2128,15 +1988,13 @@ function initialize(T,GLTFLoader){
    camera.lookAt(position.clone().add(new T.Vector3(0,1,0)));
   }else{
    camera.position.copy(
-    pilotEye.clone().add(eyeOffset).applyQuaternion(rotation).add(position)
-   );
+    pilotEye.clone().add(eyeOffset).applyQuaternion(rotation).add(position));
    const look=new T.Quaternion().setFromEuler(new T.Euler(
     rad(+$("lookPitch").value)+headPitch,
-    rad(+$("lookYaw").value)+headYaw,0,"YXZ"
-   ));
+    rad(+$("lookYaw").value)+headYaw,0,"YXZ"));
    camera.quaternion.copy(rotation).multiply(look);
   }
-  const near=chase ? .2 : .02;
+  const near=chase?.2:.02;
   if(camera.near!==near){camera.near=near;camera.updateProjectionMatrix();}
  }
  function hud(){
@@ -2153,10 +2011,9 @@ function initialize(T,GLTFLoader){
   const ok=deg(pitch)>=l.minPitch&&deg(pitch)<=l.maxPitch&&
    Math.abs(deg(bank))<=l.bank&&Math.max(0,-velocity.y)<=l.sink&&
    airspeed*KNOTS<=l.speed&&alignmentError()<=l.yaw&&gearDown;
-  $("landingHint").textContent=
-   "Landing: pitch "+l.minPitch+"° to +"+l.maxPitch+
-   "° · bank ±"+l.bank+"° · descent ≤"+l.sink+
-   " m/s · speed ≤"+l.speed+" kt · gear "+(gearDown?"DOWN":"UP")+
+  $("landingHint").textContent="Landing: pitch "+l.minPitch+"° to +"+l.maxPitch+
+   "° · bank ±"+l.bank+"° · descent ≤"+l.sink+" m/s · speed ≤"+l.speed+
+   " kt · gear "+(gearDown?"DOWN":"UP")+
    (routeIndex===4&&!grounded?" · "+landingAdvice():"");
   $("landingHint").style.color=ok?"#86efac":"#fde68a";
   const stalled=!grounded&&Math.abs(alpha)>rad(flaps?17:15);
@@ -2167,7 +2024,6 @@ function initialize(T,GLTFLoader){
    (autopilot?"AUTOPILOT — ":approachAssist?"APPROACH ASSIST — ":"")+message;
  }
 
- // Touch controls.
  const primary=e=>e.pointerType!=="mouse"||e.button===0;
  const stick=$("stick"),lever=$("lever");
  stick.onpointerdown=e=>{
@@ -2191,16 +2047,13 @@ function initialize(T,GLTFLoader){
  lever.onpointermove=e=>{
   if(leverDrag?.id!==e.pointerId||state!=="playing")return;
   e.preventDefault();
-  throttle=clamp(
-   leverDrag.power+(leverDrag.y-e.clientY)/Math.max(35,lever.clientHeight-42),0,1
-  );
+  throttle=clamp(leverDrag.power+(leverDrag.y-e.clientY)/
+   Math.max(35,lever.clientHeight-42),0,1);
  };
  function hitControl(e){
   const rect=renderer.domElement.getBoundingClientRect();
-  pointer.set(
-   (e.clientX-rect.left)/rect.width*2-1,
-   -(e.clientY-rect.top)/rect.height*2+1
-  );
+  pointer.set((e.clientX-rect.left)/rect.width*2-1,
+   -(e.clientY-rect.top)/rect.height*2+1);
   scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
   raycaster.setFromCamera(pointer,camera);
   for(const hit of raycaster.intersectObject(cockpitModel,true)){
@@ -2208,8 +2061,7 @@ function initialize(T,GLTFLoader){
    const ms=Array.isArray(o.material)?o.material:[o.material];
    if(ms.every(m=>m&&!m.visible))continue;
    while(o&&o!==cockpitRig){
-    if(o.userData.flightControl)return o.userData.flightControl;
-    o=o.parent;
+    if(o.userData.flightControl)return o.userData.flightControl;o=o.parent;
    }
    return null;
   }
@@ -2244,11 +2096,9 @@ function initialize(T,GLTFLoader){
    const dx=e.clientX-lookDrag.x,dy=e.clientY-lookDrag.y;
    lookDrag.x=e.clientX;lookDrag.y=e.clientY;
    if(chase){
-    orbitYaw-=dx*.006;
-    orbitPitch=clamp(orbitPitch+dy*.005,rad(-15),rad(80));
+    orbitYaw-=dx*.006;orbitPitch=clamp(orbitPitch+dy*.005,rad(-15),rad(80));
    }else{
-    headYaw-=dx*.005;
-    headPitch=clamp(headPitch-dy*.005,rad(-75),rad(75));
+    headYaw-=dx*.005;headPitch=clamp(headPitch-dy*.005,rad(-75),rad(75));
    }
    updateCamera(0,true);
   }
@@ -2262,13 +2112,11 @@ function initialize(T,GLTFLoader){
   });
   renderer.domElement.addEventListener(name,e=>{
    if(cockpitDrag?.id===e.pointerId){
-    if(cockpitDrag.control==="yoke")stickX=stickY=0;
-    cockpitDrag=null;
+    if(cockpitDrag.control==="yoke")stickX=stickY=0;cockpitDrag=null;
    }
    if(lookDrag?.id===e.pointerId)lookDrag=null;
   });
  }
-
  $("launch").onclick=start;$("restart").onclick=setup;
  $("pause").onclick=pause;$("gear").onclick=toggleGear;
  $("flaps").onclick=()=>{if(state==="playing"){flaps=!flaps;buttons();}};
@@ -2284,15 +2132,11 @@ function initialize(T,GLTFLoader){
   const k=e.key.length===1?e.key.toLowerCase():e.key;
   if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","q","e","w","s"]
    .includes(k)&&state==="playing"){
-   e.preventDefault();
-   manualControl(k==="w"||k==="s"?"throttle":"yoke");
-   keys.add(k);
+   e.preventDefault();manualControl(k==="w"||k==="s"?"throttle":"yoke");keys.add(k);
   }
   if(!e.repeat){
-   if(k==="p")pause();
-   if(k==="a")toggleAutopilot();
-   if(k==="l")toggleApproachAssist();
-   if(k==="r")goAround();
+   if(k==="p")pause();if(k==="a")toggleAutopilot();
+   if(k==="l")toggleApproachAssist();if(k==="r")goAround();
    if(k==="g")toggleGear();
    if(k==="f"&&state==="playing"){flaps=!flaps;buttons();}
    if(k==="b"&&state==="playing"){brakes=!brakes;buttons();}
@@ -2308,7 +2152,6 @@ function initialize(T,GLTFLoader){
   e.preventDefault();stopped=true;suspend();
   window.gameFatal("Graphics context lost. Reload the app.");
  });
-
  function resize(){
   const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
   renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
@@ -2320,7 +2163,6 @@ function initialize(T,GLTFLoader){
  const resizeObserver=new ResizeObserver(resize);
  resizeObserver.observe(stage);window.addEventListener("resize",resize);
 
- // Initial world setup.
  readEye();planeSize();buildMap();resetWeather();resetRoute();resize();
  approachPath.visible=false;
  camera.position.set(130,100,airport.length/2+220);
@@ -2339,17 +2181,14 @@ function initialize(T,GLTFLoader){
     updateWeather(dt);
     const steps=Math.max(1,Math.ceil(dt/.008));
     for(let i=0;i<steps;i++)physics(dt/steps);
-    updateExterior(dt);
-    if(state==="playing")updateNavigation();
+    updateExterior(dt);if(state==="playing")updateNavigation();
    }
    if(state!=="menu"){updateAircraft();updateCamera(dt);}
    else approachPath.visible=false;
    if(state==="crashed")updateExplosion(dt);
    weatherVisuals();drawRain(state==="playing"?dt:0);
-   uiClock+=dt;
-   if(uiClock>.07){hud();drawNavigation();uiClock=0;}
-   renderer.render(scene,camera);
-   requestAnimationFrame(frame);
+   uiClock+=dt;if(uiClock>.07){hud();drawNavigation();uiClock=0;}
+   renderer.render(scene,camera);requestAnimationFrame(frame);
   }catch(error){
    stopped=true;suspend();
    window.gameFatal("Game stopped: "+error.message+". Reload to restart.");
@@ -2358,7 +2197,6 @@ function initialize(T,GLTFLoader){
  }
  requestAnimationFrame(frame);
 
- // Existing shared cockpit: original orientation retained.
  let textureFailure=false;
  const cm=new T.LoadingManager();
  cm.onError=url=>{
@@ -2368,8 +2206,7 @@ function initialize(T,GLTFLoader){
   const oldP=cockpitRig.position.clone(),oldQ=cockpitRig.quaternion.clone();
   try{
    cockpitRig.position.set(0,0,0);cockpitRig.quaternion.identity();
-   cockpitModel.add(gltf.scene);
-   cockpitModel.rotation.set(0,-Math.PI/2,0);
+   cockpitModel.add(gltf.scene);cockpitModel.rotation.set(0,-Math.PI/2,0);
    cockpitRig.updateMatrixWorld(true);
    const bounds=new T.Box3().setFromObject(cockpitModel);
    if(bounds.isEmpty())throw new Error("Empty cockpit model.");
@@ -2405,8 +2242,6 @@ function initialize(T,GLTFLoader){
   $("notice").textContent="Cockpit unavailable. Exterior flight remains available.";
   assetText();console.error(error);
  });
-
- // Default remains the Boeing 737.
  loadSelectedAircraft();
 }
 </script>
