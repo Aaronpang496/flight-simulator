@@ -522,7 +522,6 @@ function initialize(T,GLTFLoader){
 
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
- // Exterior corrections only. The Boeing 737 orientation is unchanged.
  const aircraftOptions={
   boeing737:{
    name:"Boeing 737",
@@ -534,7 +533,7 @@ function initialize(T,GLTFLoader){
    name:"Learjet",
    file:"learjet.glb",
    defaultYaw:180,
-   defaultPitch:-90
+   defaultPitch:90
   },
   f20:{
    name:"F-20",
@@ -1674,7 +1673,7 @@ function initialize(T,GLTFLoader){
   exteriorMixer.update(0);
  }
 
- // Aircraft loader: retains the 737 and adds Learjet / F-20.
+ // Aircraft loader.
  function disposeModel(root){
   const gs=new Set(),ms=new Set(),ts=new Set();
   root.traverse(o=>{
@@ -2370,4 +2369,3 @@ function initialize(T,GLTFLoader){
 </script>
 </body>
 </html>
-```
