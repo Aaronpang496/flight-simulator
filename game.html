@@ -15,19 +15,20 @@ html, body {
 }
 [hidden]{display:none!important}
 
-/* Stack layout to guarantee nothing is cut off */
-.wrap {
- width: 100vw; height: 100vh; height: 100dvh;
- margin: 0; padding: 0;
- display: flex; flex-direction: column;
+/* The Game Container */
+#game {
+ position: absolute; inset: 0;
+ background: #101827;
 }
 
+/* The 3D Canvas */
 #stage {
- position: relative; flex: 1; min-height: 200px; overflow: hidden;
+ position: absolute; inset: 0;
  background: #a4cfe8;
 }
 #stage>canvas.world{display:block;width:100%;height:100%;touch-action:none}
 
+/* HUD Elements */
 #rain{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
 #notice{
  position:absolute;top:6px;left:8px;right:8px;z-index:30;
@@ -82,17 +83,18 @@ button:disabled{opacity:.5}
 }
 #navText{font-size:10px;color:#cffafe;line-height:1.45;white-space:pre-line}
 
-/* RESTORED ORIGINAL CONTROLS - STACKED AT BOTTOM */
+/* CONTROLS OVERLAY - LIFTED HIGHER */
 #controls{
- position: relative; /* Changed from absolute */
- flex-shrink: 0;
- display: flex; justify-content: space-between; gap: 8px;
- padding: 8px; pointer-events: auto; align-items: flex-end;
- background: #0f172a; /* Solid background */
+ position:absolute;
+ bottom: 170px; /* Lifted high above the bottom */
+ left:0; right:0; z-index:10;
+ display:flex; justify-content:space-between; gap:8px;
+ padding:0 12px; pointer-events:none; align-items:flex-end
 }
 .panel{
  padding:6px;border:1px solid #64748b;border-radius:12px;
- background:#1e293b;
+ background:#0f172ade;pointer-events:auto;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 #yokePanel{width:185px}
 #powerPanel{width:145px}
@@ -163,31 +165,38 @@ button:disabled{opacity:.5}
  line-height:1.4;white-space:pre-line
 }
 
-/* RESTORED ORIGINAL BOTTOM BARS */
+/* BOTTOM BARS OVERLAY */
 #instruments{
- flex-shrink: 0;
+ position:absolute; bottom:85px; left:0; right:0; z-index:10;
  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
- gap:5px; margin:0; padding:6px;
- background:#0f172a;
+ gap:5px; padding:0 12px;
+ pointer-events: none;
 }
 .instrument{
- padding:6px 2px;background:#1d293c;border-radius:8px;
- text-align:center;font-size:10px
+ padding:6px 2px;background:#0f172ade;border-radius:8px;
+ text-align:center;font-size:10px; border:1px solid #334155;
 }
 .instrument strong{display:block;color:#a5f3fc;font-size:15px}
+
 #status{
- flex-shrink: 0; padding:5px;text-align:center;
- color:#fde68a;font-size:12px; background:#0f172a;
+ position:absolute; bottom:60px; left:0; right:0; z-index:10;
+ text-align:center; color:#fde68a; font-size:12px;
+ text-shadow: 0 2px 4px #000; pointer-events: none;
 }
 #landingHint{
- flex-shrink: 0; padding:6px;border-radius:8px;background:#1d293c;
- color:#b6c9dd;font-size:10px;text-align:center; margin:0 6px;
+ position:absolute; bottom:45px; left:0; right:0; z-index:10;
+ text-align:center; color:#86efac; font-size:10px;
+ text-shadow: 0 2px 4px #000; pointer-events: none;
 }
+
 .buttons{
- flex-shrink: 0; display:flex;flex-wrap:wrap;gap:6px;margin:0; padding:6px;
- background:#0f172a; padding-bottom: max(6px, env(safe-area-inset-bottom));
+ position:absolute; bottom:0; left:0; right:0; z-index:10;
+ display:flex; flex-wrap:wrap; gap:6px;
+ padding:6px 12px; padding-bottom: max(6px, env(safe-area-inset-bottom));
+ background:#0f172af5; border-top: 1px solid #334155;
 }
 .buttons button{flex:1;min-width:85px}
+
 small{display:block;color:#adbbcf;font-size:10px;line-height:1.5; padding: 0 10px 10px;}
 output{color:#a5f3fc}
 
@@ -195,6 +204,7 @@ output{color:#a5f3fc}
 @media(max-width:600px){
  #menu{padding:60px 12px 12px}
  h2{font-size:20px}
+ #controls{ bottom: 140px; } /* Lift higher on mobile */
  #stick{height:120px}
  #lever{height:82px}
  #radarPanel{width:116px}
@@ -203,6 +213,7 @@ output{color:#a5f3fc}
  .instrument strong{font-size:12px}
  #knob{width:96px;margin-left:-48px}
  #yoke{width:96px}
+ #instruments{ bottom: 65px; }
 }
 .hiddenData { display: none !important; }
 </style>
@@ -218,7 +229,7 @@ output{color:#a5f3fc}
 </head>
 
 <body>
-<div class="wrap" id="game">
+<div id="game">
  <div id="stage">
   <canvas id="rain"></canvas>
 
@@ -265,77 +276,80 @@ output{color:#a5f3fc}
    </svg>
    <div id="navText">Runway ready</div>
   </div>
- </div>
 
- <div id="controls" hidden>
-  <div class="panel" id="yokePanel">
-   <div class="panelTitle">GRAB THE YOKE</div>
-   <div id="stick">
-    <div class="guide">PUSH: NOSE DOWN</div>
-    <div id="knob">
-     <svg id="yoke" viewBox="0 0 160 100" aria-hidden="true">
-      <path d="M68 58 L92 58 L98 98 L62 98 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-      <path d="M20 16 L39 16 L39 48 Q39 58 51 58 L109 58 Q121 58 121 48 L121 16 L140 16 L140 49 Q140 77 111 77 L49 77 Q20 77 20 49 Z" fill="#273345" stroke="#94a3b8" stroke-width="3"/>
-      <rect x="16" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
-      <rect x="117" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
-      <rect x="24" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
-      <rect x="125" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
-      <rect x="63" y="55" width="34" height="21" rx="5" fill="#0f172a" stroke="#94a3b8"/>
-      <text x="80" y="69" text-anchor="middle" fill="#e2e8f0" font-size="9">FLIGHT</text>
-     </svg>
+  <!-- Controls Overlay -->
+  <div id="controls" hidden>
+   <div class="panel" id="yokePanel">
+    <div class="panelTitle">GRAB THE YOKE</div>
+    <div id="stick">
+     <div class="guide">PUSH: NOSE DOWN</div>
+     <div id="knob">
+      <svg id="yoke" viewBox="0 0 160 100" aria-hidden="true">
+       <path d="M68 58 L92 58 L98 98 L62 98 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+       <path d="M20 16 L39 16 L39 48 Q39 58 51 58 L109 58 Q121 58 121 48 L121 16 L140 16 L140 49 Q140 77 111 77 L49 77 Q20 77 20 49 Z" fill="#273345" stroke="#94a3b8" stroke-width="3"/>
+       <rect x="16" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
+       <rect x="117" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
+       <rect x="24" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
+       <rect x="125" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
+       <rect x="63" y="55" width="34" height="21" rx="5" fill="#0f172a" stroke="#94a3b8"/>
+       <text x="80" y="69" text-anchor="middle" fill="#e2e8f0" font-size="9">FLIGHT</text>
+      </svg>
+     </div>
+     <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
     </div>
-    <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
    </div>
-  </div>
 
-  <div class="panel" id="autopilotPanel">
-   <div class="panelTitle">FLIGHT ASSIST</div>
-   <button id="autopilotButton" aria-pressed="false">AUTOPILOT OFF</button>
-   <button id="assistButton" aria-pressed="false">APPROACH ASSIST</button>
-   <button id="goAroundButton">GO AROUND</button>
-   <div id="autopilotInfo">Take off manually first.</div>
-  </div>
+   <div class="panel" id="autopilotPanel">
+    <div class="panelTitle">FLIGHT ASSIST</div>
+    <button id="autopilotButton" aria-pressed="false">AUTOPILOT OFF</button>
+    <button id="assistButton" aria-pressed="false">APPROACH ASSIST</button>
+    <button id="goAroundButton">GO AROUND</button>
+    <div id="autopilotInfo">Take off manually first.</div>
+   </div>
 
-  <div class="panel" id="powerPanel">
-   <div class="panelTitle">THROTTLE</div>
-   <div id="lever">
-    <div class="leverLabel full">FULL</div>
-    <div class="track"></div>
-    <div id="grip">
-     <div class="ridges"></div>
-     <span id="gripPower">0%</span>
+   <div class="panel" id="powerPanel">
+    <div class="panelTitle">THROTTLE</div>
+    <div id="lever">
+     <div class="leverLabel full">FULL</div>
+     <div class="track"></div>
+     <div id="grip">
+      <div class="ridges"></div>
+      <span id="gripPower">0%</span>
+     </div>
+     <div class="leverLabel idle">IDLE</div>
     </div>
-    <div class="leverLabel idle">IDLE</div>
+    <div class="mini">
+     <button id="flaps">Flaps DOWN</button>
+     <button id="brakes">Brake OFF</button>
+    </div>
+    <button id="gear">Gear DOWN</button>
    </div>
-   <div class="mini">
-    <button id="flaps">Flaps DOWN</button>
-    <button id="brakes">Brake OFF</button>
-   </div>
-   <button id="gear">Gear DOWN</button>
   </div>
- </div>
 
- <div id="instruments">
-  <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
-  <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
-  <div class="instrument">Vertical speed<strong id="vertical">0 ft/min</strong></div>
-  <div class="instrument">Heading<strong id="heading">000°</strong></div>
-  <div class="instrument">Throttle / engine<strong id="power">0 / 0%</strong></div>
-  <div class="instrument">Air time<strong id="timer">0.0 s</strong></div>
-  <div class="instrument">Pitch<strong id="pitchValue">0°</strong></div>
-  <div class="instrument">Bank<strong id="bankValue">0°</strong></div>
- </div>
+  <!-- Bottom Bars Overlay -->
+  <div id="instruments">
+   <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
+   <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
+   <div class="instrument">V/Speed<strong id="vertical">0 ft/min</strong></div>
+   <div class="instrument">Heading<strong id="heading">000°</strong></div>
+   <div class="instrument">Power<strong id="power">0 / 0%</strong></div>
+   <div class="instrument">Time<strong id="timer">0.0 s</strong></div>
+   <div class="instrument">Pitch<strong id="pitchValue">0°</strong></div>
+   <div class="instrument">Bank<strong id="bankValue">0°</strong></div>
+  </div>
 
- <div id="status">Choose a world and start.</div>
- <div id="landingHint"></div>
+  <div id="status">Choose a world and start.</div>
+  <div id="landingHint"></div>
 
- <div class="buttons">
-  <button id="camera" disabled>Camera: CHASE</button>
-  <button id="pause" disabled>Pause</button>
-  <button id="return">Guide to destination</button>
-  <button id="resetLook">Reset look</button>
-  <button id="fullscreen">Fullscreen</button>
-  <button id="restart" disabled>New flight</button>
+  <div class="buttons">
+   <button id="camera" disabled>Camera</button>
+   <button id="pause" disabled>Pause</button>
+   <button id="return">Guide</button>
+   <button id="resetLook">Look</button>
+   <button id="fullscreen">Full</button>
+   <button id="restart" disabled>New flight</button>
+  </div>
+
  </div>
 
  <small id="assets" style="display:none;"></small>
