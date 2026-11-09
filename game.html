@@ -345,11 +345,11 @@ output{color:#a5f3fc}
 
  <small id="assets" style="display:none;"></small>
 
- <!-- Hidden Data for Original Logic (Dev Controls) -->
+ <!-- Hidden Data for Original Logic (Dev Controls & Missing Buttons) -->
  <div class="hiddenData">
   <input id="planeSize" value="18">
   <input id="cameraDistance" value="32">
-  <input id="exteriorYaw" value="180">
+  <select id="exteriorYaw"><option value="180" selected>180</option></select>
   <input id="exteriorPitch" value="0">
   <input id="learjetLower" value="0">
   <input id="eyeX" value="0">
@@ -373,6 +373,9 @@ output{color:#a5f3fc}
   <input id="sinkMax" value="8">
   <input id="speedMax" value="190">
   <input id="yawMax" value="35">
+  <!-- RESTORED BUTTONS to prevent null error -->
+  <button id="glass"></button>
+  <button id="turn"></button>
   <button id="resetView"></button>
  </div>
 
