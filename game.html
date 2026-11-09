@@ -15,7 +15,7 @@ html, body {
 }
 [hidden]{display:none!important}
 
-/* Restored original wrapper, but full screen */
+/* Stack layout to guarantee nothing is cut off */
 .wrap {
  width: 100vw; height: 100vh; height: 100dvh;
  margin: 0; padding: 0;
@@ -23,7 +23,7 @@ html, body {
 }
 
 #stage {
- position: relative; flex: 1; overflow: hidden;
+ position: relative; flex: 1; min-height: 200px; overflow: hidden;
  background: #a4cfe8;
 }
 #stage>canvas.world{display:block;width:100%;height:100%;touch-action:none}
@@ -82,15 +82,17 @@ button:disabled{opacity:.5}
 }
 #navText{font-size:10px;color:#cffafe;line-height:1.45;white-space:pre-line}
 
-/* RESTORED ORIGINAL CONTROLS */
+/* RESTORED ORIGINAL CONTROLS - STACKED AT BOTTOM */
 #controls{
- position:absolute;bottom:0;left:0;right:0;z-index:8;
- display:flex;justify-content:space-between;gap:8px;
- padding:8px;pointer-events:none;align-items:flex-end
+ position: relative; /* Changed from absolute */
+ flex-shrink: 0;
+ display: flex; justify-content: space-between; gap: 8px;
+ padding: 8px; pointer-events: auto; align-items: flex-end;
+ background: #0f172a; /* Solid background */
 }
 .panel{
  padding:6px;border:1px solid #64748b;border-radius:12px;
- background:#0f172ade;pointer-events:auto
+ background:#1e293b;
 }
 #yokePanel{width:185px}
 #powerPanel{width:145px}
@@ -163,8 +165,10 @@ button:disabled{opacity:.5}
 
 /* RESTORED ORIGINAL BOTTOM BARS */
 #instruments{
+ flex-shrink: 0;
  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
- gap:5px;margin:7px 0; padding: 0 6px;
+ gap:5px; margin:0; padding:6px;
+ background:#0f172a;
 }
 .instrument{
  padding:6px 2px;background:#1d293c;border-radius:8px;
@@ -172,42 +176,33 @@ button:disabled{opacity:.5}
 }
 .instrument strong{display:block;color:#a5f3fc;font-size:15px}
 #status{
- padding:5px;min-height:30px;text-align:center;
- color:#fde68a;font-size:12px
+ flex-shrink: 0; padding:5px;text-align:center;
+ color:#fde68a;font-size:12px; background:#0f172a;
 }
 #landingHint{
- padding:6px;border-radius:8px;background:#1d293c;
- color:#b6c9dd;font-size:10px;text-align:center; margin: 0 6px;
+ flex-shrink: 0; padding:6px;border-radius:8px;background:#1d293c;
+ color:#b6c9dd;font-size:10px;text-align:center; margin:0 6px;
 }
-.buttons{display:flex;flex-wrap:wrap;gap:6px;margin:7px 6px;}
+.buttons{
+ flex-shrink: 0; display:flex;flex-wrap:wrap;gap:6px;margin:0; padding:6px;
+ background:#0f172a; padding-bottom: max(6px, env(safe-area-inset-bottom));
+}
 .buttons button{flex:1;min-width:85px}
 small{display:block;color:#adbbcf;font-size:10px;line-height:1.5; padding: 0 10px 10px;}
 output{color:#a5f3fc}
 
 /* Mobile tweaks */
 @media(max-width:600px){
- #stage{height:auto}
  #menu{padding:60px 12px 12px}
  h2{font-size:20px}
- #controls.phone{
-  position:relative;inset:auto;padding:6px 0;align-items:stretch;gap:5px
- }
- #controls.phone .panel{flex:1;min-width:0;width:auto;background:#172235}
- #controls.phone #autopilotPanel{
-  flex:0 0 88px;width:88px;padding:4px;align-self:stretch
- }
- #autopilotPanel button{font-size:9px;padding:4px}
- #autopilotInfo{font-size:8px}
- #stick{height:140px}
+ #stick{height:120px}
  #lever{height:82px}
  #radarPanel{width:116px}
  #guidance{width:140px}
  .instrument{font-size:9px}
  .instrument strong{font-size:12px}
- .grid{grid-template-columns:1fr}
- #controls.phone #knob{width:96px;margin-left:-48px}
- #controls.phone #yoke{width:96px}
- #instruments { padding: 0; margin: 4px 0; }
+ #knob{width:96px;margin-left:-48px}
+ #yoke{width:96px}
 }
 .hiddenData { display: none !important; }
 </style>
@@ -270,53 +265,53 @@ output{color:#a5f3fc}
    </svg>
    <div id="navText">Runway ready</div>
   </div>
+ </div>
 
-  <div id="controls" hidden>
-   <div class="panel" id="yokePanel">
-    <div class="panelTitle">GRAB THE YOKE</div>
-    <div id="stick">
-     <div class="guide">PUSH: NOSE DOWN</div>
-     <div id="knob">
-      <svg id="yoke" viewBox="0 0 160 100" aria-hidden="true">
-       <path d="M68 58 L92 58 L98 98 L62 98 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-       <path d="M20 16 L39 16 L39 48 Q39 58 51 58 L109 58 Q121 58 121 48 L121 16 L140 16 L140 49 Q140 77 111 77 L49 77 Q20 77 20 49 Z" fill="#273345" stroke="#94a3b8" stroke-width="3"/>
-       <rect x="16" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
-       <rect x="117" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
-       <rect x="24" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
-       <rect x="125" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
-       <rect x="63" y="55" width="34" height="21" rx="5" fill="#0f172a" stroke="#94a3b8"/>
-       <text x="80" y="69" text-anchor="middle" fill="#e2e8f0" font-size="9">FLIGHT</text>
-      </svg>
-     </div>
-     <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
+ <div id="controls" hidden>
+  <div class="panel" id="yokePanel">
+   <div class="panelTitle">GRAB THE YOKE</div>
+   <div id="stick">
+    <div class="guide">PUSH: NOSE DOWN</div>
+    <div id="knob">
+     <svg id="yoke" viewBox="0 0 160 100" aria-hidden="true">
+      <path d="M68 58 L92 58 L98 98 L62 98 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+      <path d="M20 16 L39 16 L39 48 Q39 58 51 58 L109 58 Q121 58 121 48 L121 16 L140 16 L140 49 Q140 77 111 77 L49 77 Q20 77 20 49 Z" fill="#273345" stroke="#94a3b8" stroke-width="3"/>
+      <rect x="16" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
+      <rect x="117" y="8" width="27" height="42" rx="10" fill="#17202e" stroke="#94a3b8" stroke-width="2"/>
+      <rect x="24" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
+      <rect x="125" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
+      <rect x="63" y="55" width="34" height="21" rx="5" fill="#0f172a" stroke="#94a3b8"/>
+      <text x="80" y="69" text-anchor="middle" fill="#e2e8f0" font-size="9">FLIGHT</text>
+     </svg>
     </div>
+    <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
    </div>
+  </div>
 
-   <div class="panel" id="autopilotPanel">
-    <div class="panelTitle">FLIGHT ASSIST</div>
-    <button id="autopilotButton" aria-pressed="false">AUTOPILOT OFF</button>
-    <button id="assistButton" aria-pressed="false">APPROACH ASSIST</button>
-    <button id="goAroundButton">GO AROUND</button>
-    <div id="autopilotInfo">Take off manually first.</div>
-   </div>
+  <div class="panel" id="autopilotPanel">
+   <div class="panelTitle">FLIGHT ASSIST</div>
+   <button id="autopilotButton" aria-pressed="false">AUTOPILOT OFF</button>
+   <button id="assistButton" aria-pressed="false">APPROACH ASSIST</button>
+   <button id="goAroundButton">GO AROUND</button>
+   <div id="autopilotInfo">Take off manually first.</div>
+  </div>
 
-   <div class="panel" id="powerPanel">
-    <div class="panelTitle">THROTTLE</div>
-    <div id="lever">
-     <div class="leverLabel full">FULL</div>
-     <div class="track"></div>
-     <div id="grip">
-      <div class="ridges"></div>
-      <span id="gripPower">0%</span>
-     </div>
-     <div class="leverLabel idle">IDLE</div>
+  <div class="panel" id="powerPanel">
+   <div class="panelTitle">THROTTLE</div>
+   <div id="lever">
+    <div class="leverLabel full">FULL</div>
+    <div class="track"></div>
+    <div id="grip">
+     <div class="ridges"></div>
+     <span id="gripPower">0%</span>
     </div>
-    <div class="mini">
-     <button id="flaps">Flaps DOWN</button>
-     <button id="brakes">Brake OFF</button>
-    </div>
-    <button id="gear">Gear DOWN</button>
+    <div class="leverLabel idle">IDLE</div>
    </div>
+   <div class="mini">
+    <button id="flaps">Flaps DOWN</button>
+    <button id="brakes">Brake OFF</button>
+   </div>
+   <button id="gear">Gear DOWN</button>
   </div>
  </div>
 
@@ -345,7 +340,7 @@ output{color:#a5f3fc}
 
  <small id="assets" style="display:none;"></small>
 
- <!-- Hidden Data for Original Logic (Dev Controls & Missing Buttons) -->
+ <!-- Hidden Data for Original Logic -->
  <div class="hiddenData">
   <input id="planeSize" value="18">
   <input id="cameraDistance" value="32">
@@ -373,7 +368,6 @@ output{color:#a5f3fc}
   <input id="sinkMax" value="8">
   <input id="speedMax" value="190">
   <input id="yawMax" value="35">
-  <!-- RESTORED BUTTONS to prevent null error -->
   <button id="glass"></button>
   <button id="turn"></button>
   <button id="resetView"></button>
@@ -432,12 +426,6 @@ function initialize(T,GLTFLoader){
  const savedExteriorYaw={},savedExteriorPitch={};
 
  const stage=$("stage"),controls=$("controls");
- const mobile=matchMedia("(max-width:600px)");
- function layout(){
-  controls.classList.toggle("phone",mobile.matches);
- }
- layout();
- if(mobile.addEventListener)mobile.addEventListener("change",layout);
 
  const renderer=new T.WebGLRenderer({antialias:true});
  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
