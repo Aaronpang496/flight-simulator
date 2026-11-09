@@ -3,147 +3,238 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Island Flight</title>
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box}
 html, body {
+ margin: 0; padding: 0;
  width: 100vw; height: 100vh; height: 100dvh;
- background: #0f172a; color: #edf2f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
- overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
+ background: #101827; color: #edf2f7; font-family: system-ui, sans-serif;
+ overflow: hidden; touch-action: none; user-select: none;
 }
-[hidden] { display: none !important; }
+[hidden]{display:none!important}
 
-/* Game Layout */
-#game { position: absolute; inset: 0; display: flex; flex-direction: column; }
-#stage { position: relative; flex: 1; overflow: hidden; background: #a4cfe8; }
-#stage > canvas.world { display: block; width: 100%; height: 100%; touch-action: none; }
-
-/* HUD Overlays */
-#rain { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
-
-#notice {
- position: absolute; top: max(env(safe-area-inset-top), 12px); left: 50%; transform: translateX(-50%);
- z-index: 30; padding: 8px 16px; border-radius: 20px; background: rgba(10,19,34,0.85);
- backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
- color: #fde68a; font-size: 12px; font-weight: 600; pointer-events: none; white-space: nowrap;
- box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+/* Restored original wrapper, but full screen */
+.wrap {
+ width: 100vw; height: 100vh; height: 100dvh;
+ margin: 0; padding: 0;
+ display: flex; flex-direction: column;
 }
 
-#mapLabel { position: absolute; top: calc(env(safe-area-inset-top, 12px) + 40px); left: 16px; z-index: 4; color: #fff; font-size: 12px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.8); pointer-events: none; letter-spacing: 1px; }
-#weatherLabel { position: absolute; top: calc(env(safe-area-inset-top, 12px) + 60px); left: 16px; z-index: 4; font-size: 11px; color: #a5f3fc; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.8); pointer-events: none; }
-
-/* Top Right Buttons */
-#topButtons { position: absolute; top: calc(env(safe-area-inset-top, 12px) + 40px); right: 16px; z-index: 10; display: flex; gap: 8px; }
-.topBtn {
- width: 38px; height: 38px; border-radius: 10px; background: rgba(15, 23, 42, 0.8);
- border: 1px solid rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center;
- font-size: 14px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); cursor: pointer; font-weight: bold;
+#stage {
+ position: relative; flex: 1; overflow: hidden;
+ background: #a4cfe8;
 }
-.topBtn:active { background: rgba(255,255,255,0.2); transform: scale(0.95); }
+#stage>canvas.world{display:block;width:100%;height:100%;touch-action:none}
 
-#radarPanel { position: absolute; top: calc(env(safe-area-inset-top, 12px) + 90px); right: 16px; z-index: 5; width: 120px; padding: 8px; border: 1px solid rgba(118,232,196,0.3); border-radius: 16px; background: rgba(7,30,37,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-#radar { display: block; width: 100%; aspect-ratio: 1; border-radius: 8px; }
-#radarText { text-align: center; font-size: 9px; color: #a7f3d0; line-height: 1.4; margin-top: 4px; font-weight: 700; letter-spacing: 0.5px; }
-
-#guidance { position: absolute; top: calc(env(safe-area-inset-top, 12px) + 230px); right: 16px; z-index: 5; width: 120px; text-align: center; background: rgba(10,25,38,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(125,211,252,0.3); border-radius: 16px; padding: 10px; pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-#navArrow { display: block; margin: 0 auto; width: 40px; height: 40px; color: #b9ffff; filter: drop-shadow(0 0 10px #00eaff); transform-origin: center; }
-#navText { font-size: 10px; color: #cffafe; line-height: 1.4; white-space: pre-line; font-weight: 700; margin-top: 4px; }
-
-/* Instruments Top Center */
-#instruments { position: absolute; top: calc(env(safe-area-inset-top, 12px) + 40px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 4; pointer-events: none; }
-.instrument { background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 8px; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); }
-.instrument strong { display: block; color: #fff; font-size: 13px; margin-top: 2px; font-variant-numeric: tabular-nums; }
-
-/* Status & Hints (Restored) */
-#status {
- position: absolute; bottom: max(env(safe-area-inset-bottom, 16px) + 130px, 146px); left: 50%; transform: translateX(-50%);
- z-index: 10; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px;
- font-size: 11px; color: #fde68a; font-weight: 600; text-align: center; white-space: nowrap; pointer-events: none;
+#rain{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+#notice{
+ position:absolute;top:6px;left:8px;right:8px;z-index:30;
+ padding:6px 8px;border-radius:6px;background:#0a1322d9;
+ color:#fde68a;font-size:10px;pointer-events:none
 }
-#landingHint {
- position: absolute; bottom: max(env(safe-area-inset-bottom, 16px) + 160px, 176px); left: 50%; transform: translateX(-50%);
- z-index: 10; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px;
- font-size: 10px; color: #86efac; font-weight: 600; text-align: center; white-space: nowrap; pointer-events: none; display: none;
+#menu{
+ position:absolute;inset:0;z-index:20;overflow:auto;
+ padding:60px 16px 20px;background:#0a1322f5
+}
+.menuInner{max-width:490px;margin:auto}
+h2{margin:0 0 12px;color:#a5f3fc}
+label{display:block;font-size:12px;margin:9px 0}
+select{
+ display:block;width:100%;padding:8px;margin-top:4px;
+ color:white;background:#24344d;border:1px solid #64748b;
+ border-radius:7px;font:inherit
+}
+button{
+ min-height:40px;padding:8px;border:0;border-radius:8px;
+ background:#a5f3fc;color:#083344;font:bold 12px system-ui;
+ cursor:pointer;touch-action:manipulation
+}
+button:disabled{opacity:.5}
+#launch{width:100%;margin-top:12px}
+#mapLabel{
+ position:absolute;top:50px;left:10px;z-index:4;color:white;
+ font-size:10px;text-shadow:0 1px 4px #000;
+ pointer-events:none;max-width:55%
+}
+#weatherLabel{
+ position:absolute;top:84px;left:10px;z-index:4;
+ font-size:11px;text-shadow:0 1px 4px #000;pointer-events:none
+}
+#radarPanel{
+ position:absolute;top:46px;right:8px;z-index:5;width:150px;
+ padding:5px;border:1px solid #76e8c477;border-radius:12px;
+ background:#071e25cc;pointer-events:none
+}
+#radar{display:block;width:100%;aspect-ratio:1}
+#radarText{text-align:center;font-size:9px;color:#a7f3d0;line-height:1.4}
+#guidance{
+ position:absolute;top:115px;left:10px;z-index:5;width:160px;
+ text-align:center;background:#0a1926bd;
+ border:1px solid #7dd3fc55;border-radius:12px;
+ padding:6px;pointer-events:none
+}
+#navArrow{
+ display:block;margin:0 auto;width:42px;height:42px;
+ color:#b9ffff;filter:drop-shadow(0 0 8px #00eaff);
+ transform-origin:center
+}
+#navText{font-size:10px;color:#cffafe;line-height:1.45;white-space:pre-line}
+
+/* RESTORED ORIGINAL CONTROLS */
+#controls{
+ position:absolute;bottom:0;left:0;right:0;z-index:8;
+ display:flex;justify-content:space-between;gap:8px;
+ padding:8px;pointer-events:none;align-items:flex-end
+}
+.panel{
+ padding:6px;border:1px solid #64748b;border-radius:12px;
+ background:#0f172ade;pointer-events:auto
+}
+#yokePanel{width:185px}
+#powerPanel{width:145px}
+.panelTitle{
+ color:#a5f3fc;text-align:center;font-size:10px;
+ font-weight:bold;margin-bottom:5px
+}
+#stick{
+ position:relative;height:145px;overflow:hidden;
+ background:#0f172acc;border:1px solid #64748b;border-radius:10px;
+ touch-action:none;user-select:none;-webkit-user-select:none
+}
+#knob{
+ position:absolute;left:50%;top:50%;width:112px;height:76px;
+ margin:-38px 0 0 -56px;pointer-events:none
+}
+#yoke{
+ width:112px;height:76px;transform-origin:50% 65%;
+ filter:drop-shadow(0 4px 3px #000)
+}
+.guide{
+ position:absolute;top:5px;width:100%;text-align:center;
+ font-size:8px;color:#bdcbe0;pointer-events:none
+}
+.guide.bottom{top:auto;bottom:5px}
+#lever{
+ position:relative;height:94px;overflow:hidden;
+ background:linear-gradient(90deg,#111827,#334155,#111827);
+ border:1px solid #64748b;border-radius:10px;
+ touch-action:none;user-select:none;-webkit-user-select:none
+}
+.track{
+ position:absolute;top:20px;bottom:20px;left:calc(50% - 4px);
+ width:8px;border-radius:5px;background:#020617
+}
+.leverLabel{
+ position:absolute;width:100%;text-align:center;
+ font-size:8px;color:#cbd5e1
+}
+.full{top:3px}.idle{bottom:3px}
+#grip{
+ position:absolute;left:50%;top:75%;width:78px;height:34px;
+ transform:translate(-50%,-50%);border:2px solid #94a3b8;
+ border-radius:9px;background:linear-gradient(#596579,#1e293b,#111827);
+ box-shadow:0 4px 5px #0008;pointer-events:none
+}
+.ridges{
+ height:6px;margin:4px 7px 0;opacity:.6;
+ background:repeating-linear-gradient(
+  90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 7px)
+}
+#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:12px}
+.mini{display:flex;gap:4px;margin-top:5px}
+.mini button{flex:1;min-width:0;padding:4px 2px;font-size:9px}
+#gear{width:100%;min-height:30px;margin-top:4px;font-size:10px}
+#autopilotPanel{width:150px;text-align:center;align-self:center}
+#autopilotPanel button{
+ width:100%;margin:3px 0;font-size:10px;min-height:38px
+}
+#autopilotButton{background:#334155;color:#e2e8f0}
+#assistButton{background:#25465b;color:#e0f2fe}
+#goAroundButton{background:#fde68a;color:#422006}
+#autopilotPanel button.engaged{
+ background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66
+}
+#autopilotInfo{
+ margin-top:5px;color:#cbd5e1;font-size:10px;
+ line-height:1.4;white-space:pre-line
 }
 
-/* Original Controls Restored */
-#controls { position: absolute; bottom: max(env(safe-area-inset-bottom), 16px); left: 0; right: 0; z-index: 8; display: flex; justify-content: center; align-items: flex-end; gap: 8px; padding: 0 10px; pointer-events: none; }
-.panel { padding: 8px; border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; background: rgba(15,23,42,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); pointer-events: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-#yokePanel { width: 160px; }
-#powerPanel { width: 110px; }
-#autopilotPanel { width: 120px; display: flex; flex-direction: column; gap: 4px; }
+/* RESTORED ORIGINAL BOTTOM BARS */
+#instruments{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:5px;margin:7px 0; padding: 0 6px;
+}
+.instrument{
+ padding:6px 2px;background:#1d293c;border-radius:8px;
+ text-align:center;font-size:10px
+}
+.instrument strong{display:block;color:#a5f3fc;font-size:15px}
+#status{
+ padding:5px;min-height:30px;text-align:center;
+ color:#fde68a;font-size:12px
+}
+#landingHint{
+ padding:6px;border-radius:8px;background:#1d293c;
+ color:#b6c9dd;font-size:10px;text-align:center; margin: 0 6px;
+}
+.buttons{display:flex;flex-wrap:wrap;gap:6px;margin:7px 6px;}
+.buttons button{flex:1;min-width:85px}
+small{display:block;color:#adbbcf;font-size:10px;line-height:1.5; padding: 0 10px 10px;}
+output{color:#a5f3fc}
 
-.panelTitle { color: #a5f3fc; text-align: center; font-size: 9px; font-weight: 800; margin-bottom: 6px; letter-spacing: 1px; }
-
-/* Yoke */
-#stick { position: relative; height: 110px; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; touch-action: none; user-select: none; }
-#knob { position: absolute; left: 50%; top: 50%; width: 90px; height: 60px; margin: -30px 0 0 -45px; pointer-events: none; }
-#yoke { width: 90px; height: 60px; transform-origin: 50% 65%; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.5)); }
-.guide { position: absolute; top: 4px; width: 100%; text-align: center; font-size: 8px; color: #94a3b8; font-weight: 700; pointer-events: none; }
-.guide.bottom { top: auto; bottom: 4px; }
-
-/* Throttle */
-#lever { position: relative; height: 90px; overflow: hidden; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; touch-action: none; user-select: none; }
-.track { position: absolute; top: 20px; bottom: 20px; left: calc(50% - 4px); width: 8px; border-radius: 4px; background: #020617; box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); }
-.leverLabel { position: absolute; width: 100%; text-align: center; font-size: 8px; color: #64748b; font-weight: 800; }
-.full { top: 4px; } .idle { bottom: 4px; }
-#grip { position: absolute; left: 50%; top: 75%; width: 70px; height: 32px; transform: translate(-50%,-50%); border: 2px solid #94a3b8; border-radius: 8px; background: linear-gradient(#64748b,#334155,#0f172a); box-shadow: 0 6px 12px rgba(0,0,0,0.6); pointer-events: none; display: flex; flex-direction: column; justify-content: center; }
-.ridges { height: 4px; margin: 0 6px; opacity: .4; background: repeating-linear-gradient(90deg,#fff 0,#fff 2px,transparent 2px,transparent 6px); }
-#gripPower { display: block; text-align: center; color: #a5f3fc; font-size: 10px; font-weight: 900; margin-top: 1px; }
-
-/* Buttons */
-button { border: 0; border-radius: 10px; padding: 8px 6px; background: rgba(255,255,255,0.1); color: #e2e8f0; font: 700 10px system-ui; cursor: pointer; touch-action: manipulation; transition: all 0.1s; border: 1px solid rgba(255,255,255,0.1); }
-button:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
-button:disabled { opacity: .3; cursor: not-allowed; }
-.mini { display: flex; gap: 4px; margin-top: 6px; }
-.mini button { flex: 1; padding: 6px 2px; font-size: 9px; }
-
-#autopilotButton { background: rgba(51,65,85,0.9); color: #fff; }
-#assistButton { background: rgba(37,70,91,0.9); color: #e0f2fe; }
-#goAroundButton { background: rgba(253,230,138,0.2); color: #fde68a; border: 1px solid rgba(253,230,138,0.4); }
-#autopilotPanel button.engaged { background: #86efac; color: #052e16; box-shadow: 0 0 10px rgba(34,197,94,0.4); border-color: #86efac; }
-#autopilotInfo { color: #cbd5e1; font-size: 8px; line-height: 1.2; white-space: pre-line; text-align: center; margin-top: 4px; }
-
-/* Start Menu */
-#menu { position: absolute; inset: 0; z-index: 20; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: max(env(safe-area-inset-top), 30px) 20px max(env(safe-area-inset-bottom), 30px); background: radial-gradient(ellipse at center, rgba(13,26,38,0.95) 0%, rgba(5,8,13,0.98) 100%); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.menuInner { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 12px; }
-h2 { margin: 0 0 10px; color: #a5f3fc; font-size: 26px; text-align: center; letter-spacing: 2px; text-shadow: 0 0 20px rgba(165,243,252,0.5); }
-label { display: block; font-size: 11px; color: #94a3b8; font-weight: 700; margin-top: 6px; }
-select { display: block; width: 100%; padding: 12px; margin-top: 4px; color: white; background: rgba(30,41,59,0.8); border: 1px solid rgba(100,116,139,0.5); border-radius: 10px; font: 600 13px system-ui; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 12px top 50%; background-size: 12px auto; }
-#launch { width: 100%; margin-top: 16px; padding: 16px; background: linear-gradient(180deg, #a5f3fc 0%, #38bdf8 100%); color: #083344; font: 900 15px system-ui; border-radius: 14px; box-shadow: 0 6px 0 #0284c7, 0 15px 30px rgba(56,189,248,0.3); border: none; }
-#launch:active { transform: translateY(4px); box-shadow: 0 2px 0 #0284c7; }
-small { display: block; color: #64748b; font-size: 10px; line-height: 1.5; text-align: center; }
-
-/* Hidden elements for JS logic (Dev Controls) */
+/* Mobile tweaks */
+@media(max-width:600px){
+ #stage{height:auto}
+ #menu{padding:60px 12px 12px}
+ h2{font-size:20px}
+ #controls.phone{
+  position:relative;inset:auto;padding:6px 0;align-items:stretch;gap:5px
+ }
+ #controls.phone .panel{flex:1;min-width:0;width:auto;background:#172235}
+ #controls.phone #autopilotPanel{
+  flex:0 0 88px;width:88px;padding:4px;align-self:stretch
+ }
+ #autopilotPanel button{font-size:9px;padding:4px}
+ #autopilotInfo{font-size:8px}
+ #stick{height:140px}
+ #lever{height:82px}
+ #radarPanel{width:116px}
+ #guidance{width:140px}
+ .instrument{font-size:9px}
+ .instrument strong{font-size:12px}
+ .grid{grid-template-columns:1fr}
+ #controls.phone #knob{width:96px;margin-left:-48px}
+ #controls.phone #yoke{width:96px}
+ #instruments { padding: 0; margin: 4px 0; }
+}
 .hiddenData { display: none !important; }
 </style>
 
 <script type="importmap">
 {
- "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+ "imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
  }
 }
 </script>
 </head>
 
 <body>
-<div id="game">
+<div class="wrap" id="game">
  <div id="stage">
   <canvas id="rain"></canvas>
 
   <div id="menu">
    <div class="menuInner">
-    <h2>ISLAND FLIGHT</h2>
+    <h2>✈️ ISLAND FLIGHT</h2>
     <label>World
      <select id="airport">
-      <option value="juliana">Princess Juliana</option>
-      <option value="heathrow">Heathrow</option>
-      <option value="kaitak">Kai Tak</option>
+      <option value="juliana">Princess Juliana — tropical island</option>
+      <option value="heathrow">Heathrow — countryside and city</option>
+      <option value="kaitak">Kai Tak — harbor and mountains</option>
      </select>
     </label>
     <label>Aircraft
@@ -153,15 +244,14 @@ small { display: block; color: #64748b; font-size: 10px; line-height: 1.5; text-
       <option value="f20">F-20</option>
      </select>
     </label>
-    <label>Difficulty
+    <label>Flight difficulty
      <select id="difficulty">
-      <option value="easy">Easy — landing assist</option>
-      <option value="medium">Medium — speed assist only</option>
+      <option value="easy">Easy — speed, descent and flare assistance</option>
+      <option value="medium">Medium — speed assistance only</option>
       <option value="hard">Hard — manual landing</option>
      </select>
     </label>
     <button id="launch" disabled>Loading engine...</button>
-    <small>Easy mode provides descent and flare assistance on final approach. Moving the throttle disconnects assists.</small>
    </div>
   </div>
 
@@ -169,15 +259,9 @@ small { display: block; color: #64748b; font-size: 10px; line-height: 1.5; text-
   <div id="mapLabel"></div>
   <div id="weatherLabel"></div>
 
-  <div id="topButtons">
-   <button class="topBtn" id="pause">⏸</button>
-   <button class="topBtn" id="camera">👁️</button>
-   <button class="topBtn" id="restart">🔄</button>
-  </div>
-
   <div id="radarPanel">
    <canvas id="radar" width="280" height="280"></canvas>
-   <div id="radarText">RADAR</div>
+   <div id="radarText">RADAR · HEADING UP</div>
   </div>
 
   <div id="guidance">
@@ -187,21 +271,11 @@ small { display: block; color: #64748b; font-size: 10px; line-height: 1.5; text-
    <div id="navText">Runway ready</div>
   </div>
 
-  <div id="instruments" style="display:none;">
-   <div class="instrument">SPD<strong id="speed">0 kt</strong></div>
-   <div class="instrument">ALT<strong id="altitude">0 ft</strong></div>
-   <div class="instrument">V/S<strong id="vertical">0 ft/m</strong></div>
-   <div class="instrument">HDG<strong id="heading">000°</strong></div>
-  </div>
-
-  <div id="status">Choose a world and start.</div>
-  <div id="landingHint"></div>
-
   <div id="controls" hidden>
    <div class="panel" id="yokePanel">
-    <div class="panelTitle">YOKE</div>
+    <div class="panelTitle">GRAB THE YOKE</div>
     <div id="stick">
-     <div class="guide">NOSE DOWN</div>
+     <div class="guide">PUSH: NOSE DOWN</div>
      <div id="knob">
       <svg id="yoke" viewBox="0 0 160 100" aria-hidden="true">
        <path d="M68 58 L92 58 L98 98 L62 98 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
@@ -211,18 +285,19 @@ small { display: block; color: #64748b; font-size: 10px; line-height: 1.5; text-
        <rect x="24" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
        <rect x="125" y="12" width="11" height="8" rx="3" fill="#ef4444"/>
        <rect x="63" y="55" width="34" height="21" rx="5" fill="#0f172a" stroke="#94a3b8"/>
+       <text x="80" y="69" text-anchor="middle" fill="#e2e8f0" font-size="9">FLIGHT</text>
       </svg>
      </div>
-     <div class="guide bottom">NOSE UP / BANK</div>
+     <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
     </div>
    </div>
 
    <div class="panel" id="autopilotPanel">
-    <div class="panelTitle">ASSIST</div>
-    <button id="autopilotButton" aria-pressed="false">AUTOPILOT</button>
-    <button id="assistButton" aria-pressed="false">APPROACH</button>
+    <div class="panelTitle">FLIGHT ASSIST</div>
+    <button id="autopilotButton" aria-pressed="false">AUTOPILOT OFF</button>
+    <button id="assistButton" aria-pressed="false">APPROACH ASSIST</button>
     <button id="goAroundButton">GO AROUND</button>
-    <div id="autopilotInfo">Take off first.</div>
+    <div id="autopilotInfo">Take off manually first.</div>
    </div>
 
    <div class="panel" id="powerPanel">
@@ -237,22 +312,41 @@ small { display: block; color: #64748b; font-size: 10px; line-height: 1.5; text-
      <div class="leverLabel idle">IDLE</div>
     </div>
     <div class="mini">
-     <button id="flaps">FLAPS</button>
-     <button id="brakes">BRAKE</button>
+     <button id="flaps">Flaps DOWN</button>
+     <button id="brakes">Brake OFF</button>
     </div>
-    <button id="gear" style="margin-top:4px; width:100%; padding:6px;">GEAR</button>
+    <button id="gear">Gear DOWN</button>
    </div>
   </div>
  </div>
 
+ <div id="instruments">
+  <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
+  <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
+  <div class="instrument">Vertical speed<strong id="vertical">0 ft/min</strong></div>
+  <div class="instrument">Heading<strong id="heading">000°</strong></div>
+  <div class="instrument">Throttle / engine<strong id="power">0 / 0%</strong></div>
+  <div class="instrument">Air time<strong id="timer">0.0 s</strong></div>
+  <div class="instrument">Pitch<strong id="pitchValue">0°</strong></div>
+  <div class="instrument">Bank<strong id="bankValue">0°</strong></div>
+ </div>
+
+ <div id="status">Choose a world and start.</div>
+ <div id="landingHint"></div>
+
+ <div class="buttons">
+  <button id="camera" disabled>Camera: CHASE</button>
+  <button id="pause" disabled>Pause</button>
+  <button id="return">Guide to destination</button>
+  <button id="resetLook">Reset look</button>
+  <button id="fullscreen">Fullscreen</button>
+  <button id="restart" disabled>New flight</button>
+ </div>
+
+ <small id="assets" style="display:none;"></small>
+
  <!-- Hidden Data for Original Logic (Dev Controls) -->
  <div class="hiddenData">
-  <span id="timer">0.0</span>
-  <span id="pitchValue">0</span>
-  <span id="bankValue">0</span>
-  <span id="power">0</span>
-  <span id="assets"></span>
-  
   <input id="planeSize" value="18">
   <input id="cameraDistance" value="32">
   <input id="exteriorYaw" value="180">
@@ -279,32 +373,36 @@ small { display: block; color: #64748b; font-size: 10px; line-height: 1.5; text-
   <input id="sinkMax" value="8">
   <input id="speedMax" value="190">
   <input id="yawMax" value="35">
-  <button id="return"></button>
-  <button id="resetLook"></button>
-  <button id="fullscreen"></button>
-  <button id="glass"></button>
-  <button id="turn"></button>
   <button id="resetView"></button>
  </div>
 
 </div>
 
 <script>
-window.gameFatal=message=>{ document.getElementById("notice").textContent=message; };
-window.addEventListener("error",e=>{ window.gameFatal("Game error: "+(e.message||"Unknown error")); });
-window.addEventListener("unhandledrejection",e=>{ window.gameFatal("Game error: "+(e.reason?.message||String(e.reason))); });
-window.startupTimer=setTimeout(()=>{ window.gameFatal("Engine startup is slow. Check your connection and reload."); },25000);
+window.gameFatal=message=>{
+ document.getElementById("notice").textContent=message;
+ document.getElementById("status").textContent=message;
+};
+window.addEventListener("error",e=>{
+ window.gameFatal("Game error: "+(e.message||"Unknown error"));
+});
+window.addEventListener("unhandledrejection",e=>{
+ window.gameFatal("Game error: "+(e.reason?.message||String(e.reason)));
+});
+window.startupTimer=setTimeout(()=>{
+ window.gameFatal("Engine startup is slow. Check your connection and reload.");
+},25000);
 </script>
 
 <script type="module">
 const $=id=>document.getElementById(id);
 
-try {
+try{
  const T=await import("three");
  const {GLTFLoader}=await import("three/addons/loaders/GLTFLoader.js");
  clearTimeout(window.startupTimer);
  initialize(T,GLTFLoader);
-} catch(error) {
+}catch(error){
  clearTimeout(window.startupTimer);
  $("launch").textContent="Unable to start";
  window.gameFatal("Startup failed: "+error.message);
@@ -326,12 +424,15 @@ function initialize(T,GLTFLoader){
   f20:{name:"F-20",file:"F-20.glb",defaultYaw:90,defaultPitch:0}
  };
 
- let exteriorRequest=0, loadedAircraftKey=null, loadingAircraftKey=null;
+ let exteriorRequest=0;
+ let loadedAircraftKey=null,loadingAircraftKey=null;
  const savedExteriorYaw={},savedExteriorPitch={};
 
  const stage=$("stage"),controls=$("controls");
  const mobile=matchMedia("(max-width:600px)");
- function layout(){ controls.classList.toggle("phone",mobile.matches); }
+ function layout(){
+  controls.classList.toggle("phone",mobile.matches);
+ }
  layout();
  if(mobile.addEventListener)mobile.addEventListener("change",layout);
 
@@ -354,14 +455,21 @@ function initialize(T,GLTFLoader){
 
  const weatherClouds=new T.Group();
  scene.add(weatherClouds);
- const cloudMaterial=new T.MeshStandardMaterial({color:"#ffffff",roughness:1,transparent:true,opacity:.85});
+ const cloudMaterial=new T.MeshStandardMaterial({
+  color:"#ffffff",roughness:1,transparent:true,opacity:.85
+ });
  const cloudGeometry=new T.SphereGeometry(1,8,6);
  const cloudObjects=[];
  for(let i=0;i<65;i++){
   const mesh=new T.Mesh(cloudGeometry,cloudMaterial);
-  mesh.scale.set(200+Math.random()*300,50+Math.random()*90,150+Math.random()*180);
+  mesh.scale.set(
+   200+Math.random()*300,50+Math.random()*90,150+Math.random()*180
+  );
   weatherClouds.add(mesh);
-  cloudObjects.push({ mesh,x:(Math.random()-.5)*22000,z:(Math.random()-.5)*22000,y:850+Math.random()*1100 });
+  cloudObjects.push({
+   mesh,x:(Math.random()-.5)*22000,
+   z:(Math.random()-.5)*22000,y:850+Math.random()*1100
+  });
  }
 
  const aircraft=new T.Group(),placeholder=new T.Group();
@@ -412,26 +520,61 @@ function initialize(T,GLTFLoader){
    f20:{mass:7000,area:19,thrust:80000,agility:1.7}
   };
   const selected=settings[$("aircraftChoice").value]||settings.boeing737;
-  MASS=selected.mass; AREA=selected.area; MAX_THRUST=selected.thrust; aircraftAgility=selected.agility;
+  MASS=selected.mass;
+  AREA=selected.area;
+  MAX_THRUST=selected.thrust;
+  aircraftAgility=selected.agility;
  }
 
  const airports={
-  juliana:{title:"PRINCESS JULIANA",length:2300,width:45,heading:100,sky:"#8dd4f4",seed:591},
-  heathrow:{title:"HEATHROW",length:3900,width:50,heading:90,sky:"#b4cadb",seed:127},
-  kaitak:{title:"KAI TAK",length:3390,width:55,heading:130,sky:"#a7bdca",seed:973}
+  juliana:{
+   title:"PRINCESS JULIANA · TROPICAL ISLAND",
+   length:2300,width:45,heading:100,sky:"#8dd4f4",seed:591
+  },
+  heathrow:{
+   title:"HEATHROW · COUNTRYSIDE / CITY",
+   length:3900,width:50,heading:90,sky:"#b4cadb",seed:127
+  },
+  kaitak:{
+   title:"KAI TAK · HARBOR / MOUNTAINS",
+   length:3390,width:55,heading:130,sky:"#a7bdca",seed:973
+  }
  };
  let airportKey="juliana",airport=airports.juliana;
  const airportSites=[{x:0,z:0},{x:6500,z:-10000}];
- const destinationNames={ juliana:"PALM COAST", heathrow:"NORTHFIELD", kaitak:"EAST HARBOR" };
+ const destinationNames={
+  juliana:"PALM COAST AIRPORT",
+  heathrow:"NORTHFIELD AIRPORT",
+  kaitak:"EAST HARBOR AIRPORT"
+ };
  let groundedAirport=0,departureAirport=0,destinationAirport=1;
  let route=[],routeIndex=0,legStart={x:0,z:0,alt:0};
 
  function mode(){return $("difficulty").value;}
- function airportName(i){ return i===0?airport.title:destinationNames[airportKey]; }
- function runwayAt(x,z,margin=0){ return airportSites.findIndex(s=>Math.abs(x-s.x)<=airport.width/2+margin&&Math.abs(z-s.z)<=airport.length/2); }
- function mat(color,extra={}){ return new T.MeshStandardMaterial({color,roughness:.85,...extra}); }
- function box(parent,x,y,z,w,h,d,material){ const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),material); mesh.position.set(x,y,z); parent.add(mesh); return mesh; }
- function seeded(seed){ return()=>{ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; }; }
+ function airportName(i){
+  return i===0?airport.title.split(" · ")[0]:destinationNames[airportKey];
+ }
+ function runwayAt(x,z,margin=0){
+  return airportSites.findIndex(s=>
+   Math.abs(x-s.x)<=airport.width/2+margin&&
+   Math.abs(z-s.z)<=airport.length/2
+  );
+ }
+ function mat(color,extra={}){
+  return new T.MeshStandardMaterial({color,roughness:.85,...extra});
+ }
+ function box(parent,x,y,z,w,h,d,material){
+  const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),material);
+  mesh.position.set(x,y,z);
+  parent.add(mesh);
+  return mesh;
+ }
+ function seeded(seed){
+  return()=>{
+   seed=(seed*1664525+1013904223)>>>0;
+   return seed/4294967296;
+  };
+ }
 
  const white=mat("#e4eaf0"),blue=mat("#188ca2"),dark=mat("#263344");
  box(placeholder,0,0,0,1,1,7,white);
@@ -444,137 +587,260 @@ function initialize(T,GLTFLoader){
  box(placeholderGear,0,-1.15,-2,.25,.5,.4,dark);
 
  const particles=[],particleGeometry=new T.BoxGeometry(1,1,1);
- const particleMaterials=[ mat("#ff4400",{emissive:"#ff2200"}), mat("#ffcc00",{emissive:"#ffaa00"}), mat("#333333") ];
- function clearExplosion(){ particles.forEach(p=>scene.remove(p.mesh)); particles.length=0; }
+ const particleMaterials=[
+  mat("#ff4400",{emissive:"#ff2200"}),
+  mat("#ffcc00",{emissive:"#ffaa00"}),
+  mat("#333333")
+ ];
+ function clearExplosion(){
+  particles.forEach(p=>scene.remove(p.mesh));
+  particles.length=0;
+ }
  function explode(){
   clearExplosion();
   for(let i=0;i<90;i++){
-   const mesh=new T.Mesh(particleGeometry,particleMaterials[Math.floor(Math.random()*3)]);
-   mesh.position.copy(position); mesh.scale.setScalar(.6+Math.random()*2); scene.add(mesh);
-   particles.push({ mesh,life:1.8,v:new T.Vector3((Math.random()-.5)*45,5+Math.random()*30,(Math.random()-.5)*45) });
+   const mesh=new T.Mesh(
+    particleGeometry,particleMaterials[Math.floor(Math.random()*3)]
+   );
+   mesh.position.copy(position);
+   mesh.scale.setScalar(.6+Math.random()*2);
+   scene.add(mesh);
+   particles.push({
+    mesh,life:1.8,v:new T.Vector3(
+     (Math.random()-.5)*45,5+Math.random()*30,(Math.random()-.5)*45
+    )
+   });
   }
  }
  function updateExplosion(dt){
   for(let i=particles.length-1;i>=0;i--){
    const p=particles[i];
-   p.v.y-=G*dt; p.mesh.position.addScaledVector(p.v,dt);
-   p.mesh.rotation.x+=dt*2; p.mesh.rotation.y+=dt;
+   p.v.y-=G*dt;
+   p.mesh.position.addScaledVector(p.v,dt);
+   p.mesh.rotation.x+=dt*2;
+   p.mesh.rotation.y+=dt;
    p.mesh.scale.multiplyScalar(Math.exp(-dt*.5));
    p.life-=dt;
-   if(p.life<=0){ scene.remove(p.mesh); particles.splice(i,1); }
+   if(p.life<=0){
+    scene.remove(p.mesh);
+    particles.splice(i,1);
+   }
   }
  }
 
  function disposeMap(){
   const gs=new Set(),ms=new Set();
-  scenery.traverse(o=>{ if(o.geometry)gs.add(o.geometry); if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>ms.add(m));} });
-  gs.forEach(g=>g.dispose()); ms.forEach(m=>m.dispose()); textures.forEach(t=>t.dispose()); textures.length=0;
-  mountainColliders.length=0; scene.remove(scenery); scenery=new T.Group(); scene.add(scenery);
+  scenery.traverse(o=>{
+   if(o.geometry)gs.add(o.geometry);
+   if(o.material){
+    (Array.isArray(o.material)?o.material:[o.material])
+     .forEach(m=>ms.add(m));
+   }
+  });
+  gs.forEach(g=>g.dispose());
+  ms.forEach(m=>m.dispose());
+  textures.forEach(t=>t.dispose());
+  textures.length=0;
+  mountainColliders.length=0;
+  scene.remove(scenery);
+  scenery=new T.Group();
+  scene.add(scenery);
  }
  function runwayNumber(n,z,turn){
-  const c=document.createElement("canvas"); c.width=128;c.height=256;
+  const c=document.createElement("canvas");
+  c.width=128;c.height=256;
   const ctx=c.getContext("2d");
-  ctx.fillStyle="#f8fafc"; ctx.font="bold 135px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillStyle="#f8fafc";
+  ctx.font="bold 135px sans-serif";
+  ctx.textAlign="center";ctx.textBaseline="middle";
   ctx.fillText(String(n).padStart(2,"0"),64,128);
-  const texture=new T.CanvasTexture(c); texture.colorSpace=T.SRGBColorSpace; textures.push(texture);
-  const mesh=new T.Mesh(new T.PlaneGeometry(15,30), new T.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false,side:T.DoubleSide}));
-  mesh.rotation.set(-Math.PI/2,0,turn); mesh.position.set(0,.075,z); scenery.add(mesh);
+  const texture=new T.CanvasTexture(c);
+  texture.colorSpace=T.SRGBColorSpace;
+  textures.push(texture);
+  const mesh=new T.Mesh(
+   new T.PlaneGeometry(15,30),
+   new T.MeshBasicMaterial({
+    map:texture,transparent:true,depthWrite:false,side:T.DoubleSide
+   })
+  );
+  mesh.rotation.set(-Math.PI/2,0,turn);
+  mesh.position.set(0,.075,z);
+  scenery.add(mesh);
  }
  function runway(){
-  const asphalt=mat("#363c43"),paint=mat("#ecebdc"),taxi=mat("#5d6265"),yellow=mat("#dcc44e");
+  const asphalt=mat("#363c43"),paint=mat("#ecebdc");
+  const taxi=mat("#5d6265"),yellow=mat("#dcc44e");
   const half=airport.length/2,tx=airport.width/2+70;
 
   box(scenery,0,-.07,0,airport.width,.14,airport.length,asphalt);
-  for(let z=-half+150;z<half-150;z+=95){ box(scenery,0,.025,z,1.1,.025,32,paint); }
-  for(const side of [-1,1]){ box(scenery,side*(airport.width/2-1),.025,0,.45,.025,airport.length-20,paint); }
+  for(let z=-half+150;z<half-150;z+=95){
+   box(scenery,0,.025,z,1.1,.025,32,paint);
+  }
+  for(const side of [-1,1]){
+   box(scenery,side*(airport.width/2-1),.025,0,
+    .45,.025,airport.length-20,paint);
+  }
   for(const end of [-1,1]){
-   for(let i=-3;i<=3;i++){ box(scenery,i*4,.035,end*(half-38),2,.025,24,paint); }
-   for(const x of [-9,9]){ box(scenery,x,.035,end*(half-330),5,.025,40,paint); }
+   for(let i=-3;i<=3;i++){
+    box(scenery,i*4,.035,end*(half-38),2,.025,24,paint);
+   }
+   for(const x of [-9,9]){
+    box(scenery,x,.035,end*(half-330),5,.025,40,paint);
+   }
   }
 
   const number=Math.round(airport.heading/10)||36;
-  runwayNumber(number,half-100,0); runwayNumber(((number+17)%36)+1,-half+100,Math.PI);
+  runwayNumber(number,half-100,0);
+  runwayNumber(((number+17)%36)+1,-half+100,Math.PI);
   box(scenery,tx,-.04,0,22,.08,airport.length-180,taxi);
   box(scenery,tx,.015,0,.3,.02,airport.length-200,yellow);
-  for(const z of [-half+180,0,half-180]){ box(scenery,tx/2,-.04,z,tx,.08,22,taxi); }
+  for(const z of [-half+180,0,half-180]){
+   box(scenery,tx/2,-.04,z,tx,.08,22,taxi);
+  }
 
-  const lamp=new T.MeshBasicMaterial({color:"#fff3bd"}),green=new T.MeshBasicMaterial({color:"#73ff8d"}),blueLamp=new T.MeshBasicMaterial({color:"#4c8eff"});
-  for(let z=-half+15;z<half;z+=90){ for(const side of [-1,1]){ box(scenery,side*(airport.width/2+1),.5,z,.7,.7,.7,lamp); } box(scenery,tx+12,.4,z,.6,.6,.6,blueLamp); }
-  for(let x=-18;x<=18;x+=6){ box(scenery,x,.4,half-4,.8,.6,.8,green); }
-  for(let i=1;i<=7;i++){ for(const x of [-4,0,4]){ box(scenery,x,.3,half+i*30,.7,.4,.7,lamp); } }
+  const lamp=new T.MeshBasicMaterial({color:"#fff3bd"});
+  const green=new T.MeshBasicMaterial({color:"#73ff8d"});
+  const blueLamp=new T.MeshBasicMaterial({color:"#4c8eff"});
+  for(let z=-half+15;z<half;z+=90){
+   for(const side of [-1,1]){
+    box(scenery,side*(airport.width/2+1),.5,z,.7,.7,.7,lamp);
+   }
+   box(scenery,tx+12,.4,z,.6,.6,.6,blueLamp);
+  }
+  for(let x=-18;x<=18;x+=6){
+   box(scenery,x,.4,half-4,.8,.6,.8,green);
+  }
+  for(let i=1;i<=7;i++){
+   for(const x of [-4,0,4]){
+    box(scenery,x,.3,half+i*30,.7,.4,.7,lamp);
+   }
+  }
  }
  function terminal(x,z){
-  const wall=mat("#c3c5bc"),roof=mat("#6a7981"),glass=mat("#427185",{roughness:.35});
+  const wall=mat("#c3c5bc"),roof=mat("#6a7981");
+  const glass=mat("#427185",{roughness:.35});
   box(scenery,x,-.15,z,230,.3,470,mat("#70777a"));
-  box(scenery,x+60,12,z,55,24,330,wall); box(scenery,x+60,24.5,z,60,1,337,roof);
+  box(scenery,x+60,12,z,55,24,330,wall);
+  box(scenery,x+60,24.5,z,60,1,337,roof);
   box(scenery,x+31,14,z,1,7,310,glass);
-  for(let i=-2;i<=2;i++){ box(scenery,x+6,7,z+i*58,50,5,9,wall); }
-  box(scenery,x+140,23,z-220,12,46,12,wall); box(scenery,x+140,48,z-220,25,8,25,glass);
+  for(let i=-2;i<=2;i++){
+   box(scenery,x+6,7,z+i*58,50,5,9,wall);
+  }
+  box(scenery,x+140,23,z-220,12,46,12,wall);
+  box(scenery,x+140,48,z-220,25,8,25,glass);
  }
  function hill(x,z,r,h,material){
   const mesh=new T.Mesh(new T.SphereGeometry(1,18,10),material);
-  mesh.scale.set(r,h,r*.8); mesh.position.set(x,-10,z); mesh.userData.mountain=true; scenery.add(mesh);
+  mesh.scale.set(r,h,r*.8);
+  mesh.position.set(x,-10,z);
+  mesh.userData.mountain=true;
+  scenery.add(mesh);
  }
  function trees(random,count,palm){
-  const trunk=mat("#806a4d"),leaves=mat(palm?"#388b51":"#386347"),crownGeometry=new T.ConeGeometry(5,12,6);
+  const trunk=mat("#806a4d"),leaves=mat(palm?"#388b51":"#386347");
+  const crownGeometry=new T.ConeGeometry(5,12,6);
   for(let i=0;i<count;i++){
    const x=palm?(i%2?-1:1)*(110+random()*380):-300-random()*300;
    const z=palm?airport.length/2+35+random()*65:(random()-.5)*7000;
    const h=palm?12:9+random()*5;
    box(scenery,x,h/2,z,1.2,h,1.2,trunk);
    if(palm){
-    for(let j=0;j<5;j++){ const leaf=box(scenery,x,h,z,13,.5,2,leaves); leaf.rotation.y=j*Math.PI/5; leaf.rotation.z=.12; }
+    for(let j=0;j<5;j++){
+     const leaf=box(scenery,x,h,z,13,.5,2,leaves);
+     leaf.rotation.y=j*Math.PI/5;
+     leaf.rotation.z=.12;
+    }
    }else{
-    const crown=new T.Mesh(crownGeometry,leaves); crown.position.set(x,h+1,z); scenery.add(crown);
+    const crown=new T.Mesh(crownGeometry,leaves);
+    crown.position.set(x,h+1,z);
+    scenery.add(crown);
    }
   }
  }
  function city(random,count,dense){
-  const walls=[mat("#b8bdc2"),mat("#c4bdb0"),mat("#86949e"),mat("#aaa9a0")],windows=mat("#427083");
+  const walls=[
+   mat("#b8bdc2"),mat("#c4bdb0"),mat("#86949e"),mat("#aaa9a0")
+  ];
+  const windows=mat("#427083");
   for(let i=0;i<count;i++){
-   const x=(i%2?-1:1)*(dense?950+random()*1700:750+random()*3300),z=(random()-.5)*6500;
-   const h=dense?35+random()*190:12+random()*90,w=25+random()*45,d=25+random()*50;
+   const x=(i%2?-1:1)*(dense?950+random()*1700:750+random()*3300);
+   const z=(random()-.5)*6500;
+   const h=dense?35+random()*190:12+random()*90;
+   const w=25+random()*45,d=25+random()*50;
    box(scenery,x,h/2-.5,z,w,h,d,walls[i%4]);
-   if(dense){ for(const f of [.33,.66]){ box(scenery,x,h*f,z+d/2+.1,w*.8,2,.3,windows); } }
+   if(dense){
+    for(const f of [.33,.66]){
+     box(scenery,x,h*f,z+d/2+.1,w*.8,2,.3,windows);
+    }
+   }
   }
  }
  function ship(x,z,angle){
-  const group=new T.Group(); scenery.add(group); group.position.set(x,-3.5,z); group.rotation.y=angle;
-  box(group,0,2,0,30,8,130,mat("#334653")); box(group,0,7,-5,25,2,110,mat("#9a9f9b"));
+  const group=new T.Group();
+  scenery.add(group);
+  group.position.set(x,-3.5,z);
+  group.rotation.y=angle;
+  box(group,0,2,0,30,8,130,mat("#334653"));
+  box(group,0,7,-5,25,2,110,mat("#9a9f9b"));
   box(group,0,16,40,22,18,22,mat("#e5e7eb"));
   const red=mat("#b85741"),blue=mat("#467f8e");
-  for(let i=-2;i<=2;i++){ box(group,0,13,i*15-15,22,9,12,i%2?red:blue); }
+  for(let i=-2;i<=2;i++){
+   box(group,0,13,i*15-15,22,9,12,i%2?red:blue);
+  }
  }
  function addSecondAirport(){
-  const original=scenery,group=new T.Group(),random=seeded(airport.seed+737);
+  const original=scenery,group=new T.Group();
+  const random=seeded(airport.seed+737);
   scenery=group;
   try{
    if(airportKey==="juliana"){
-    box(scenery,150,-7,-150,2800,1,airport.length+2200,mat("#36b7c3")); box(scenery,150,-2.2,-150,2300,3,airport.length+1700,mat("#d5c493"));
+    box(scenery,150,-7,-150,2800,1,airport.length+2200,mat("#36b7c3"));
+    box(scenery,150,-2.2,-150,2300,3,airport.length+1700,mat("#d5c493"));
     box(scenery,150,-1.4,-200,2050,2,airport.length+1450,mat("#679b5c"));
     const green=mat("#4e8455");
-    for(let i=0;i<5;i++){ hill(-800-random()*180,-900+i*420,280+random()*160,110+random()*130,green); }
+    for(let i=0;i<5;i++){
+     hill(-800-random()*180,-900+i*420,
+      280+random()*160,110+random()*130,green);
+    }
     trees(random,24,true);
    }else if(airportKey==="heathrow"){
     box(scenery,120,-.4,0,1700,.12,airport.length+1000,mat("#72864c"));
     const wall=mat("#b8bdc2"),roof=mat("#6a7981");
-    for(let i=0;i<4;i++){ const z=-800+i*420; box(scenery,650,10,z,95,20,150,wall); box(scenery,650,20.5,z,100,1,155,roof); }
+    for(let i=0;i<4;i++){
+     const z=-800+i*420;
+     box(scenery,650,10,z,95,20,150,wall);
+     box(scenery,650,20.5,z,100,1,155,roof);
+    }
     trees(random,35,false);
    }else{
-    box(scenery,150,-2,0,1900,3,airport.length+1300,mat("#9a9b86")); box(scenery,150,-1.3,0,1750,2,airport.length+1100,mat("#7e956b"));
+    box(scenery,150,-2,0,1900,3,airport.length+1300,mat("#9a9b86"));
+    box(scenery,150,-1.3,0,1750,2,airport.length+1100,mat("#7e956b"));
     const walls=[mat("#b8bdc2"),mat("#c4bdb0"),mat("#86949e")];
-    for(let i=0;i<20;i++){ const h=25+random()*100; box(scenery,i%2===0?-650:720,h/2,-1300+random()*2600,40+random()*25,h,45+random()*30,walls[i%3]); }
+    for(let i=0;i<20;i++){
+     const h=25+random()*100;
+     box(scenery,i%2===0?-650:720,h/2,-1300+random()*2600,
+      40+random()*25,h,45+random()*30,walls[i%3]);
+    }
    }
-   runway(); terminal(260,-100);
-  }finally{ scenery=original; }
-  group.position.set(airportSites[1].x,0,airportSites[1].z); original.add(group);
+   runway();
+   terminal(260,-100);
+  }finally{
+   scenery=original;
+  }
+  group.position.set(airportSites[1].x,0,airportSites[1].z);
+  original.add(group);
  }
  function collectMountains(){
-  mountainColliders.length=0; scenery.updateMatrixWorld(true);
+  mountainColliders.length=0;
+  scenery.updateMatrixWorld(true);
   scenery.traverse(o=>{
    if(!o.userData.mountain)return;
-   const c=o.getWorldPosition(new T.Vector3()),s=o.getWorldScale(new T.Vector3());
-   mountainColliders.push({ x:c.x,y:c.y,z:c.z, rx:Math.abs(s.x)+2.5,ry:Math.abs(s.y)+2.5,rz:Math.abs(s.z)+2.5 });
+   const c=o.getWorldPosition(new T.Vector3());
+   const s=o.getWorldScale(new T.Vector3());
+   mountainColliders.push({
+    x:c.x,y:c.y,z:c.z,
+    rx:Math.abs(s.x)+2.5,ry:Math.abs(s.y)+2.5,rz:Math.abs(s.z)+2.5
+   });
   });
  }
  function mountainHit(a,b){
@@ -586,7 +852,8 @@ function initialize(T,GLTFLoader){
    if(C<=0){earliest=0;continue;}
    const A=dx*dx+dy*dy+dz*dz;
    if(A<1e-16)continue;
-   const B=2*(x*dx+y*dy+z*dz),discriminant=B*B-4*A*C;
+   const B=2*(x*dx+y*dy+z*dz);
+   const discriminant=B*B-4*A*C;
    if(discriminant<0)continue;
    const t=(-B-Math.sqrt(discriminant))/(2*A);
    if(t>=0&&t<=1)earliest=Math.min(earliest,t);
@@ -595,7 +862,9 @@ function initialize(T,GLTFLoader){
  }
  function terrainWarning(){
   if(grounded||state!=="playing")return false;
-  return mountainHit(position,position.clone().addScaledVector(velocity,4))!==null;
+  return mountainHit(
+   position,position.clone().addScaledVector(velocity,4)
+  )!==null;
  }
  function buildMap(){
   disposeMap();
@@ -603,113 +872,210 @@ function initialize(T,GLTFLoader){
   if(airportKey==="heathrow"){
    box(scenery,0,-2,0,50000,3,50000,mat("#6f8c53"));
    const fields=[mat("#8e9d61"),mat("#72864c"),mat("#a19b65")];
-   for(let i=0;i<60;i++){ box(scenery,(i%2?-1:1)*(800+random()*9000),-.46,(random()-.5)*18000,400+random()*600,.04,450+random()*500,fields[i%3]); }
+   for(let i=0;i<60;i++){
+    box(scenery,(i%2?-1:1)*(800+random()*9000),-.46,
+     (random()-.5)*18000,400+random()*600,.04,
+     450+random()*500,fields[i%3]);
+   }
    const road=mat("#525960");
-   for(const x of [-600,540]){ box(scenery,x,-.35,0,18,.1,13000,road); }
-   for(let z=-5000;z<6000;z+=1400){ box(scenery,-1800,-.35,z,2400,.1,14,road); }
-   terminal(260,-250); city(random,110,false); trees(random,50,false);
+   for(const x of [-600,540]){
+    box(scenery,x,-.35,0,18,.1,13000,road);
+   }
+   for(let z=-5000;z<6000;z+=1400){
+    box(scenery,-1800,-.35,z,2400,.1,14,road);
+   }
+   terminal(260,-250);
+   city(random,110,false);
+   trees(random,50,false);
   }else if(airportKey==="juliana"){
    box(scenery,0,-12,0,60000,10,60000,mat("#127fa4",{roughness:.35}));
-   box(scenery,150,-7,-700,2600,1,6500,mat("#36b7c3")); box(scenery,150,-2.2,-780,1800,3,5300,mat("#d5c493")); box(scenery,150,-1.4,-850,1600,2,5100,mat("#679b5c"));
-   box(scenery,0,-.32,half+65,1000,.08,150,mat("#ead7a4")); box(scenery,0,-.22,half+18,1000,.08,13,mat("#66706d"));
+   box(scenery,150,-7,-700,2600,1,6500,mat("#36b7c3"));
+   box(scenery,150,-2.2,-780,1800,3,5300,mat("#d5c493"));
+   box(scenery,150,-1.4,-850,1600,2,5100,mat("#679b5c"));
+   box(scenery,0,-.32,half+65,1000,.08,150,mat("#ead7a4"));
+   box(scenery,0,-.22,half+18,1000,.08,13,mat("#66706d"));
    terminal(260,-100);
    const green=mat("#4e8455");
-   for(let i=0;i<12;i++){ hill((i%2?-1:1)*(1000+random()*500),-700-random()*2500,400+random()*350,110+random()*230,green); }
+   for(let i=0;i<12;i++){
+    hill((i%2?-1:1)*(1000+random()*500),-700-random()*2500,
+     400+random()*350,110+random()*230,green);
+   }
    const hotel=mat("#e8d8bd");
-   for(let i=0;i<22;i++){ const h=10+random()*20; box(scenery,(i%2?-1:1)*(300+random()*350),h/2,half-400+random()*300,25,h,35,hotel); }
+   for(let i=0;i<22;i++){
+    const h=10+random()*20;
+    box(scenery,(i%2?-1:1)*(300+random()*350),h/2,
+     half-400+random()*300,25,h,35,hotel);
+   }
    trees(random,32,true);
   }else{
    box(scenery,0,-12,0,60000,10,60000,mat("#3c7d91"));
-   box(scenery,0,-2,-100,330,3,airport.length+200,mat("#9a9b86")); box(scenery,0,-1.3,-100,285,2,airport.length+130,mat("#7e956b"));
+   box(scenery,0,-2,-100,330,3,airport.length+200,mat("#9a9b86"));
+   box(scenery,0,-1.3,-100,285,2,airport.length+130,mat("#7e956b"));
    const land=mat("#89918a");
-   box(scenery,0,-2,-half-2100,10000,3,4300,land); box(scenery,-1900,-2,0,2200,3,7200,land); box(scenery,1900,-2,-300,2200,3,6500,land);
-   terminal(260,-half+400); city(random,180,true);
+   box(scenery,0,-2,-half-2100,10000,3,4300,land);
+   box(scenery,-1900,-2,0,2200,3,7200,land);
+   box(scenery,1900,-2,-300,2200,3,6500,land);
+   terminal(260,-half+400);
+   city(random,180,true);
    const green=mat("#536f5c");
-   for(let i=0;i<13;i++){ hill((i%2?-1:1)*(3000+random()*1800),-2500-random()*2500,700+random()*650,300+random()*500,green); }
-   ship(-480,450,.2); ship(500,half+550,-.4); ship(-550,-700,.1);
+   for(let i=0;i<13;i++){
+    hill((i%2?-1:1)*(3000+random()*1800),-2500-random()*2500,
+     700+random()*650,300+random()*500,green);
+   }
+   ship(-480,450,.2);
+   ship(500,half+550,-.4);
+   ship(-550,-700,.1);
   }
-  runway(); addSecondAirport(); collectMountains();
+  runway();
+  addSecondAirport();
+  collectMountains();
   $("mapLabel").textContent=airportName(0)+" ↔ "+airportName(1);
  }
 
  function limits(){
-  return{ minPitch:+$("pitchMin").value,maxPitch:+$("pitchMax").value,bank:+$("bankMax").value,sink:+$("sinkMax").value,speed:+$("speedMax").value,yaw:+$("yawMax").value };
+  return{
+   minPitch:+$("pitchMin").value,maxPitch:+$("pitchMax").value,
+   bank:+$("bankMax").value,sink:+$("sinkMax").value,
+   speed:+$("speedMax").value,yaw:+$("yawMax").value
+  };
  }
  function difficulty(){
-  const presets={ easy:[-10,22,25,8,190,35], medium:[-8,18,18,6,180,25], hard:[-3,12,10,3,165,12] };
+  const presets={
+   easy:[-10,22,25,8,190,35],
+   medium:[-8,18,18,6,180,25],
+   hard:[-3,12,10,3,165,12]
+  };
   const v=presets[mode()]||presets.easy;
-  ["pitchMin","pitchMax","bankMax","sinkMax","speedMax","yawMax"].forEach((id,i)=>$(id).value=v[i]);
+  ["pitchMin","pitchMax","bankMax","sinkMax","speedMax","yawMax"]
+   .forEach((id,i)=>$(id).value=v[i]);
  }
  $("difficulty").onchange=difficulty;
  difficulty();
 
- const weather={ time:0,next:100,kind:"Clear",dark:0,rain:0,strength:2,direction:.4,targetDark:0,targetRain:0,targetStrength:2,targetDirection:.4 };
+ const weather={
+  time:0,next:100,kind:"Clear",dark:0,rain:0,strength:2,
+  direction:.4,targetDark:0,targetRain:0,targetStrength:2,targetDirection:.4
+ };
  const clearSky=new T.Color(),stormSky=new T.Color("#626d79");
  const whiteCloud=new T.Color("#ffffff"),grayCloud=new T.Color("#535c68");
  const rainCanvas=$("rain"),rainCtx=rainCanvas.getContext("2d");
  let rainWidth=1,rainHeight=1;
- const drops=Array.from({length:130},()=>({ x:Math.random(),y:Math.random(),r:1+Math.random()*3, speed:.03+Math.random()*.12 }));
+ const drops=Array.from({length:130},()=>({
+  x:Math.random(),y:Math.random(),r:1+Math.random()*3,
+  speed:.03+Math.random()*.12
+ }));
 
  function resetWeather(){
-  Object.assign(weather,{ time:0,next:90+Math.random()*60,kind:"Clear",dark:0,rain:0,strength:2,direction:.4,targetDark:0,targetRain:0,targetStrength:2,targetDirection:.4 });
+  Object.assign(weather,{
+   time:0,next:90+Math.random()*60,kind:"Clear",
+   dark:0,rain:0,strength:2,direction:.4,
+   targetDark:0,targetRain:0,targetStrength:2,targetDirection:.4
+  });
   wind.set(0,0,0);
  }
  function chooseWeather(){
   const r=Math.random();
-  if(r<.38){ weather.kind="Clear"; weather.targetDark=.05;weather.targetRain=0; weather.targetStrength=2+Math.random()*3; }
-  else if(r<.70){ weather.kind="Strong wind"; weather.targetDark=.65;weather.targetRain=0; weather.targetStrength=9+Math.random()*5; }
-  else{ weather.kind="Heavy rain"; weather.targetDark=1;weather.targetRain=1; weather.targetStrength=7+Math.random()*6; }
+  if(r<.38){
+   weather.kind="Clear";
+   weather.targetDark=.05;weather.targetRain=0;
+   weather.targetStrength=2+Math.random()*3;
+  }else if(r<.70){
+   weather.kind="Strong wind";
+   weather.targetDark=.65;weather.targetRain=0;
+   weather.targetStrength=9+Math.random()*5;
+  }else{
+   weather.kind="Heavy rain";
+   weather.targetDark=1;weather.targetRain=1;
+   weather.targetStrength=7+Math.random()*6;
+  }
   weather.targetDirection=weather.direction+(Math.random()-.5)*1.4;
   weather.next=weather.time+100+Math.random()*100;
  }
  function updateWeather(dt){
-  weather.time+=dt; if(weather.time>weather.next)chooseWeather();
+  weather.time+=dt;
+  if(weather.time>weather.next)chooseWeather();
   weather.dark=approach(weather.dark,weather.targetDark,dt,22);
   weather.rain=approach(weather.rain,weather.targetRain,dt,18);
   weather.strength=approach(weather.strength,weather.targetStrength,dt,25);
   weather.direction=approach(weather.direction,weather.targetDirection,dt,30);
-  const t=weather.time,gust=1+.16*Math.sin(t*.63)+.1*Math.sin(t*1.41);
+  const t=weather.time;
+  const gust=1+.16*Math.sin(t*.63)+.1*Math.sin(t*1.41);
   const difficultyScale=mode()==="easy" ? .45 : mode()==="medium" ? .75 : 1;
-  const strength=weather.strength*gust*difficultyScale,dir=weather.direction+.08*Math.sin(t*.29);
-  wind.set( Math.sin(dir)*strength, weather.dark*(Math.sin(t*.9)+.4*Math.sin(t*2.2))*.65*difficultyScale, Math.cos(dir)*strength );
+  const strength=weather.strength*gust*difficultyScale;
+  const dir=weather.direction+.08*Math.sin(t*.29);
+  wind.set(
+   Math.sin(dir)*strength,
+   weather.dark*(Math.sin(t*.9)+.4*Math.sin(t*2.2))*.65*difficultyScale,
+   Math.cos(dir)*strength
+  );
  }
  function weatherVisuals(){
-  clearSky.set(airport.sky); if(!scene.background)scene.background=new T.Color();
+  clearSky.set(airport.sky);
+  if(!scene.background)scene.background=new T.Color();
   scene.background.copy(clearSky).lerp(stormSky,weather.dark);
   if(!scene.fog)scene.fog=new T.Fog(scene.background,3200,20000);
-  scene.fog.color.copy(scene.background); scene.fog.near=3200-weather.dark*1800; scene.fog.far=22000-weather.dark*15000;
-  sun.intensity=2.4-weather.dark*1.7; hemi.intensity=2.1-weather.dark*.6;
-  cloudMaterial.color.copy(whiteCloud).lerp(grayCloud,weather.dark); cloudMaterial.opacity=.72+.22*weather.dark;
+  scene.fog.color.copy(scene.background);
+  scene.fog.near=3200-weather.dark*1800;
+  scene.fog.far=22000-weather.dark*15000;
+  sun.intensity=2.4-weather.dark*1.7;
+  hemi.intensity=2.1-weather.dark*.6;
+  cloudMaterial.color.copy(whiteCloud).lerp(grayCloud,weather.dark);
+  cloudMaterial.opacity=.72+.22*weather.dark;
   const count=Math.round(12+weather.dark*53);
   cloudObjects.forEach((c,i)=>{
    c.mesh.visible=i<count;
-   c.mesh.position.set(c.x+Math.sin(weather.direction)*weather.time*4,c.y-weather.dark*350,c.z+Math.cos(weather.direction)*weather.time*4);
+   c.mesh.position.set(
+    c.x+Math.sin(weather.direction)*weather.time*4,
+    c.y-weather.dark*350,
+    c.z+Math.cos(weather.direction)*weather.time*4
+   );
   });
-  $("weatherLabel").textContent=weather.kind+" · wind "+Math.round(Math.hypot(wind.x,wind.z)*KNOTS)+" kt";
+  $("weatherLabel").textContent=weather.kind+" · effective wind "+
+   Math.round(Math.hypot(wind.x,wind.z)*KNOTS)+" kt";
  }
  function drawRain(dt){
   const w=rainWidth,h=rainHeight,r=weather.rain;
   rainCtx.clearRect(0,0,w,h);
   if(r<.01||state==="menu")return;
-  rainCtx.fillStyle=`rgba(25,38,55,${r*.08})`; rainCtx.fillRect(0,0,w,h);
-  rainCtx.strokeStyle=`rgba(210,232,247,${.2+r*.25})`; rainCtx.lineWidth=1; rainCtx.beginPath();
+  rainCtx.fillStyle=`rgba(25,38,55,${r*.08})`;
+  rainCtx.fillRect(0,0,w,h);
+  rainCtx.strokeStyle=`rgba(210,232,247,${.2+r*.25})`;
+  rainCtx.lineWidth=1;
+  rainCtx.beginPath();
   for(let i=0;i<Math.floor(110*r);i++){
    const d=drops[i];
-   if(dt>0){ d.y+=dt*(.45+d.speed*3); d.x+=dt*.08*Math.sin(weather.direction); if(d.y>1.1){d.y=-.1;d.x=Math.random();} if(d.x>1.1)d.x=-.1; if(d.x<-.1)d.x=1.1; }
-   const x=d.x*w,y=d.y*h; rainCtx.moveTo(x,y); rainCtx.lineTo(x-7-weather.strength*.35,y-18-d.r*5);
+   if(dt>0){
+    d.y+=dt*(.45+d.speed*3);
+    d.x+=dt*.08*Math.sin(weather.direction);
+    if(d.y>1.1){d.y=-.1;d.x=Math.random();}
+    if(d.x>1.1)d.x=-.1;
+    if(d.x<-.1)d.x=1.1;
+   }
+   const x=d.x*w,y=d.y*h;
+   rainCtx.moveTo(x,y);
+   rainCtx.lineTo(x-7-weather.strength*.35,y-18-d.r*5);
   }
   rainCtx.stroke();
   for(let i=110;i<130;i++){
    const d=drops[i];
-   if(dt>0){ d.y+=dt*d.speed*.2; if(d.y>1.05){d.y=-.05;d.x=Math.random();} }
-   rainCtx.beginPath(); rainCtx.ellipse(d.x*w,d.y*h,d.r,d.r*1.8,0,0,Math.PI*2);
-   rainCtx.fillStyle=`rgba(180,215,235,${r*.11})`; rainCtx.fill(); rainCtx.strokeStyle=`rgba(225,245,255,${r*.35})`; rainCtx.stroke();
+   if(dt>0){
+    d.y+=dt*d.speed*.2;
+    if(d.y>1.05){d.y=-.05;d.x=Math.random();}
+   }
+   rainCtx.beginPath();
+   rainCtx.ellipse(d.x*w,d.y*h,d.r,d.r*1.8,0,0,Math.PI*2);
+   rainCtx.fillStyle=`rgba(180,215,235,${r*.11})`;
+   rainCtx.fill();
+   rainCtx.strokeStyle=`rgba(225,245,255,${r*.35})`;
+   rainCtx.stroke();
   }
  }
 
  function resetRoute(){
-  departureAirport=groundedAirport; destinationAirport=1-groundedAirport;
-  const from=airportSites[departureAirport],to=airportSites[destinationAirport],h=airport.length/2,direction=Math.cos(yaw)>=0?-1:1;
+  departureAirport=groundedAirport;
+  destinationAirport=1-groundedAirport;
+  const from=airportSites[departureAirport],to=airportSites[destinationAirport];
+  const h=airport.length/2,direction=Math.cos(yaw)>=0?-1:1;
   route=[
    {x:from.x,z:from.z+direction*(h+1400),name:"Climb straight ahead",alt:350},
    {x:to.x+3600,z:from.z+direction*(h+2500),name:"Cruise to destination",alt:650},
@@ -717,329 +1083,713 @@ function initialize(T,GLTFLoader){
    {x:to.x,z:to.z+h+8500,name:"Line up with the glowing path",alt:450},
    {x:to.x,z:to.z+h-220,name:"Touchdown zone",alt:0}
   ];
-  routeIndex=0; legStart={x:position.x,z:position.z,alt:Math.max(0,position.y-GROUND)}; updateApproachPath();
+  routeIndex=0;
+  legStart={x:position.x,z:position.z,alt:Math.max(0,position.y-GROUND)};
+  updateApproachPath();
  }
  function navTarget(){return route[Math.min(routeIndex,route.length-1)];}
- function setRouteIndex(i){ routeIndex=i; legStart={x:position.x,z:position.z,alt:Math.max(0,position.y-GROUND)}; }
+ function setRouteIndex(i){
+  routeIndex=i;
+  legStart={x:position.x,z:position.z,alt:Math.max(0,position.y-GROUND)};
+ }
  function routeHeight(){
-  const t=navTarget(); if(!t)return 350;
+  const t=navTarget();
+  if(!t)return 350;
   const x=t.x-legStart.x,z=t.z-legStart.z,length=x*x+z*z;
-  const f=length>1?clamp(((position.x-legStart.x)*x+(position.z-legStart.z)*z)/length,0,1):1;
+  const f=length>1?clamp(
+   ((position.x-legStart.x)*x+(position.z-legStart.z)*z)/length,0,1
+  ):1;
   return legStart.alt+(t.alt-legStart.alt)*f;
  }
  function finalData(){
-  const s=airportSites[destinationAirport],threshold=s.z+airport.length/2,touchdown=threshold-220,remaining=position.z-touchdown;
-  const x=position.x-s.x,height=Math.max(0,position.y-GROUND),targetHeight=Math.max(0,remaining*Math.tan(rad(3)));
-  return{ site:s,threshold,touchdown,remaining,x,height,targetHeight, headingError:deg(wrapAngle(yaw)), outsideThreshold:position.z>threshold,
-   corridor: remaining>0&&remaining<10000&&Math.abs(x)<1000&&Math.abs(deg(wrapAngle(yaw)))<40, aligned:Math.abs(x)<100&&Math.abs(deg(wrapAngle(yaw)))<8 };
+  const s=airportSites[destinationAirport];
+  const threshold=s.z+airport.length/2;
+  const touchdown=threshold-220;
+  const remaining=position.z-touchdown;
+  const x=position.x-s.x;
+  const height=Math.max(0,position.y-GROUND);
+  const targetHeight=Math.max(0,remaining*Math.tan(rad(3)));
+  return{
+   site:s,threshold,touchdown,remaining,x,height,targetHeight,
+   headingError:deg(wrapAngle(yaw)),
+   outsideThreshold:position.z>threshold,
+   corridor:
+    remaining>0&&remaining<10000&&Math.abs(x)<1000&&
+    Math.abs(deg(wrapAngle(yaw)))<40,
+   aligned:Math.abs(x)<100&&Math.abs(deg(wrapAngle(yaw)))<8
+  };
  }
+
  function insideLandingAssistEnvelope(f){
   const runwayEnd=f.site.z-airport.length/2;
-  return routeIndex===4&&position.z>runwayEnd&&position.z<f.touchdown+10000&&Math.abs(f.x)<1200&&Math.abs(f.headingError)<50;
+  return routeIndex===4&&
+   position.z>runwayEnd&&
+   position.z<f.touchdown+10000&&
+   Math.abs(f.x)<1200&&
+   Math.abs(f.headingError)<50;
  }
- function easyLandingAssistActive(){ return approachAssist&&!grounded&&mode()==="easy"&&insideLandingAssistEnvelope(finalData()); }
+ function easyLandingAssistActive(){
+  return approachAssist&&!grounded&&mode()==="easy"&&
+   insideLandingAssistEnvelope(finalData());
+ }
 
- const approachPath=new T.Group(); scene.add(approachPath);
- const pathMaterial=new T.LineBasicMaterial({ color:"#68f9dc",transparent:true,opacity:.65,depthTest:true });
+ const approachPath=new T.Group();
+ scene.add(approachPath);
+ const pathMaterial=new T.LineBasicMaterial({
+  color:"#68f9dc",transparent:true,opacity:.65,depthTest:true
+ });
  const pathPoints=[];
  for(let d=800;d<=8500;d+=700){
-  const y=d*Math.tan(rad(3)),w=clamp(d*.025,24,95),h=clamp(d*.012,12,45);
-  pathPoints.push(-w,y-h,d,w,y-h,d, w,y-h,d,w,y+h,d, w,y+h,d,-w,y+h,d, -w,y+h,d,-w,y-h,d);
+  const y=d*Math.tan(rad(3));
+  const w=clamp(d*.025,24,95),h=clamp(d*.012,12,45);
+  pathPoints.push(
+   -w,y-h,d,w,y-h,d,
+   w,y-h,d,w,y+h,d,
+   w,y+h,d,-w,y+h,d,
+   -w,y+h,d,-w,y-h,d
+  );
  }
  const pathGeometry=new T.BufferGeometry();
  pathGeometry.setAttribute("position",new T.Float32BufferAttribute(pathPoints,3));
  approachPath.add(new T.LineSegments(pathGeometry,pathMaterial));
- const targetMarker=new T.Mesh(new T.RingGeometry(10,13,32), new T.MeshBasicMaterial({ color:"#85ffb8",side:T.DoubleSide,transparent:true,opacity:.8 }));
- targetMarker.rotation.x=-Math.PI/2; approachPath.add(targetMarker);
+ const targetMarker=new T.Mesh(
+  new T.RingGeometry(10,13,32),
+  new T.MeshBasicMaterial({
+   color:"#85ffb8",side:T.DoubleSide,transparent:true,opacity:.8
+  })
+ );
+ targetMarker.rotation.x=-Math.PI/2;
+ approachPath.add(targetMarker);
+
  function updateApproachPath(){
   const s=airportSites[destinationAirport];
-  approachPath.position.set(s.x,GROUND,s.z+airport.length/2-220); targetMarker.position.set(0,-GROUND+.12,0);
+  approachPath.position.set(s.x,GROUND,s.z+airport.length/2-220);
+  targetMarker.position.set(0,-GROUND+.12,0);
  }
 
  function assistDisplay(){
   $("autopilotButton").classList.toggle("engaged",autopilot);
   $("autopilotButton").setAttribute("aria-pressed",String(autopilot));
-  $("autopilotButton").textContent=autopilot?"AUTOPILOT ON":"AUTOPILOT";
+  $("autopilotButton").textContent=autopilot?"AUTOPILOT ON":"AUTOPILOT OFF";
   $("assistButton").classList.toggle("engaged",approachAssist);
   $("assistButton").setAttribute("aria-pressed",String(approachAssist));
-  $("assistButton").textContent=mode()==="hard"?"ASSIST: HARD":approachAssist?"ASSIST ON":"APPROACH";
+  $("assistButton").textContent=mode()==="hard"
+   ?"ASSIST: HARD / OFF"
+   :approachAssist?"APPROACH ASSIST ON":"APPROACH ASSIST";
 
   let info;
-  if(grounded){ info="Take off manually."; }
-  else if(goAroundTime>0){ info="GO AROUND"; }
-  else if(autopilot){ info="ROUTE TRACKING"; }
-  else if(approachAssist){ info=mode()==="easy"?"FLARE ASSIST":"SPEED ASSIST"; }
-  else{ info=routeIndex===4?"FINAL APPROACH":"YOU HAVE CONTROL"; }
+  if(grounded){
+   info="Take off manually.";
+  }else if(goAroundTime>0){
+   info="GO AROUND\nPower + climb assist";
+  }else if(autopilot){
+   info="ROUTE TRACKING\nPrepare to steer on final";
+  }else if(approachAssist){
+   if(mode()==="easy"){
+    info=position.y-GROUND<8
+     ?"FLARE ASSIST\nSteer left / right only"
+     :"YOU STEER LEFT / RIGHT\nDescent + speed assisted";
+   }else{
+    info="YOU STEER\nSpeed assisted only";
+   }
+  }else{
+   info=routeIndex===4
+    ?"FINAL APPROACH\nYou have control"
+    :"Autopilot available\nLanding assist near runway";
+  }
   $("autopilotInfo").textContent=info;
  }
  function disconnectAutopilot(reason="",announce=true){
-  const wasOn=autopilot; autopilot=false;
+  const wasOn=autopilot;
+  autopilot=false;
   if(wasOn&&announce&&reason)message=reason;
  }
  function manualControl(kind){
   disconnectAutopilot("Autopilot OFF — you have control.");
   goAroundTime=0;
-  if(kind==="throttle"&&approachAssist){ approachAssist=false; message="Approach assistance OFF."; }
+  if(kind==="throttle"&&approachAssist){
+   approachAssist=false;
+   message="Approach assistance OFF — manual throttle selected.";
+  }
  }
  function toggleAutopilot(){
-  if(state!=="playing"){ message="Start or resume the flight first.";return; }
-  if(autopilot){ disconnectAutopilot("Autopilot OFF — you have control.");return; }
-  if(grounded||position.y-GROUND<50){ message="Climb above 165 ft before engaging autopilot.";return; }
-  if(airspeed*KNOTS<130||Math.abs(deg(bank))>40){ message="Level the wings and reach 130 kt first.";return; }
-  if(routeIndex===4){ message="Use approach assistance on final, or GO AROUND.";return; }
-  clearControls(); approachAssist=false; goAroundTime=0; autopilot=true;
-  message="Autopilot ON.";
+  if(state!=="playing"){
+   message="Start or resume the flight first.";return;
+  }
+  if(autopilot){
+   disconnectAutopilot("Autopilot OFF — you have control.");return;
+  }
+  if(grounded||position.y-GROUND<50){
+   message="Take off and climb above 165 ft before engaging autopilot.";return;
+  }
+  if(airspeed*KNOTS<130||Math.abs(deg(bank))>40){
+   message="Level the wings and reach at least 130 kt first.";return;
+  }
+  if(routeIndex===4){
+   message="Use approach assistance on final, or GO AROUND for another attempt.";return;
+  }
+  clearControls();
+  approachAssist=false;
+  goAroundTime=0;
+  autopilot=true;
+  message="Autopilot ON. It will line up before handing over. Mountains must still be avoided.";
  }
  function toggleApproachAssist(){
-  if(state!=="playing"||grounded){ message="Use in flight near destination runway.";return; }
-  if(mode()==="hard"){ message="Hard mode uses manual landing.";return; }
-  if(approachAssist){ approachAssist=false; message="Approach assistance OFF.";return; }
+  if(state!=="playing"||grounded){
+   message="Use approach assistance in flight near the destination runway.";return;
+  }
+  if(mode()==="hard"){
+   message="Hard mode uses manual landing. Choose Easy or Medium on the starting page.";return;
+  }
+  if(approachAssist){
+   approachAssist=false;
+   message="Approach assistance OFF.";return;
+  }
   const f=finalData();
-  if(!f.corridor||position.z<f.threshold-50){ message="Line up with the glowing path first.";return; }
-  disconnectAutopilot("",false); approachAssist=true; goAroundTime=0; setRouteIndex(4);
+  if(!f.corridor||position.z<f.threshold-50){
+   message="Follow the route to the glowing approach path and line up first.";return;
+  }
+  disconnectAutopilot("",false);
+  approachAssist=true;
+  goAroundTime=0;
+  setRouteIndex(4);
   gearDown=true;flaps=true;brakes=false;
-  message=mode()==="easy"?"Approach assist ON. Steer LEFT / RIGHT.":"Approach assist ON. YOU STEER.";
+  message=mode()==="easy"
+   ?"Approach assist ON. Steer LEFT / RIGHT. Let assistance handle descent and flare."
+   :"Approach assist ON. YOU STEER and control descent. Speed is assisted.";
   buttons();
  }
  function goAround(){
-  if(state!=="playing"||grounded){ message="GO AROUND is available while airborne.";return; }
-  disconnectAutopilot("",false); approachAssist=false; clearControls(); goAroundTime=12;throttle=1;brakes=false;
-  flaps=true;gearDown=true; setRouteIndex(3); message="GO AROUND: power + climb assist. Move yoke to take over.";
+  if(state!=="playing"||grounded){
+   message="GO AROUND is available while airborne.";return;
+  }
+  disconnectAutopilot("",false);
+  approachAssist=false;
+  clearControls();
+  goAroundTime=12;throttle=1;brakes=false;
+  flaps=true;gearDown=true;
+  setRouteIndex(3);
+  message="GO AROUND: power and gentle climb assistance for 12 seconds. Move the yoke to take over.";
  }
  $("autopilotButton").onclick=toggleAutopilot;
  $("assistButton").onclick=toggleApproachAssist;
  $("goAroundButton").onclick=goAround;
- $("return").onclick=()=>{ if(!["playing","paused"].includes(state))return; if(grounded){message="Take off toward "+airportName(destinationAirport)+".";return;} approachAssist=false;goAroundTime=0; setRouteIndex(3); message="Follow guidance to destination."; };
-
+ $("return").onclick=()=>{
+  if(!["playing","paused"].includes(state))return;
+  if(grounded){
+   message="Take off toward "+airportName(destinationAirport)+".";return;
+  }
+  approachAssist=false;goAroundTime=0;
+  setRouteIndex(3);
+  message="Follow guidance to the destination approach. The aircraft has not been moved.";
+ };
  function steeringTarget(){
   if(routeIndex!==4)return navTarget();
   const f=finalData();
-  return{ x:f.site.x,z:Math.max(f.touchdown,position.z-1000),alt:f.targetHeight,name:"Runway centreline" };
+  return{
+   x:f.site.x,z:Math.max(f.touchdown,position.z-1000),
+   alt:f.targetHeight,name:"Runway centreline"
+  };
  }
  function updateNavigation(){
   if(grounded||!route.length)return;
-  const target=navTarget(),dx=target.x-position.x,dz=target.z-position.z,distance=Math.hypot(dx,dz);
-  const vx=target.x-legStart.x,vz=target.z-legStart.z,len=Math.hypot(vx,vz);
-  const passed=len>1&&((position.x-target.x)*vx+(position.z-target.z)*vz)>0&&Math.abs((position.x-legStart.x)*vz-(position.z-legStart.z)*vx)/len<600;
+  const target=navTarget();
+  const dx=target.x-position.x,dz=target.z-position.z;
+  const distance=Math.hypot(dx,dz);
+  const vx=target.x-legStart.x,vz=target.z-legStart.z;
+  const len=Math.hypot(vx,vz);
+  const passed=len>1&&
+   ((position.x-target.x)*vx+(position.z-target.z)*vz)>0&&
+   Math.abs((position.x-legStart.x)*vz-(position.z-legStart.z)*vx)/len<600;
 
   if(routeIndex<4&&(distance<400||passed)){
-   const old=route[routeIndex]; routeIndex++; legStart={x:old.x,z:old.z,alt:old.alt};
-   if(routeIndex===4&&!autopilot){ message="FINAL APPROACH. Tap APPROACH ASSIST."; }
+   const old=route[routeIndex];
+   routeIndex++;
+   legStart={x:old.x,z:old.z,alt:old.alt};
+   if(routeIndex===4&&!autopilot){
+    message="FINAL APPROACH. Follow the glowing path. Tap APPROACH ASSIST if wanted.";
+   }
   }
 
   if(routeIndex===4){
    const f=finalData();
    if(autopilot){
     gearDown=true;flaps=true;
-    const stable=f.aligned&&Math.abs(deg(bank))<10&&airspeed*KNOTS>=130&&airspeed*KNOTS<=170&&Math.abs(f.height-f.targetHeight)<100&&velocity.y>-6;
+    const stable=f.aligned&&Math.abs(deg(bank))<10&&
+     airspeed*KNOTS>=130&&airspeed*KNOTS<=170&&
+     Math.abs(f.height-f.targetHeight)<100&&velocity.y>-6;
     if(f.remaining<6500&&f.remaining>4000&&stable){
-     disconnectAutopilot("",false); approachAssist=mode()!=="hard";
-     message=approachAssist?"YOU HAVE CONTROL. Steer LEFT / RIGHT.":"YOU HAVE CONTROL.";
-    }else if(f.remaining<4000&&!stable){ goAround(); message="Not lined up. GO AROUND started."; }
+     disconnectAutopilot("",false);
+     approachAssist=mode()!=="hard";
+     message=approachAssist
+      ?(mode()==="easy"
+       ?"YOU HAVE CONTROL. Steer LEFT / RIGHT. Descent and flare assistance are ON."
+       :"YOU HAVE CONTROL. Speed assistance is ON; manage descent manually.")
+      :"YOU HAVE CONTROL. Hard mode: manage speed and descent manually.";
+    }else if(f.remaining<4000&&!stable){
+     goAround();
+     message="Approach was not lined up safely. GO AROUND assistance started.";
+    }
    }
-   if(approachAssist&&!insideLandingAssistEnvelope(f)){ approachAssist=false; message="Approach assistance OFF."; }
-   if(f.remaining< -airport.length){ approachAssist=false; setRouteIndex(3); message="Runway passed."; }
+
+   if(approachAssist&&!insideLandingAssistEnvelope(f)){
+    approachAssist=false;
+    message="Approach assistance OFF — outside the approach area or past the runway. GO AROUND is available.";
+   }
+
+   if(f.remaining< -airport.length){
+    approachAssist=false;
+    setRouteIndex(3);
+    message="Runway passed. Add power and climb for another approach.";
+   }
   }
  }
 
  function speedAssist(dt,targetKnots,targetVS=0){
-  const speed=Math.max(airspeed,1),density=1.225*Math.exp(-Math.max(0,position.y)/8500),q=.5*density*speed*speed;
-  let cl=clamp(.25+4.7*alpha+(flaps ? .65 : 0),-1,flaps?2.25:1.55);
-  const stallAngle=rad(flaps?17:15),stalled=Math.abs(alpha)>stallAngle;
+  const speed=Math.max(airspeed,1);
+  const density=1.225*Math.exp(-Math.max(0,position.y)/8500);
+  const q=.5*density*speed*speed;
+  let cl=clamp(
+   .25+4.7*alpha+(flaps ? .65 : 0),-1,flaps?2.25:1.55
+  );
+  const stallAngle=rad(flaps?17:15);
+  const stalled=Math.abs(alpha)>stallAngle;
   if(stalled)cl*=Math.max(.25,1-(Math.abs(alpha)-stallAngle)*3.5);
-  const cd=.022+.045*cl*cl+(flaps ? .035 : 0)+(gearDown ? .018 : 0)+(stalled ? .12 : 0);
-  const drag=q*AREA*cd,availableThrust=MAX_THRUST*clamp(density/1.225,.3,1)*clamp(1-speed/600,.65,1);
-  const desiredAcceleration=clamp((targetKnots/KNOTS-speed)*.12,-2,2),climbFraction=clamp(targetVS/speed,-.25,.25);
+  const cd=.022+.045*cl*cl+
+   (flaps ? .035 : 0)+(gearDown ? .018 : 0)+(stalled ? .12 : 0);
+  const drag=q*AREA*cd;
+  const availableThrust=MAX_THRUST*
+   clamp(density/1.225,.3,1)*clamp(1-speed/600,.65,1);
+  const desiredAcceleration=clamp((targetKnots/KNOTS-speed)*.12,-2,2);
+  const climbFraction=clamp(targetVS/speed,-.25,.25);
   const requiredThrust=drag+MASS*G*climbFraction+MASS*desiredAcceleration;
-  throttle=approach(throttle,clamp(requiredThrust/Math.max(1,availableThrust),0,1),dt,1.3);
+  throttle=approach(
+   throttle,clamp(requiredThrust/Math.max(1,availableThrust),0,1),dt,1.3
+  );
  }
- function pitchCommand(targetPitch,authority){ return clamp((targetPitch-pitch)*1.8/Math.max(.04,.15*authority),-1,1); }
+ function pitchCommand(targetPitch,authority){
+  return clamp(
+   (targetPitch-pitch)*1.8/Math.max(.04,.15*authority),-1,1
+  );
+ }
  function trimPitch(targetVS){
-  const rho=1.225*Math.exp(-Math.max(0,position.y)/8500),q=.5*rho*airspeed*airspeed;
-  const required=MASS*G/Math.max(1,q*AREA*Math.cos(bank)),alphaTrim=clamp((required-.25-(flaps ? .65 : 0))/4.7,rad(-2),rad(10));
-  return clamp(Math.atan2(targetVS,Math.max(airspeed,55))+alphaTrim+(targetVS-velocity.y)*.006,rad(-5),rad(13));
+  const rho=1.225*Math.exp(-Math.max(0,position.y)/8500);
+  const q=.5*rho*airspeed*airspeed;
+  const required=MASS*G/Math.max(1,q*AREA*Math.cos(bank));
+  const alphaTrim=clamp(
+   (required-.25-(flaps ? .65 : 0))/4.7,rad(-2),rad(10)
+  );
+  return clamp(
+   Math.atan2(targetVS,Math.max(airspeed,55))+alphaTrim+
+   (targetVS-velocity.y)*.006,rad(-5),rad(13)
+  );
  }
  function autopilotCommands(dt,authority){
-  const t=steeringTarget(),dx=t.x-position.x,dz=t.z-position.z,distance=Math.max(1,Math.hypot(dx,dz)),gs=Math.max(airspeed,70);
-  const desiredYaw=Math.atan2(-(dx/distance*gs-wind.x),-(dz/distance*gs-wind.z));
+  const t=steeringTarget();
+  const dx=t.x-position.x,dz=t.z-position.z;
+  const distance=Math.max(1,Math.hypot(dx,dz));
+  const gs=Math.max(airspeed,70);
+  const desiredYaw=Math.atan2(
+   -(dx/distance*gs-wind.x),-(dz/distance*gs-wind.z)
+  );
   const targetBank=clamp(wrapAngle(desiredYaw-yaw)*.7,rad(-22),rad(22));
-  apTargetHeight=routeIndex===4?Math.max(180,finalData().targetHeight):Math.max(150,routeHeight());
+  apTargetHeight=routeIndex===4
+   ?Math.max(180,finalData().targetHeight):Math.max(150,routeHeight());
   const targetVS=clamp((apTargetHeight-(position.y-GROUND))*.035,-4.5,7);
-  let targetPitch=trimPitch(targetVS); const slow=airspeed*KNOTS<(flaps?130:150);
+  let targetPitch=trimPitch(targetVS);
+  const slow=airspeed*KNOTS<(flaps?130:150);
   if(slow)targetPitch=Math.min(targetPitch,rad(3));
   apTargetSpeed=routeIndex>=2?(flaps?150:180):(flaps?165:210);
-  speedAssist(dt,apTargetSpeed,targetVS); if(slow)throttle=1;
+  speedAssist(dt,apTargetSpeed,targetVS);
+  if(slow)throttle=1;
   return{pitchInput:pitchCommand(targetPitch,authority),targetBank};
  }
 
  const radar=$("radar"),radarCtx=radar.getContext("2d");
  function landingAdvice(){
   const f=finalData();
-  if(f.remaining>10000)return"Follow route first.";
+  if(f.remaining>10000)return"Follow the arrival route first.";
   if(Math.abs(f.x)>250&&f.height<100)return"OFF CENTRE — GO AROUND";
-  if(f.outsideThreshold&&f.height<8)return"TOO LOW — GO AROUND";
+  if(f.outsideThreshold&&f.height<8)return"TOO LOW BEFORE RUNWAY — GO AROUND";
   if(airspeed*KNOTS<125)return"LOW SPEED — ADD POWER";
   if(airspeed*KNOTS>165)return"TOO FAST — REDUCE POWER";
-  if(easyLandingAssistActive()){ if(f.height<8)return"FLARE ASSIST"; return"DESCENT ASSIST"; }
-  if(velocity.y< -6)return"REDUCE DESCENT";
-  if(f.height<10&&!f.outsideThreshold)return"PULL BACK GENTLY";
-  if(f.height>f.targetHeight+35)return"TOO HIGH — DESCEND";
-  if(f.height<f.targetHeight-25)return"TOO LOW — CLIMB";
-  if(Math.abs(f.x)>15)return f.x>0?"MOVE LEFT":"MOVE RIGHT";
-  return"GOOD APPROACH";
+  if(easyLandingAssistActive()){
+   if(f.height<8)return"FLARE ASSIST — STEER LEFT / RIGHT ONLY";
+   return"DESCENT ASSIST — KEEP RUNWAY CENTRED";
+  }
+  if(velocity.y< -6)return"REDUCE DESCENT — PULL BACK GENTLY";
+  if(f.height<10&&!f.outsideThreshold)return"PULL BACK GENTLY · WINGS LEVEL";
+  if(f.height>f.targetHeight+35)return"TOO HIGH — DESCEND GENTLY";
+  if(f.height<f.targetHeight-25)return"TOO LOW — ADD POWER / CLIMB";
+  if(Math.abs(f.x)>15)return f.x>0?"MOVE SLIGHTLY LEFT":"MOVE SLIGHTLY RIGHT";
+  return"GOOD APPROACH — KEEP RUNWAY CENTRED";
  }
  function drawNavigation(){
   if(!route.length)return;
-  const t=steeringTarget(),dx=t.x-position.x,dz=t.z-position.z,desiredYaw=Math.atan2(-dx,-dz),turn=deg(wrapAngle(yaw-desiredYaw));
-  const heading=((airport.heading-deg(desiredYaw))%360+360)%360,height=position.y-GROUND,targetHeight=routeIndex===4?finalData().targetHeight:routeHeight();
-  const turnText=Math.abs(turn)<8?"ON COURSE — LEVEL WINGS":turn>0?"TURN RIGHT "+Math.round(Math.abs(turn))+"°":"TURN LEFT "+Math.round(Math.abs(turn))+"°";
+  const t=steeringTarget();
+  const dx=t.x-position.x,dz=t.z-position.z;
+  const desiredYaw=Math.atan2(-dx,-dz);
+  const turn=deg(wrapAngle(yaw-desiredYaw));
+  const heading=((airport.heading-deg(desiredYaw))%360+360)%360;
+  const height=position.y-GROUND;
+  const targetHeight=routeIndex===4?finalData().targetHeight:routeHeight();
+  const turnText=Math.abs(turn)<8?"ON COURSE — LEVEL WINGS":
+   turn>0?"TURN RIGHT "+Math.round(Math.abs(turn))+"°":
+   "TURN LEFT "+Math.round(Math.abs(turn))+"°";
   $("navArrow").style.transform=`rotate(${turn}deg)`;
-  $("navText").textContent=grounded?"Next: "+airportName(destinationAirport)+"\nTake off":(autopilot?"AUTO ON\n":approachAssist?"ASSIST ON\n":"")+turnText+"\nHeading "+String(Math.round(heading)%360).padStart(3,"0")+"°\n"+(routeIndex===4?landingAdvice():height>targetHeight+40?"DESCEND":height<targetHeight-40?"CLIMB":"HOLD")+"\nTarget "+Math.round(targetHeight*3.28084)+" ft";
+  $("navText").textContent=grounded
+   ?"Next: "+airportName(destinationAirport)+"\nTake off straight ahead"
+   :(autopilot?"AUTOPILOT ON\n":approachAssist?"ASSIST ON — YOU STEER\n":"")+
+    turnText+"\nHeading "+
+    String(Math.round(heading)%360).padStart(3,"0")+"°\n"+
+    (routeIndex===4?landingAdvice():
+     height>targetHeight+40?"DESCEND GENTLY":
+     height<targetHeight-40?"CLIMB GENTLY":"HOLD HEIGHT")+
+    "\nTarget "+Math.round(targetHeight*3.28084)+" ft"+
+    (routeIndex===4?" · 140–150 kt":"");
 
   const ctx=radarCtx,cx=140,cy=140,radius=122;
-  const farthest=Math.max(...airportSites.map(s=>Math.hypot(s.x-position.x,s.z-position.z)));
-  const range=Math.max(6000,Math.hypot(dx,dz)*1.15,farthest*1.15),scale=radius/range;
-  ctx.clearRect(0,0,280,280); ctx.fillStyle="#061c22";ctx.fillRect(0,0,280,280);
+  const farthest=Math.max(...airportSites.map(s=>
+   Math.hypot(s.x-position.x,s.z-position.z)));
+  const range=Math.max(6000,Math.hypot(dx,dz)*1.15,farthest*1.15);
+  const scale=radius/range;
+  ctx.clearRect(0,0,280,280);
+  ctx.fillStyle="#061c22";ctx.fillRect(0,0,280,280);
   ctx.strokeStyle="#52d5b44d";ctx.lineWidth=1;
-  for(const r of [radius/3,radius*2/3,radius]){ ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke(); }
-  ctx.beginPath(); ctx.moveTo(cx,12);ctx.lineTo(cx,268); ctx.moveTo(12,cy);ctx.lineTo(268,cy);ctx.stroke();
+  for(const r of [radius/3,radius*2/3,radius]){
+   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.moveTo(cx,12);ctx.lineTo(cx,268);
+  ctx.moveTo(12,cy);ctx.lineTo(268,cy);ctx.stroke();
 
-  function point(x,z){ const a=x-position.x,b=z-position.z; return{ x:cx+(a*Math.cos(yaw)-b*Math.sin(yaw))*scale, y:cy+(a*Math.sin(yaw)+b*Math.cos(yaw))*scale }; }
+  function point(x,z){
+   const a=x-position.x,b=z-position.z;
+   return{
+    x:cx+(a*Math.cos(yaw)-b*Math.sin(yaw))*scale,
+    y:cy+(a*Math.sin(yaw)+b*Math.cos(yaw))*scale
+   };
+  }
 
-  ctx.save(); ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.clip();
+  ctx.save();
+  ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.clip();
   ctx.strokeStyle="#68d6ef66";ctx.setLineDash([5,5]);ctx.beginPath();
-  route.forEach((p,i)=>{ const q=point(p.x,p.z); if(i===0)ctx.moveTo(q.x,q.y);else ctx.lineTo(q.x,q.y); });
-  ctx.stroke();ctx.setLineDash([]);
-  for(const m of mountainColliders){ const q=point(m.x,m.z); ctx.fillStyle="#b9936688";ctx.beginPath(); ctx.arc(q.x,q.y,Math.max(2,m.rx*scale),0,Math.PI*2);ctx.fill(); }
-  airportSites.forEach((s,i)=>{
-   const a=point(s.x,s.z+airport.length/2),b=point(s.x,s.z-airport.length/2);
-   ctx.strokeStyle=i===destinationAirport?"#86efac":"#eeeecc"; ctx.lineWidth=5;ctx.beginPath(); ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-   const q=point(s.x,s.z); ctx.fillStyle=ctx.strokeStyle;ctx.font="bold 13px sans-serif"; ctx.fillText(i===0?"A":"B",q.x+8,q.y);
+  route.forEach((p,i)=>{
+   const q=point(p.x,p.z);
+   if(i===0)ctx.moveTo(q.x,q.y);else ctx.lineTo(q.x,q.y);
   });
-  const q=point(t.x,t.z); ctx.fillStyle="#79ffff";ctx.beginPath(); ctx.arc(q.x,q.y,5,0,Math.PI*2);ctx.fill(); ctx.restore();
-  ctx.fillStyle="#fff";ctx.beginPath(); ctx.moveTo(cx,cy-11);ctx.lineTo(cx-7,cy+8); ctx.lineTo(cx,cy+4);ctx.lineTo(cx+7,cy+8); ctx.closePath();ctx.fill();
-  $("radarText").textContent="A/B PORTS · "+(range/1000).toFixed(1)+" km";
+  ctx.stroke();ctx.setLineDash([]);
+  for(const m of mountainColliders){
+   const q=point(m.x,m.z);
+   ctx.fillStyle="#b9936688";ctx.beginPath();
+   ctx.arc(q.x,q.y,Math.max(2,m.rx*scale),0,Math.PI*2);ctx.fill();
+  }
+  airportSites.forEach((s,i)=>{
+   const a=point(s.x,s.z+airport.length/2);
+   const b=point(s.x,s.z-airport.length/2);
+   ctx.strokeStyle=i===destinationAirport?"#86efac":"#eeeecc";
+   ctx.lineWidth=5;ctx.beginPath();
+   ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+   const q=point(s.x,s.z);
+   ctx.fillStyle=ctx.strokeStyle;ctx.font="bold 13px sans-serif";
+   ctx.fillText(i===0?"A":"B",q.x+8,q.y);
+  });
+  const q=point(t.x,t.z);
+  ctx.fillStyle="#79ffff";ctx.beginPath();
+  ctx.arc(q.x,q.y,5,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  ctx.fillStyle="#fff";ctx.beginPath();
+  ctx.moveTo(cx,cy-11);ctx.lineTo(cx-7,cy+8);
+  ctx.lineTo(cx,cy+4);ctx.lineTo(cx+7,cy+8);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle="#b5fce6";ctx.font="12px sans-serif";
+  ctx.fillText("HEADING UP",10,18);
+  $("radarText").textContent=
+   "A/B AIRPORTS · GREEN DESTINATION · BROWN HILLS · "+
+   (range/1000).toFixed(1)+" km";
  }
 
- function assetText(){ $("assets").textContent=cockpitStatus+"\n"+exteriorStatus+(animationStatus?"\n"+animationStatus:""); }
- function normalize(v){ return String(v||"").toLowerCase().replace(/[^a-z0-9]/g,""); }
- function find(root,name){ let result=null; root.traverse(o=>{ if(!result&&normalize(o.name)===normalize(name))result=o; }); return result; }
+ function assetText(){
+  $("assets").textContent=cockpitStatus+"\n"+exteriorStatus+
+   (animationStatus?"\n"+animationStatus:"");
+ }
+ function normalize(v){
+  return String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+ }
+ function find(root,name){
+  let result=null;
+  root.traverse(o=>{
+   if(!result&&normalize(o.name)===normalize(name))result=o;
+  });
+  return result;
+ }
  function calibrateEye(){
   const oldP=cockpitRig.position.clone(),oldQ=cockpitRig.quaternion.clone();
   try{
-   cockpitRig.position.set(0,0,0); cockpitRig.quaternion.identity(); cockpitRig.updateMatrixWorld(true);
-   const yoke=find(cockpitModel,"yoke.capt"),bounds=new T.Box3().setFromObject(yoke||cockpitModel);
+   cockpitRig.position.set(0,0,0);
+   cockpitRig.quaternion.identity();
+   cockpitRig.updateMatrixWorld(true);
+   const yoke=find(cockpitModel,"yoke.capt");
+   const bounds=new T.Box3().setFromObject(yoke||cockpitModel);
    if(!bounds.isEmpty()){
-    if(yoke){ pilotEye.copy(bounds.getCenter(new T.Vector3())).add(new T.Vector3(0,.5,.5)); }
-    else{ const s=bounds.getSize(new T.Vector3()); pilotEye.set(bounds.min.x+s.x*.3,bounds.min.y+s.y*.65,bounds.min.z+s.z*.65); }
+    if(yoke){
+     pilotEye.copy(bounds.getCenter(new T.Vector3())).add(new T.Vector3(0,.5,.5));
+    }else{
+     const s=bounds.getSize(new T.Vector3());
+     pilotEye.set(
+      bounds.min.x+s.x*.3,bounds.min.y+s.y*.65,bounds.min.z+s.z*.65
+     );
+    }
    }
-  }finally{ cockpitRig.position.copy(oldP); cockpitRig.quaternion.copy(oldQ); cockpitRig.updateMatrixWorld(true); }
+  }finally{
+   cockpitRig.position.copy(oldP);
+   cockpitRig.quaternion.copy(oldQ);
+   cockpitRig.updateMatrixWorld(true);
+  }
  }
  function installCockpit(root){
   const names=new Set();
-  for(const [name,control] of [["yoke.capt","yoke"],["yoke.FO","yoke"],["pd.n1","throttle"],["pd.n2","throttle"],["pd.flaps","flaps"],["pd.parking-brake","brakes"]]){
-   const o=find(root,name); if(!o?.parent)continue;
-   o.userData.flightControl=control; names.add(control); o.updateWorldMatrix(true,true);
-   const bounds=new T.Box3().setFromObject(o); if(bounds.isEmpty())continue;
-   const center=bounds.getCenter(new T.Vector3()); if(control!=="yoke")center.y=bounds.min.y;
-   const parent=o.parent; parent.worldToLocal(center);
-   const pivot=new T.Group(); pivot.position.copy(center); parent.add(pivot); pivot.updateWorldMatrix(true,false); pivot.attach(o);
-   const rigQ=cockpitRig.getWorldQuaternion(new T.Quaternion()),inv=pivot.getWorldQuaternion(new T.Quaternion()).invert();
-   const axis=(x,y,z)=>new T.Vector3(x,y,z).applyQuaternion(rigQ).applyQuaternion(inv).normalize();
-   parts.push({ pivot,control,base:pivot.quaternion.clone(), p:axis(1,0,0),r:axis(0,0,1) });
+  for(const [name,control] of [
+   ["yoke.capt","yoke"],["yoke.FO","yoke"],
+   ["pd.n1","throttle"],["pd.n2","throttle"],
+   ["pd.flaps","flaps"],["pd.parking-brake","brakes"]
+  ]){
+   const o=find(root,name);
+   if(!o?.parent)continue;
+   o.userData.flightControl=control;
+   names.add(control);
+   o.updateWorldMatrix(true,true);
+   const bounds=new T.Box3().setFromObject(o);
+   if(bounds.isEmpty())continue;
+   const center=bounds.getCenter(new T.Vector3());
+   if(control!=="yoke")center.y=bounds.min.y;
+   const parent=o.parent;
+   parent.worldToLocal(center);
+   const pivot=new T.Group();
+   pivot.position.copy(center);
+   parent.add(pivot);
+   pivot.updateWorldMatrix(true,false);
+   pivot.attach(o);
+   const rigQ=cockpitRig.getWorldQuaternion(new T.Quaternion());
+   const inv=pivot.getWorldQuaternion(new T.Quaternion()).invert();
+   const axis=(x,y,z)=>new T.Vector3(x,y,z)
+    .applyQuaternion(rigQ).applyQuaternion(inv).normalize();
+   parts.push({
+    pivot,control,base:pivot.quaternion.clone(),
+    p:axis(1,0,0),r:axis(0,0,1)
+   });
   }
   return [...names].join(", ")||"on-screen controls only";
  }
  function animateCockpit(){
   const a=new T.Quaternion(),b=new T.Quaternion();
   for(const p of parts){
-   if(p.control==="yoke"){ a.setFromAxisAngle(p.p,stickY*.1); b.setFromAxisAngle(p.r,-stickX*.55); p.pivot.quaternion.copy(p.base).multiply(a).multiply(b); }
-   else{ const angle=p.control==="throttle"?-throttle*.65:p.control==="flaps"?(flaps ? .45 : 0):(brakes ? .45 : 0); a.setFromAxisAngle(p.p,angle); p.pivot.quaternion.copy(p.base).multiply(a); }
+   if(p.control==="yoke"){
+    a.setFromAxisAngle(p.p,stickY*.1);
+    b.setFromAxisAngle(p.r,-stickX*.55);
+    p.pivot.quaternion.copy(p.base).multiply(a).multiply(b);
+   }else{
+    const angle=p.control==="throttle"?-throttle*.65:
+     p.control==="flaps"?(flaps ? .45 : 0):(brakes ? .45 : 0);
+    a.setFromAxisAngle(p.p,angle);
+    p.pivot.quaternion.copy(p.base).multiply(a);
+   }
   }
  }
- function applyGlass(){ glassMaterials.forEach(i=>i.material.visible=glassHidden?false:i.visible); $("glass").textContent="Window glass: "+(glassHidden?"HIDDEN":"SHOWN"); }
+ function applyGlass(){
+  glassMaterials.forEach(i=>i.material.visible=glassHidden?false:i.visible);
+  $("glass").textContent="Window glass: "+(glassHidden?"HIDDEN":"SHOWN");
+ }
  $("glass").onclick=()=>{glassHidden=!glassHidden;applyGlass();};
- $("turn").onclick=()=>{ if(!cockpitReady)return; cockpitTurned=!cockpitTurned; cockpitModel.rotation.y=-Math.PI/2+(cockpitTurned?Math.PI:0); calibrateEye(); };
- function readEye(){ eyeOffset.set(+$("eyeX").value,+$("eyeY").value,+$("eyeZ").value); }
+ $("turn").onclick=()=>{
+  if(!cockpitReady)return;
+  cockpitTurned=!cockpitTurned;
+  cockpitModel.rotation.y=-Math.PI/2+(cockpitTurned?Math.PI:0);
+  calibrateEye();
+ };
+ function readEye(){
+  eyeOffset.set(+$("eyeX").value,+$("eyeY").value,+$("eyeZ").value);
+ }
  ["eyeX","eyeY","eyeZ"].forEach(id=>$(id).oninput=readEye);
- $("resetView").onclick=()=>{ ["eyeX","eyeY","eyeZ","lookYaw"].forEach(id=>$(id).value="0"); $("lookPitch").value="-5"; headYaw=headPitch=0; readEye(); };
+ $("resetView").onclick=()=>{
+  ["eyeX","eyeY","eyeZ","lookYaw"].forEach(id=>$(id).value="0");
+  $("lookPitch").value="-5";
+  headYaw=headPitch=0;
+  readEye();
+ };
 
- function isLearjetExterior(){ return (loadedAircraftKey||loadingAircraftKey)==="learjet"; }
+ function isLearjetExterior(){
+  return (loadedAircraftKey||loadingAircraftKey)==="learjet";
+ }
  function learjetPosedBounds(){
-  const bounds=new T.Box3(),vertex=new T.Vector3(); aircraft.updateMatrixWorld(true);
-  exteriorObject.traverse(o=>{ if(o.isSkinnedMesh&&o.skeleton)o.skeleton.update(); });
+  const bounds=new T.Box3(),vertex=new T.Vector3();
+  aircraft.updateMatrixWorld(true);
+  exteriorObject.traverse(o=>{
+   if(o.isSkinnedMesh&&o.skeleton)o.skeleton.update();
+  });
+
   function visit(o){
    if(!o.visible)return;
    if(o.isMesh&&o.geometry){
-    const geometry=o.geometry,positions=geometry.getAttribute("position"),materials=Array.isArray(o.material)?o.material:[o.material];
-    const visibleMaterial=materials.some(m=>m&&m.visible!==false&&!(m.transparent&&m.opacity<=0));
+    const geometry=o.geometry;
+    const positions=geometry.getAttribute("position");
+    const materials=Array.isArray(o.material)?o.material:[o.material];
+    const visibleMaterial=materials.some(m=>
+     m&&m.visible!==false&&!(m.transparent&&m.opacity<=0));
     if(positions&&visibleMaterial){
-     const index=geometry.getIndex(),count=index?index.count:positions.count,rangeStart=Math.max(0,geometry.drawRange.start||0),rangeCount=geometry.drawRange.count;
-     const rangeEnd=Math.min(count,Number.isFinite(rangeCount)?rangeStart+rangeCount:count),groups=geometry.groups.length?geometry.groups:[{start:0,count,materialIndex:0}];
+     const index=geometry.getIndex();
+     const count=index?index.count:positions.count;
+     const rangeStart=Math.max(0,geometry.drawRange.start||0);
+     const rangeCount=geometry.drawRange.count;
+     const rangeEnd=Math.min(
+      count,Number.isFinite(rangeCount)?rangeStart+rangeCount:count);
+     const groups=geometry.groups.length?geometry.groups:
+      [{start:0,count,materialIndex:0}];
      for(const group of groups){
-      const material=Array.isArray(o.material)?o.material[group.materialIndex||0]:o.material;
-      if(!material||material.visible===false||(material.transparent&&material.opacity<=0))continue;
-      const start=Math.max(rangeStart,group.start),end=Math.min(rangeEnd,group.start+group.count);
-      for(let i=start;i<end;i++){ o.getVertexPosition(index?index.getX(i):i,vertex); vertex.applyMatrix4(o.matrixWorld); if(Number.isFinite(vertex.x)&&Number.isFinite(vertex.y)&&Number.isFinite(vertex.z))bounds.expandByPoint(vertex); }
+      const material=Array.isArray(o.material)
+       ?o.material[group.materialIndex||0]:o.material;
+      if(!material||material.visible===false||
+       (material.transparent&&material.opacity<=0))continue;
+      const start=Math.max(rangeStart,group.start);
+      const end=Math.min(rangeEnd,group.start+group.count);
+      for(let i=start;i<end;i++){
+       o.getVertexPosition(index?index.getX(i):i,vertex);
+       vertex.applyMatrix4(o.matrixWorld);
+       if(Number.isFinite(vertex.x)&&Number.isFinite(vertex.y)&&
+        Number.isFinite(vertex.z))bounds.expandByPoint(vertex);
+      }
      }
     }
    }
    for(const child of o.children)visit(child);
   }
-  visit(exteriorYaw); if(bounds.isEmpty())bounds.setFromObject(exteriorYaw,true); return bounds;
+
+  visit(exteriorYaw);
+  if(bounds.isEmpty())bounds.setFromObject(exteriorYaw,true);
+  return bounds;
  }
  function fitExterior(){
   if(!exteriorObject)return;
   const oldP=aircraft.position.clone(),oldQ=aircraft.quaternion.clone();
   try{
-   aircraft.position.set(0,0,0); aircraft.quaternion.identity(); exteriorAnchor.position.set(0,0,0); exteriorAnchor.scale.setScalar(1);
-   exteriorYaw.rotation.y=rad(+$("exteriorYaw").value); exteriorTilt.rotation.x=rad(+$("exteriorPitch").value); aircraft.updateMatrixWorld(true);
-   const bounds=isLearjetExterior()?learjetPosedBounds():new T.Box3().setFromObject(exteriorYaw);
-   const size=bounds.getSize(new T.Vector3()),span=Math.max(size.x,size.z);
-   if(!Number.isFinite(span)||span<=0||!Number.isFinite(bounds.min.y)){ throw new Error("Invalid exterior dimensions."); }
-   exteriorFit={ span,center:bounds.getCenter(new T.Vector3()),minY:bounds.min.y };
-  }finally{ aircraft.position.copy(oldP); aircraft.quaternion.copy(oldQ); aircraft.updateMatrixWorld(true); }
+   aircraft.position.set(0,0,0);
+   aircraft.quaternion.identity();
+   exteriorAnchor.position.set(0,0,0);
+   exteriorAnchor.scale.setScalar(1);
+   exteriorYaw.rotation.y=rad(+$("exteriorYaw").value);
+   exteriorTilt.rotation.x=rad(+$("exteriorPitch").value);
+   aircraft.updateMatrixWorld(true);
+   const bounds=isLearjetExterior()?learjetPosedBounds():
+    new T.Box3().setFromObject(exteriorYaw);
+   const size=bounds.getSize(new T.Vector3());
+   const span=Math.max(size.x,size.z);
+   if(!Number.isFinite(span)||span<=0||!Number.isFinite(bounds.min.y)){
+    throw new Error("Invalid exterior dimensions.");
+   }
+   exteriorFit={
+    span,center:bounds.getCenter(new T.Vector3()),minY:bounds.min.y
+   };
+  }finally{
+   aircraft.position.copy(oldP);
+   aircraft.quaternion.copy(oldQ);
+   aircraft.updateMatrixWorld(true);
+  }
   planeSize();
  }
  function planeSize(){
-  const size=+$("planeSize").value; $("sizeOut").textContent=size;
-  const fallbackScale=size/10.5; placeholder.scale.setScalar(fallbackScale); placeholder.position.y=-GROUND+1.4*fallbackScale;
+  const size=+$("planeSize").value;
+  $("sizeOut").textContent=size;
+  const fallbackScale=size/10.5;
+  placeholder.scale.setScalar(fallbackScale);
+  placeholder.position.y=-GROUND+1.4*fallbackScale;
   if(!exteriorFit)return;
-  const scale=size/exteriorFit.span,learjetLowering=isLearjetExterior()?Number($("learjetLower").value):0;
+  const scale=size/exteriorFit.span;
   exteriorAnchor.scale.setScalar(scale);
-  exteriorAnchor.position.set(-exteriorFit.center.x*scale,-GROUND-exteriorFit.minY*scale-learjetLowering,-exteriorFit.center.z*scale);
+  const learjetLowering=isLearjetExterior()
+   ?Number($("learjetLower").value):0;
+  exteriorAnchor.position.set(
+   -exteriorFit.center.x*scale,
+   -GROUND-exteriorFit.minY*scale-learjetLowering,
+   -exteriorFit.center.z*scale
+  );
  }
- $("learjetLower").oninput=()=>{ $("learjetLowerOut").textContent=Number($("learjetLower").value).toFixed(2); planeSize(); };
+ $("learjetLower").oninput=()=>{
+  $("learjetLowerOut").textContent=Number($("learjetLower").value).toFixed(2);
+  planeSize();
+ };
  $("planeSize").oninput=planeSize;
- $("cameraDistance").oninput=()=>{ $("distanceOut").textContent=$("cameraDistance").value; };
+ $("cameraDistance").oninput=()=>{
+  $("distanceOut").textContent=$("cameraDistance").value;
+ };
  $("exteriorYaw").onchange=()=>{
-  const key=loadedAircraftKey||loadingAircraftKey||$("aircraftChoice").value; savedExteriorYaw[key]=+$("exteriorYaw").value;
-  if(!exteriorFit){ exteriorYaw.rotation.y=rad(+$("exteriorYaw").value);return; }
+  const key=loadedAircraftKey||loadingAircraftKey||$("aircraftChoice").value;
+  savedExteriorYaw[key]=+$("exteriorYaw").value;
+  if(!exteriorFit){
+   exteriorYaw.rotation.y=rad(+$("exteriorYaw").value);return;
+  }
   if(isLearjetExterior()){fitExterior();return;}
-  const angle=rad(+$("exteriorYaw").value); exteriorFit.center.applyAxisAngle(new T.Vector3(0,1,0),angle-exteriorYaw.rotation.y);
-  exteriorYaw.rotation.y=angle; planeSize();
+  const angle=rad(+$("exteriorYaw").value);
+  exteriorFit.center.applyAxisAngle(
+   new T.Vector3(0,1,0),angle-exteriorYaw.rotation.y);
+  exteriorYaw.rotation.y=angle;
+  planeSize();
  };
  $("exteriorPitch").oninput=()=>{
-  const key=loadedAircraftKey||loadingAircraftKey||$("aircraftChoice").value,angle=+$("exteriorPitch").value;
-  savedExteriorPitch[key]=angle; $("exteriorPitchOut").textContent=angle+"°"; exteriorTilt.rotation.x=rad(angle);
+  const key=loadedAircraftKey||loadingAircraftKey||$("aircraftChoice").value;
+  const angle=+$("exteriorPitch").value;
+  savedExteriorPitch[key]=angle;
+  $("exteriorPitchOut").textContent=angle+"°";
+  exteriorTilt.rotation.x=rad(angle);
   if(exteriorObject)fitExterior();
  };
  function installExteriorAnimations(gltf){
   exteriorMixer=new T.AnimationMixer(gltf.scene);
   for(const type of ["gear","flap"]){
-   const clips=gltf.animations.filter(c=>c.name.toLowerCase().includes(type)&&/(extend|deploy|retract)/i.test(c.name)&&!/door/i.test(c.name));
-   const clip=clips.find(c=>/(extend|deploy)/i.test(c.name))||clips[0]; if(!clip||clip.duration<=0)continue;
-   const action=exteriorMixer.clipAction(clip); action.setLoop(T.LoopOnce,1); action.clampWhenFinished=true; action.play(); action.paused=true;
-   exteriorClips.push({ type,clip,action, reverse:/retract/i.test(clip.name)&&!/(extend|deploy)/i.test(clip.name) });
+   const clips=gltf.animations.filter(c=>
+    c.name.toLowerCase().includes(type)&&
+    /(extend|deploy|retract)/i.test(c.name)&&!/door/i.test(c.name));
+   const clip=clips.find(c=>/(extend|deploy)/i.test(c.name))||clips[0];
+   if(!clip||clip.duration<=0)continue;
+   const action=exteriorMixer.clipAction(clip);
+   action.setLoop(T.LoopOnce,1);
+   action.clampWhenFinished=true;
+   action.play();
+   action.paused=true;
+   exteriorClips.push({
+    type,clip,action,
+    reverse:/retract/i.test(clip.name)&&!/(extend|deploy)/i.test(clip.name)
+   });
   }
-  animationStatus=exteriorClips.length?"Exterior animation clips: "+exteriorClips.map(c=>c.clip.name).join(", ")+". Verify visually.":"No clearly named gear/flap deployment clips found; exterior remains as modeled.";
+  animationStatus=exteriorClips.length
+   ?"Exterior animation clips: "+
+    exteriorClips.map(c=>c.clip.name).join(", ")+". Verify visually."
+   :"No clearly named gear/flap deployment clips found; exterior remains as modeled.";
  }
  function updateExterior(dt,snap=false){
-  const previousGear=exteriorGear,previousFlaps=exteriorFlaps,f=snap?1:1-Math.exp(-dt*2);
-  exteriorGear+=(Number(gearDown)-exteriorGear)*f; exteriorFlaps+=(Number(flaps)-exteriorFlaps)*f; placeholderGear.visible=exteriorGear>.5;
-  if(isLearjetExterior()&&(snap||Math.abs(exteriorGear-previousGear)>.00001||Math.abs(exteriorFlaps-previousFlaps)>.00001)){ learjetGroundFitPending=true; }
-  if(exteriorMixer){ exteriorClips.forEach(c=>{ let v=c.type==="gear"?exteriorGear:exteriorFlaps; if(c.reverse)v=1-v; c.action.time=v*c.clip.duration; }); exteriorMixer.update(0); }
-  if(isLearjetExterior()&&exteriorObject&&exteriorFit&&grounded&&gearDown&&learjetGroundFitPending&&Math.abs(exteriorGear-1)<.001&&Math.abs(exteriorFlaps-Number(flaps))<.001){ fitExterior(); learjetGroundFitPending=false; }
+  const previousGear=exteriorGear,previousFlaps=exteriorFlaps;
+  const f=snap?1:1-Math.exp(-dt*2);
+  exteriorGear+=(Number(gearDown)-exteriorGear)*f;
+  exteriorFlaps+=(Number(flaps)-exteriorFlaps)*f;
+  placeholderGear.visible=exteriorGear>.5;
+  if(isLearjetExterior()&&(snap||
+   Math.abs(exteriorGear-previousGear)>.00001||
+   Math.abs(exteriorFlaps-previousFlaps)>.00001)){
+   learjetGroundFitPending=true;
+  }
+  if(exteriorMixer){
+   exteriorClips.forEach(c=>{
+    let v=c.type==="gear"?exteriorGear:exteriorFlaps;
+    if(c.reverse)v=1-v;
+    c.action.time=v*c.clip.duration;
+   });
+   exteriorMixer.update(0);
+  }
+  if(isLearjetExterior()&&exteriorObject&&exteriorFit&&grounded&&gearDown&&
+   learjetGroundFitPending&&Math.abs(exteriorGear-1)<.001&&
+   Math.abs(exteriorFlaps-Number(flaps))<.001){
+   fitExterior();
+   learjetGroundFitPending=false;
+  }
  }
 
  function disposeModel(root){
@@ -1047,351 +1797,866 @@ function initialize(T,GLTFLoader){
   root.traverse(o=>{
    if(o.geometry)gs.add(o.geometry);
    const list=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];
-   for(const m of list){ ms.add(m); for(const value of Object.values(m)){ if(value&&value.isTexture)ts.add(value); } }
+   for(const m of list){
+    ms.add(m);
+    for(const value of Object.values(m)){
+     if(value&&value.isTexture)ts.add(value);
+    }
+   }
   });
-  gs.forEach(g=>g.dispose()); ms.forEach(m=>m.dispose()); ts.forEach(t=>t.dispose());
+  gs.forEach(g=>g.dispose());
+  ms.forEach(m=>m.dispose());
+  ts.forEach(t=>t.dispose());
  }
  function releaseExterior(){
-  if(exteriorMixer){ exteriorMixer.stopAllAction(); if(exteriorObject)exteriorMixer.uncacheRoot(exteriorObject); }
-  exteriorClips.length=0; exteriorMixer=null;exteriorFit=null;
-  if(exteriorObject){ exteriorTilt.remove(exteriorObject); disposeModel(exteriorObject); }
-  exteriorTilt.clear(); exteriorObject=null; placeholder.visible=true; animationStatus=""; learjetGroundFitPending=false;
+  if(exteriorMixer){
+   exteriorMixer.stopAllAction();
+   if(exteriorObject)exteriorMixer.uncacheRoot(exteriorObject);
+  }
+  exteriorClips.length=0;
+  exteriorMixer=null;exteriorFit=null;
+  if(exteriorObject){
+   exteriorTilt.remove(exteriorObject);
+   disposeModel(exteriorObject);
+  }
+  exteriorTilt.clear();
+  exteriorObject=null;
+  placeholder.visible=true;
+  animationStatus="";
+  learjetGroundFitPending=false;
  }
  function loadSelectedAircraft(){
-  const key=$("aircraftChoice").value,option=aircraftOptions[key];
-  if(!option)return; if(loadedAircraftKey===key&&exteriorObject)return; if(loadingAircraftKey===key)return;
-  const request=++exteriorRequest; loadingAircraftKey=key; loadedAircraftKey=null; releaseExterior();
+  const key=$("aircraftChoice").value;
+  const option=aircraftOptions[key];
+  if(!option)return;
+  if(loadedAircraftKey===key&&exteriorObject)return;
+  if(loadingAircraftKey===key)return;
+  const request=++exteriorRequest;
+  loadingAircraftKey=key;
+  loadedAircraftKey=null;
+  releaseExterior();
 
-  const initialYaw=savedExteriorYaw[key]??option.defaultYaw,initialPitch=savedExteriorPitch[key]??option.defaultPitch;
-  $("exteriorYaw").value=String(initialYaw); $("exteriorPitch").value=String(initialPitch); $("exteriorPitchOut").textContent=initialPitch+"°";
-  exteriorYaw.rotation.y=rad(initialYaw); exteriorTilt.rotation.x=rad(initialPitch); planeSize();
-  exteriorStatus=option.name+" downloading..."; assetText();
+  const initialYaw=savedExteriorYaw[key]??option.defaultYaw;
+  const initialPitch=savedExteriorPitch[key]??option.defaultPitch;
+  $("exteriorYaw").value=String(initialYaw);
+  $("exteriorPitch").value=String(initialPitch);
+  $("exteriorPitchOut").textContent=initialPitch+"°";
+  exteriorYaw.rotation.y=rad(initialYaw);
+  exteriorTilt.rotation.x=rad(initialPitch);
+  planeSize();
+  exteriorStatus=option.name+" downloading...";
+  assetText();
 
   let textureFailed=false;
   const manager=new T.LoadingManager();
-  manager.onError=url=>{ if(request!==exteriorRequest)return; textureFailed=true; console.warn(option.name+" asset failed:",url); if(loadedAircraftKey===key){ exteriorStatus=option.name+" loaded, but an associated asset failed. Check textures."; assetText(); } };
+  manager.onError=url=>{
+   if(request!==exteriorRequest)return;
+   textureFailed=true;
+   console.warn(option.name+" asset failed:",url);
+   if(loadedAircraftKey===key){
+    exteriorStatus=option.name+
+     " loaded, but an associated asset failed. Check textures.";
+    assetText();
+   }
+  };
 
   new GLTFLoader(manager).load(base+option.file,gltf=>{
    if(request!==exteriorRequest){disposeModel(gltf.scene);return;}
    try{
-    exteriorObject=gltf.scene; exteriorTilt.add(exteriorObject);
-    if(key==="learjet"){ installExteriorAnimations(gltf); updateExterior(0,true); fitExterior(); learjetGroundFitPending=!grounded; }
-    else{ fitExterior(); installExteriorAnimations(gltf); updateExterior(0,true); }
-    placeholder.visible=false; loadedAircraftKey=key; loadingAircraftKey=null;
-    exteriorStatus=option.name+" loaded."+(textureFailed?" Asset failed.":"")+(key==="learjet"?" Tilt: "+$("exteriorPitch").value+"°.":" Adjust Exterior nose direction if needed.");
-   }catch(error){ releaseExterior(); loadedAircraftKey=loadingAircraftKey=null; exteriorStatus=option.name+" setup failed. "+error.message; console.error(error); }
+    exteriorObject=gltf.scene;
+    exteriorTilt.add(exteriorObject);
+    if(key==="learjet"){
+     installExteriorAnimations(gltf);
+     updateExterior(0,true);
+     fitExterior();
+     learjetGroundFitPending=!grounded;
+    }else{
+     fitExterior();
+     installExteriorAnimations(gltf);
+     updateExterior(0,true);
+    }
+    placeholder.visible=false;
+    loadedAircraftKey=key;
+    loadingAircraftKey=null;
+    exteriorStatus=option.name+
+     " loaded. Shared cockpit; aircraft-specific handling."+
+     (textureFailed?" An associated asset failed.":"")+
+     (key==="learjet"
+      ?" Tilt: "+$("exteriorPitch").value+"°. Height adjustment remains available."
+      :" Adjust Exterior nose direction or Exterior nose tilt if needed.");
+   }catch(error){
+    releaseExterior();
+    loadedAircraftKey=loadingAircraftKey=null;
+    exteriorStatus=option.name+" setup failed; placeholder retained. "+error.message;
+    console.error(error);
+   }
    assetText();
   },undefined,error=>{
-   if(request!==exteriorRequest)return; loadingAircraftKey=loadedAircraftKey=null; placeholder.visible=true;
-   exteriorStatus=option.name+" download failed. Check "+option.file+" exists."; assetText(); console.error(error);
+   if(request!==exteriorRequest)return;
+   loadingAircraftKey=loadedAircraftKey=null;
+   placeholder.visible=true;
+   exteriorStatus=option.name+" download failed. Check "+option.file+
+    " exists in the main branch with this exact filename.";
+   assetText();
+   console.error(error);
   });
  }
- $("aircraftChoice").onchange=()=>{ if(state==="menu")loadSelectedAircraft(); };
+ $("aircraftChoice").onchange=()=>{
+  if(state==="menu")loadSelectedAircraft();
+ };
 
- function resetLook(){ orbitYaw=0;orbitPitch=.22; headYaw=headPitch=0; lookDrag=null; }
+ function resetLook(){
+  orbitYaw=0;orbitPitch=.22;
+  headYaw=headPitch=0;
+  lookDrag=null;
+ }
  $("resetLook").onclick=resetLook;
  $("fullscreen").onclick=async()=>{
-  try{ if(document.fullscreenElement)await document.exitFullscreen(); else if($("game").requestFullscreen)await $("game").requestFullscreen(); else message="Fullscreen not supported."; }
-  catch(e){ message="Fullscreen blocked."; }
+  try{
+   if(document.fullscreenElement)await document.exitFullscreen();
+   else if($("game").requestFullscreen)await $("game").requestFullscreen();
+   else message="Fullscreen is not supported here. Rotate your device.";
+  }catch(e){
+   message="Fullscreen was blocked. Normal view remains available.";
+  }
  };
- document.addEventListener("fullscreenchange",()=>{ $("fullscreen").textContent=document.fullscreenElement?"Exit fullscreen":"Fullscreen"; });
-
+ document.addEventListener("fullscreenchange",()=>{
+  $("fullscreen").textContent=document.fullscreenElement?"Exit fullscreen":"Fullscreen";
+ });
  function syncControls(){
-  $("power").textContent=Math.round(throttle*100)+" / "+Math.round(enginePower*100)+"%"; $("gripPower").textContent=Math.round(throttle*100)+"%";
-  const h=$("lever").clientHeight; if(h)$("grip").style.top=(h-21-throttle*(h-42))+"px";
-  const s=$("stick"),k=$("knob"); const dx=Math.max(0,(s.clientWidth-k.offsetWidth)/2-2),dy=Math.max(0,(s.clientHeight-k.offsetHeight)/2-2);
-  k.style.transform=`translate(${stickX*dx}px,${stickY*dy}px)`; $("yoke").style.transform=`rotate(${stickX*25}deg)`;
+  $("power").textContent=Math.round(throttle*100)+" / "+
+   Math.round(enginePower*100)+"%";
+  $("gripPower").textContent=Math.round(throttle*100)+"%";
+  const h=$("lever").clientHeight;
+  if(h)$("grip").style.top=(h-21-throttle*(h-42))+"px";
+  const s=$("stick"),k=$("knob");
+  const dx=Math.max(0,(s.clientWidth-k.offsetWidth)/2-2);
+  const dy=Math.max(0,(s.clientHeight-k.offsetHeight)/2-2);
+  k.style.transform=`translate(${stickX*dx}px,${stickY*dy}px)`;
+  $("yoke").style.transform=`rotate(${stickX*25}deg)`;
  }
- function clearControls(){ keys.clear(); stickX=stickY=0; stickDrag=leverDrag=cockpitDrag=lookDrag=null; syncControls(); }
+ function clearControls(){
+  keys.clear();
+  stickX=stickY=0;
+  stickDrag=leverDrag=cockpitDrag=lookDrag=null;
+  syncControls();
+ }
  function buttons(){
-  $("camera").textContent=chase?"Camera: CHASE":"Camera: COCKPIT"; $("pause").textContent=state==="paused"?"Resume":"Pause";
+  $("camera").textContent=chase?"Camera: CHASE":"Camera: COCKPIT";
+  $("pause").textContent=state==="paused"?"Resume":"Pause";
   $("pause").disabled=!["playing","paused"].includes(state);
-  $("flaps").textContent=flaps?"FLAPS DN":"FLAPS UP"; $("brakes").textContent=brakes?"BRAKE ON":"BRAKE OFF"; $("gear").textContent=gearDown?"GEAR DN":"GEAR UP";
+  $("flaps").textContent=flaps?"Flaps DOWN":"Flaps UP";
+  $("brakes").textContent=brakes?"Brake ON":"Brake OFF";
+  $("gear").textContent=gearDown?"Gear DOWN":"Gear UP";
   assistDisplay();
  }
- function orient(){ rotation.setFromEuler(new T.Euler(pitch,yaw,bank,"YXZ")); }
- function alignmentError(){ return deg(Math.acos(clamp(Math.abs(Math.cos(yaw)),0,1))); }
- function runwayMargin(){ return mode()==="easy"?10:mode()==="medium"?4:0; }
-
+ function orient(){
+  rotation.setFromEuler(new T.Euler(pitch,yaw,bank,"YXZ"));
+ }
+ function alignmentError(){
+  return deg(Math.acos(clamp(Math.abs(Math.cos(yaw)),0,1)));
+ }
+ function runwayMargin(){
+  return mode()==="easy"?10:mode()==="medium"?4:0;
+ }
  function start(){
-  autopilot=approachAssist=false;goAroundTime=0; clearExplosion();clearControls();resetLook();
-  airportKey=$("airport").value; airport=airports[airportKey]; buildMap(); loadSelectedAircraft(); setAircraftHandling();
-  pitch=bank=yaw=pitchRate=bankRate=0; rotation.identity(); airTime=alpha=airspeed=0; landed=false;grounded=true;
-  throttle=enginePower=0; flaps=true;brakes=false;gearDown=true;
-  position.set(0,GROUND,airport.length/2-120); velocity.set(0,0,0); groundedAirport=0;
+  autopilot=approachAssist=false;goAroundTime=0;
+  clearExplosion();clearControls();resetLook();
+  airportKey=$("airport").value;
+  airport=airports[airportKey];
+  buildMap();
+  loadSelectedAircraft();
+  setAircraftHandling();
+  pitch=bank=yaw=pitchRate=bankRate=0;
+  rotation.identity();
+  airTime=alpha=airspeed=0;
+  landed=false;grounded=true;
+  throttle=enginePower=0;
+  flaps=true;brakes=false;gearDown=true;
+  position.set(0,GROUND,airport.length/2-120);
+  velocity.set(0,0,0);
+  groundedAirport=0;
   resetWeather();resetRoute();updateExterior(0,true);
-  state="playing"; $("menu").hidden=true;controls.hidden=false; $("instruments").style.display="flex"; $("landingHint").style.display="block";
+  state="playing";
+  $("menu").hidden=true;controls.hidden=false;
   const selected=aircraftOptions[$("aircraftChoice").value];
-  message=selected.name+": advance thrust. Rotate near 135–145 kt. Fly to "+airportName(destinationAirport)+". Autopilot available above 165 ft.";
+  message=selected.name+": advance thrust. Rotate gently near 135–145 kt. "+
+   "Fly to "+airportName(destinationAirport)+
+   ". Autopilot is available above 165 ft.";
   buttons();updateAircraft();updateCamera(1,true);hud();
  }
  function setup(){
-  autopilot=approachAssist=false;goAroundTime=0; state="menu"; clearControls();clearExplosion();
-  aircraft.visible=cockpitRig.visible=false; controls.hidden=true;$("menu").hidden=false; $("instruments").style.display="none"; $("landingHint").style.display="none";
-  message="Choose a world, aircraft, and difficulty."; buttons();hud();
+  autopilot=approachAssist=false;goAroundTime=0;
+  state="menu";
+  clearControls();clearExplosion();
+  aircraft.visible=cockpitRig.visible=false;
+  controls.hidden=true;$("menu").hidden=false;
+  message="Choose a world, aircraft, and difficulty.";
+  buttons();hud();
  }
- function pause(){ if(state==="playing"){ state="paused";clearControls(); }else if(state==="paused"){ state="playing"; } buttons(); }
+ function pause(){
+  if(state==="playing"){
+   state="paused";clearControls();
+  }else if(state==="paused"){
+   state="playing";
+  }
+  buttons();
+ }
  function crash(reason){
-  if(state!=="playing")return; autopilot=approachAssist=false;goAroundTime=0; state="crashed"; clearControls();
-  message="CRASH: "+reason+" Select New flight to restart."; explode();buttons();
+  if(state!=="playing")return;
+  autopilot=approachAssist=false;goAroundTime=0;
+  state="crashed";
+  clearControls();
+  message="CRASH: "+reason+" Select New flight to restart.";
+  explode();buttons();
   setTimeout(()=>{ setup(); }, 2000);
  }
- function toggleGear(){ if(state!=="playing")return; if(grounded){ message="Gear cannot be retracted on runway.";return; } gearDown=!gearDown; buttons(); }
+ function toggleGear(){
+  if(state!=="playing")return;
+  if(grounded){
+   message="Gear cannot be retracted on the runway.";return;
+  }
+  gearDown=!gearDown;
+  buttons();
+ }
 
  function physics(dt){
   if(state!=="playing")return;
-  const previousPosition=position.clone(); if(!grounded)airTime+=dt;
-  let p=clamp(stickY+Number(keys.has("ArrowDown"))-Number(keys.has("ArrowUp")),-1,1);
-  const r=clamp(stickX+Number(keys.has("ArrowRight"))-Number(keys.has("ArrowLeft")),-1,1),rudder=Number(keys.has("q"))-Number(keys.has("e"));
-  const flightMode=mode(); if(keys.has("w"))throttle=Math.min(1,throttle+dt*.22); if(keys.has("s"))throttle=Math.max(0,throttle-dt*.22);
-  airspeed=velocity.clone().sub(wind).length(); const authority=clamp(airspeed/75,.08,1.25)*aircraftAgility;
+  const previousPosition=position.clone();
+  if(!grounded)airTime+=dt;
+
+  let p=clamp(
+   stickY+Number(keys.has("ArrowDown"))-Number(keys.has("ArrowUp")),-1,1
+  );
+  const r=clamp(
+   stickX+Number(keys.has("ArrowRight"))-Number(keys.has("ArrowLeft")),-1,1
+  );
+  const rudder=Number(keys.has("q"))-Number(keys.has("e"));
+  const flightMode=mode();
+  if(keys.has("w"))throttle=Math.min(1,throttle+dt*.22);
+  if(keys.has("s"))throttle=Math.max(0,throttle-dt*.22);
+
+  airspeed=velocity.clone().sub(wind).length();
+  const authority=clamp(airspeed/75,.08,1.25)*aircraftAgility;
   let command=null,assistedVS=null,assistActive=false;
 
-  if(autopilot&&!grounded){ command=autopilotCommands(dt,authority); p=command.pitchInput; }
-  else if(goAroundTime>0&&!grounded){ goAroundTime=Math.max(0,goAroundTime-dt); throttle=1; p=pitchCommand(airspeed*KNOTS<130?rad(3):rad(9),authority); command={targetBank:0}; }
-  else if(approachAssist&&!grounded){
-   const f=finalData(); assistActive=insideLandingAssistEnvelope(f);
+  if(autopilot&&!grounded){
+   command=autopilotCommands(dt,authority);
+   p=command.pitchInput;
+  }else if(goAroundTime>0&&!grounded){
+   goAroundTime=Math.max(0,goAroundTime-dt);
+   throttle=1;
+   p=pitchCommand(airspeed*KNOTS<130?rad(3):rad(9),authority);
+   command={targetBank:0};
+  }else if(approachAssist&&!grounded){
+   const f=finalData();
+
+   assistActive=insideLandingAssistEnvelope(f);
+
    if(assistActive){
-    const nearGround=f.height<20,flare=f.height<8,groundSpeed=Math.max(30,-velocity.z);
-    let desiredVS=clamp(-groundSpeed*Math.tan(rad(3))+(f.targetHeight-f.height)*.045,-4,1.5);
-    if(nearGround)desiredVS=clamp(desiredVS,-1.5,.5); if(flare)desiredVS=-.65;
+    const nearGround=f.height<20;
+    const flare=f.height<8;
+    const groundSpeed=Math.max(30,-velocity.z);
+
+    let desiredVS=clamp(
+     -groundSpeed*Math.tan(rad(3))+
+     (f.targetHeight-f.height)*.045,
+     -4,1.5
+    );
+
+    if(nearGround){
+     desiredVS=clamp(desiredVS,-1.5,.5);
+    }
+    if(flare){
+     desiredVS=-.65;
+    }
+
     speedAssist(dt,flare?140:145,desiredVS);
+
     if(flightMode==="easy"){
-     assistedVS=desiredVS; const manualTrim=nearGround?clamp(p,0,1):clamp(p,-1,1);
-     let targetPitch=trimPitch(assistedVS)+manualTrim*rad(nearGround?1.5:3);
-     targetPitch=clamp(targetPitch,rad(nearGround?0:-2),rad(10)); p=pitchCommand(targetPitch,authority);
+     assistedVS=desiredVS;
+
+     const manualTrim=nearGround?clamp(p,0,1):clamp(p,-1,1);
+     let targetPitch=trimPitch(assistedVS)+
+      manualTrim*rad(nearGround?1.5:3);
+     targetPitch=clamp(
+      targetPitch,rad(nearGround?0:-2),rad(10)
+     );
+     p=pitchCommand(targetPitch,authority);
     }
    }
   }
 
-  enginePower=approach(enginePower,throttle,dt,throttle>enginePower?4.5:3); pitchRate=approach(pitchRate,p*.15*authority,dt,1/2.2);
+  enginePower=approach(
+   enginePower,throttle,dt,throttle>enginePower?4.5:3
+  );
+  pitchRate=approach(pitchRate,p*.15*authority,dt,1/2.2);
 
-  if(command){ bankRate=approach(bankRate,clamp((command.targetBank-bank)*1.8,-rad(20),rad(20)),dt,.35); }
-  else if(flightMode!=="hard"){
-   const maxTurn=rad(assistActive?15:Math.min(60,(flightMode==="easy"?25:40)*aircraftAgility));
-   bankRate=approach(bankRate,clamp((-r*maxTurn-bank)*1.8*aircraftAgility,-rad(22)*aircraftAgility,rad(22)*aircraftAgility),dt,.35/aircraftAgility);
-  }else{ bankRate=approach(bankRate,-r*.32*authority,dt,.5/aircraftAgility); }
+  if(command){
+   bankRate=approach(
+    bankRate,clamp((command.targetBank-bank)*1.8,-rad(20),rad(20)),
+    dt,.35
+   );
+  }else if(flightMode!=="hard"){
+   const maxTurn=rad(
+    assistActive?15:
+    Math.min(60,(flightMode==="easy"?25:40)*aircraftAgility)
+   );
+   bankRate=approach(
+    bankRate,
+    clamp(
+     (-r*maxTurn-bank)*1.8*aircraftAgility,
+     -rad(22)*aircraftAgility,rad(22)*aircraftAgility
+    ),
+    dt,.35/aircraftAgility
+   );
+  }else{
+   bankRate=approach(
+    bankRate,-r*.32*authority,dt,.5/aircraftAgility
+   );
+  }
 
-  if(!grounded){ const scale=flightMode==="easy" ? .3 : flightMode==="medium" ? .65 : 1; const turbulence=weather.dark*weather.strength/14*scale; pitchRate+=Math.sin(weather.time*1.7)*turbulence*.013*dt; bankRate+=(Math.sin(weather.time*1.1)+.4*Math.sin(weather.time*2.8))*turbulence*.025*dt; }
+  if(!grounded){
+   const scale=flightMode==="easy" ? .3 : flightMode==="medium" ? .65 : 1;
+   const turbulence=weather.dark*weather.strength/14*scale;
+   pitchRate+=Math.sin(weather.time*1.7)*turbulence*.013*dt;
+   bankRate+=(Math.sin(weather.time*1.1)+.4*Math.sin(weather.time*2.8))*
+    turbulence*.025*dt;
+  }
 
   pitch=clamp(pitch+pitchRate*dt,rad(-25),rad(30));
-  const bankLimit=rad(command?30:Math.min(75,(flightMode==="easy"?25:flightMode==="medium"?40:65)*aircraftAgility)); bank=clamp(bank+bankRate*dt,-bankLimit,bankLimit);
+  const bankLimit=rad(
+   command?30:
+   Math.min(75,(flightMode==="easy"?25:flightMode==="medium"?40:65)*
+    aircraftAgility)
+  );
+  bank=clamp(bank+bankRate*dt,-bankLimit,bankLimit);
 
-  if(grounded){ bank*=Math.exp(-dt*8); pitch=clamp(pitch,0,airspeed>65?rad(12):rad(1.5)); yaw+=(rudder-r)*.1*clamp(velocity.length()/30,0,1)*dt; }
-  else{ yaw+=(Math.tan(bank)*G/Math.max(airspeed,45)+rudder*.055)*dt; }
+  if(grounded){
+   bank*=Math.exp(-dt*8);
+   pitch=clamp(pitch,0,airspeed>65?rad(12):rad(1.5));
+   yaw+=(rudder-r)*.1*clamp(velocity.length()/30,0,1)*dt;
+  }else{
+   yaw+=(Math.tan(bank)*G/Math.max(airspeed,45)+rudder*.055)*dt;
+  }
   orient();
 
-  const forward=new T.Vector3(0,0,-1).applyQuaternion(rotation),right=new T.Vector3(1,0,0).applyQuaternion(rotation),up=new T.Vector3(0,1,0).applyQuaternion(rotation);
-  const air=velocity.clone().sub(wind); airspeed=air.length(); const direction=airspeed>.1?air.clone().divideScalar(airspeed):forward.clone();
-  alpha=airspeed>10?Math.atan2(-air.dot(up),Math.max(1,air.dot(forward))):0; const beta=airspeed>10?Math.asin(clamp(air.dot(right)/airspeed,-1,1)):0;
+  const forward=new T.Vector3(0,0,-1).applyQuaternion(rotation);
+  const right=new T.Vector3(1,0,0).applyQuaternion(rotation);
+  const up=new T.Vector3(0,1,0).applyQuaternion(rotation);
+  const air=velocity.clone().sub(wind);
+  airspeed=air.length();
+  const direction=airspeed>.1?air.clone().divideScalar(airspeed):forward.clone();
 
-  const density=1.225*Math.exp(-Math.max(0,position.y)/8500),q=.5*density*airspeed*airspeed;
-  let cl=clamp(.25+4.7*alpha+(flaps ? .65 : 0),-1,flaps?2.25:1.55); const stallAngle=rad(flaps?17:15),stalled=Math.abs(alpha)>stallAngle;
-  if(stalled)cl*=Math.max(.25,1-(Math.abs(alpha)-stallAngle)*3.5);
-  const cd=.022+.045*cl*cl+(flaps ? .035 : 0)+(gearDown ? .018 : 0)+(stalled ? .12 : 0);
-  const lift=up.clone().addScaledVector(direction,-up.dot(direction)); if(lift.lengthSq()>.0001)lift.normalize(); else lift.copy(up);
+  alpha=airspeed>10
+   ?Math.atan2(-air.dot(up),Math.max(1,air.dot(forward))):0;
+  const beta=airspeed>10
+   ?Math.asin(clamp(air.dot(right)/airspeed,-1,1)):0;
 
-  const thrust=MAX_THRUST*enginePower*clamp(density/1.225,.3,1)*clamp(1-airspeed/600,.65,1);
-  const force=new T.Vector3(0,-MASS*G,0); force.addScaledVector(forward,thrust);
-  const assistance=flightMode==="easy"?1:flightMode==="medium" ? .5 : 0,turnAssist=grounded?1:1+(1/Math.max(Math.cos(bank),.7)-1)*assistance;
-  force.addScaledVector(lift,q*AREA*cl*turnAssist); force.addScaledVector(direction,-q*AREA*cd); force.addScaledVector(right,-q*AREA*.8*beta);
+  const density=1.225*Math.exp(-Math.max(0,position.y)/8500);
+  const q=.5*density*airspeed*airspeed;
+  let cl=clamp(
+   .25+4.7*alpha+(flaps ? .65 : 0),-1,flaps?2.25:1.55
+  );
+  const stallAngle=rad(flaps?17:15);
+  const stalled=Math.abs(alpha)>stallAngle;
+  if(stalled){
+   cl*=Math.max(.25,1-(Math.abs(alpha)-stallAngle)*3.5);
+  }
+  const cd=.022+.045*cl*cl+
+   (flaps ? .035 : 0)+(gearDown ? .018 : 0)+(stalled ? .12 : 0);
+  const lift=up.clone().addScaledVector(direction,-up.dot(direction));
+  if(lift.lengthSq()>.0001)lift.normalize();
+  else lift.copy(up);
 
-  if(assistedVS!==null){ const correction=clamp((assistedVS-velocity.y)*1.8-force.y/MASS,-5,6); force.y+=MASS*correction; }
+  const thrust=MAX_THRUST*enginePower*
+   clamp(density/1.225,.3,1)*clamp(1-airspeed/600,.65,1);
+  const force=new T.Vector3(0,-MASS*G,0);
+  force.addScaledVector(forward,thrust);
+  const assistance=flightMode==="easy"?1:flightMode==="medium" ? .5 : 0;
+  const turnAssist=grounded?1:
+   1+(1/Math.max(Math.cos(bank),.7)-1)*assistance;
+  force.addScaledVector(lift,q*AREA*cl*turnAssist);
+  force.addScaledVector(direction,-q*AREA*cd);
+  force.addScaledVector(right,-q*AREA*.8*beta);
+
+  if(assistedVS!==null){
+   const correction=clamp(
+    (assistedVS-velocity.y)*1.8-force.y/MASS,-5,6
+   );
+   force.y+=MASS*correction;
+  }
+
   velocity.addScaledVector(force,dt/MASS);
 
   if(grounded){
-   const h=new T.Vector3(velocity.x,0,velocity.z),speed=h.length();
-   if(speed>.001){ const braking=brakes?(3.5-weather.rain*.6):.12,loss=Math.min(speed,braking*dt); velocity.x-=h.x/speed*loss; velocity.z-=h.z/speed*loss; }
-   const flatRight=new T.Vector3(Math.cos(yaw),0,-Math.sin(yaw)); velocity.addScaledVector(flatRight,-velocity.dot(flatRight)*Math.min(1,dt*6));
-   if(force.y>0&&airspeed>65&&pitch>rad(2)){ grounded=false;landed=false; resetRoute(); message="Airborne. Fly toward "+airportName(destinationAirport)+". Autopilot available above 165 ft."; }
-   else{ velocity.y=0; }
+   const h=new T.Vector3(velocity.x,0,velocity.z);
+   const speed=h.length();
+   if(speed>.001){
+    const braking=brakes?(3.5-weather.rain*.6):.12;
+    const loss=Math.min(speed,braking*dt);
+    velocity.x-=h.x/speed*loss;
+    velocity.z-=h.z/speed*loss;
+   }
+   const flatRight=new T.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+   velocity.addScaledVector(
+    flatRight,-velocity.dot(flatRight)*Math.min(1,dt*6)
+   );
+   if(force.y>0&&airspeed>65&&pitch>rad(2)){
+    grounded=false;landed=false;
+    resetRoute();
+    message="Airborne. Fly toward "+airportName(destinationAirport)+
+     ". Autopilot is available above 165 ft.";
+   }else{
+    velocity.y=0;
+   }
   }
+
   position.addScaledVector(velocity,dt);
 
   const hit=mountainHit(previousPosition,position);
-  if(hit!==null){ position.lerpVectors(previousPosition,position,Math.max(0,hit-.001)); crash("Mountain impact."); return; }
+  if(hit!==null){
+   position.lerpVectors(previousPosition,position,Math.max(0,hit-.001));
+   crash("Mountain impact. Watch the brown hills on radar and keep clear.");
+   return;
+  }
 
   if(!grounded&&position.y<=GROUND){
-   const sink=Math.max(0,-velocity.y); position.y=GROUND; const l=limits(),reasons=[],arrivedAt=runwayAt(position.x,position.z,runwayMargin());
-   if(arrivedAt<0)reasons.push("touchdown outside runway"); if(!gearDown)reasons.push("landing gear UP");
-   if(deg(pitch)<l.minPitch||deg(pitch)>l.maxPitch){ reasons.push("pitch outside limits"); }
-   if(Math.abs(deg(bank))>l.bank)reasons.push("too much bank"); if(sink>l.sink){ reasons.push("descent "+sink.toFixed(1)+" m/s too hard"); }
-   if(airspeed*KNOTS>l.speed)reasons.push("touchdown too fast"); if(alignmentError()>l.yaw)reasons.push("not aligned");
-   if(reasons.length){ crash(reasons.join("; ")+".");return; }
+   const sink=Math.max(0,-velocity.y);
+   position.y=GROUND;
+   const l=limits(),reasons=[];
+   const arrivedAt=runwayAt(position.x,position.z,runwayMargin());
 
-   const reached=arrivedAt===destinationAirport; autopilot=approachAssist=false;goAroundTime=0; velocity.y=0; grounded=landed=true; pitchRate=bankRate=0; pitch=clamp(pitch,0,rad(8)); bank=0; groundedAirport=arrivedAt;
-   if(flightMode==="easy"){ throttle=0;brakes=true; } resetRoute();
-   message=reached?"LANDED at "+airportName(arrivedAt)+"! "+(flightMode==="easy"?"Brakes applied. ":"Idle thrust and brake. ")+"Next: "+airportName(destinationAirport)+".":"Touchdown accepted. Next: "+airportName(destinationAirport)+".";
+   if(arrivedAt<0)reasons.push("touchdown outside the runway");
+   if(!gearDown)reasons.push("landing gear is UP");
+   if(deg(pitch)<l.minPitch||deg(pitch)>l.maxPitch){
+    reasons.push("pitch outside landing limits");
+   }
+   if(Math.abs(deg(bank))>l.bank)reasons.push("too much bank");
+   if(sink>l.sink){
+    reasons.push("descent "+sink.toFixed(1)+" m/s is too hard");
+   }
+   if(airspeed*KNOTS>l.speed)reasons.push("touchdown too fast");
+   if(alignmentError()>l.yaw)reasons.push("not aligned with runway");
+
+   if(reasons.length){
+    crash(reasons.join("; ")+".");return;
+   }
+
+   const reached=arrivedAt===destinationAirport;
+   autopilot=approachAssist=false;goAroundTime=0;
+   velocity.y=0;
+   grounded=landed=true;
+   pitchRate=bankRate=0;
+   pitch=clamp(pitch,0,rad(8));
+   bank=0;
+   groundedAirport=arrivedAt;
+
+   if(flightMode==="easy"){
+    throttle=0;brakes=true;
+   }
+   resetRoute();
+
+   message=reached
+    ?"LANDED at "+airportName(arrivedAt)+"! "+
+     (flightMode==="easy"?"Brakes applied. ":"Idle thrust and brake. ")+
+     "Next: "+airportName(destinationAirport)+"."
+    :"Touchdown accepted. Next: "+airportName(destinationAirport)+".";
    buttons();
   }
 
   if(grounded){
    position.y=GROUND;
-   if(runwayAt(position.x,position.z,runwayMargin())<0){ crash("You left the runway.");return; }
-   if(landed&&velocity.length()<1){ message="Parked at "+airportName(groundedAirport)+". Turn around if needed, release brakes, take off for "+airportName(destinationAirport)+"."; }
+   if(runwayAt(position.x,position.z,runwayMargin())<0){
+    crash("You left the runway.");return;
+   }
+   if(landed&&velocity.length()<1){
+    message="Parked at "+airportName(groundedAirport)+
+     ". Turn around if needed, release brakes, and take off for "+
+     airportName(destinationAirport)+".";
+   }
   }
 
   if(!grounded&&stalled)pitchRate-=.08*dt;
-  if(![position.x,position.y,position.z,velocity.x,velocity.y,velocity.z,pitch,bank,yaw].every(Number.isFinite)){ crash("Simulation calculation error.");return; }
+
+  if(![
+   position.x,position.y,position.z,velocity.x,velocity.y,velocity.z,
+   pitch,bank,yaw
+  ].every(Number.isFinite)){
+   crash("Simulation calculation error.");return;
+  }
   orient();
  }
 
  function updateAircraft(){
-  aircraft.position.copy(position); aircraft.quaternion.copy(rotation);
+  aircraft.position.copy(position);
+  aircraft.quaternion.copy(rotation);
   aircraft.visible=chase&&!["menu","crashed"].includes(state);
-  cockpitRig.position.copy(position); cockpitRig.quaternion.copy(rotation);
+  cockpitRig.position.copy(position);
+  cockpitRig.quaternion.copy(rotation);
   cockpitRig.visible=cockpitReady&&!chase&&!["menu","crashed"].includes(state);
-  approachPath.visible=!["menu","crashed"].includes(state)&&!grounded&&routeIndex>=2; animateCockpit();
+  approachPath.visible=
+   !["menu","crashed"].includes(state)&&!grounded&&routeIndex>=2;
+  animateCockpit();
  }
  function updateCamera(dt,snap=false){
   if(state==="menu")return;
   if(chase){
    const distance=+$("cameraDistance").value,a=yaw+orbitYaw;
-   const offset=new T.Vector3(Math.sin(a)*Math.cos(orbitPitch)*distance,Math.sin(orbitPitch)*distance+3,Math.cos(a)*Math.cos(orbitPitch)*distance);
-   const desired=position.clone().add(offset); desired.y=Math.max(2,desired.y);
-   if(snap||lookDrag)camera.position.copy(desired); else camera.position.lerp(desired,1-Math.exp(-dt*7));
-   camera.up.set(0,1,0); camera.lookAt(position.clone().add(new T.Vector3(0,1,0)));
+   const offset=new T.Vector3(
+    Math.sin(a)*Math.cos(orbitPitch)*distance,
+    Math.sin(orbitPitch)*distance+3,
+    Math.cos(a)*Math.cos(orbitPitch)*distance
+   );
+   const desired=position.clone().add(offset);
+   desired.y=Math.max(2,desired.y);
+   if(snap||lookDrag)camera.position.copy(desired);
+   else camera.position.lerp(desired,1-Math.exp(-dt*7));
+   camera.up.set(0,1,0);
+   camera.lookAt(position.clone().add(new T.Vector3(0,1,0)));
   }else{
-   camera.position.copy(pilotEye.clone().add(eyeOffset).applyQuaternion(rotation).add(position));
-   const look=new T.Quaternion().setFromEuler(new T.Euler(rad(+$("lookPitch").value)+headPitch,rad(+$("lookYaw").value)+headYaw,0,"YXZ"));
+   camera.position.copy(
+    pilotEye.clone().add(eyeOffset).applyQuaternion(rotation).add(position)
+   );
+   const look=new T.Quaternion().setFromEuler(new T.Euler(
+    rad(+$("lookPitch").value)+headPitch,
+    rad(+$("lookYaw").value)+headYaw,0,"YXZ"
+   ));
    camera.quaternion.copy(rotation).multiply(look);
   }
-  const near=chase ? .2 : .02; if(camera.near!==near){ camera.near=near; camera.updateProjectionMatrix(); }
+  const near=chase ? .2 : .02;
+  if(camera.near!==near){
+   camera.near=near;
+   camera.updateProjectionMatrix();
+  }
  }
  function hud(){
   syncControls();assistDisplay();
-  $("speed").textContent=Math.round(airspeed*KNOTS)+" kt"; $("altitude").textContent=Math.max(0,Math.round((position.y-GROUND)*3.28084))+" ft";
-  $("vertical").textContent=Math.round(velocity.y*196.85)+" ft/min"; const heading=((airport.heading-deg(yaw))%360+360)%360;
-  $("heading").textContent=String(Math.round(heading)%360).padStart(3,"0")+"°"; $("timer").textContent=airTime.toFixed(1)+" s";
-  $("pitchValue").textContent=deg(pitch).toFixed(1)+"°"; $("bankValue").textContent=deg(bank).toFixed(1)+"°";
+  $("speed").textContent=Math.round(airspeed*KNOTS)+" kt";
+  $("altitude").textContent=
+   Math.max(0,Math.round((position.y-GROUND)*3.28084))+" ft";
+  $("vertical").textContent=Math.round(velocity.y*196.85)+" ft/min";
+  const heading=((airport.heading-deg(yaw))%360+360)%360;
+  $("heading").textContent=String(Math.round(heading)%360).padStart(3,"0")+"°";
+  $("timer").textContent=airTime.toFixed(1)+" s";
+  $("pitchValue").textContent=deg(pitch).toFixed(1)+"°";
+  $("bankValue").textContent=deg(bank).toFixed(1)+"°";
 
-  const l=limits(),ok=deg(pitch)>=l.minPitch&&deg(pitch)<=l.maxPitch&&Math.abs(deg(bank))<=l.bank&&Math.max(0,-velocity.y)<=l.sink&&airspeed*KNOTS<=l.speed&&alignmentError()<=l.yaw&&gearDown;
-  $("landingHint").textContent="Landing: pitch "+l.minPitch+"° to +"+l.maxPitch+"° · bank ±"+l.bank+"° · descent ≤"+l.sink+" m/s · speed ≤"+l.speed+" kt · gear "+(gearDown?"DOWN":"UP")+(routeIndex===4&&!grounded?" · "+landingAdvice():"");
+  const l=limits();
+  const ok=deg(pitch)>=l.minPitch&&deg(pitch)<=l.maxPitch&&
+   Math.abs(deg(bank))<=l.bank&&Math.max(0,-velocity.y)<=l.sink&&
+   airspeed*KNOTS<=l.speed&&alignmentError()<=l.yaw&&gearDown;
+  $("landingHint").textContent=
+   "Landing: pitch "+l.minPitch+"° to +"+l.maxPitch+
+   "° · bank ±"+l.bank+"° · descent ≤"+l.sink+
+   " m/s · speed ≤"+l.speed+" kt · gear "+(gearDown?"DOWN":"UP")+
+   (routeIndex===4&&!grounded?" · "+landingAdvice():"");
   $("landingHint").style.color=ok?"#86efac":"#fde68a";
 
-  const stalled=!grounded&&Math.abs(alpha)>rad(flaps?17:15),warning=terrainWarning();
-  $("status").textContent=(state==="paused"?"PAUSED — ":"")+(warning?"TERRAIN AHEAD — CLIMB! ":(stalled&&state==="playing"?"LOW LIFT / STALL — ":""))+(autopilot?"AUTOPILOT — ":approachAssist?"APPROACH ASSIST — ":"")+message;
+  const stalled=!grounded&&Math.abs(alpha)>rad(flaps?17:15);
+  const warning=terrainWarning();
+  $("status").textContent=(state==="paused"?"PAUSED — ":"")+
+   (warning?"TERRAIN AHEAD — CLIMB OR TURN AWAY! ":
+    stalled&&state==="playing"?"LOW LIFT / STALL — ":"")+
+   (autopilot?"AUTOPILOT — ":approachAssist?"APPROACH ASSIST — ":"")+message;
  }
 
  const primary=e=>e.pointerType!=="mouse"||e.button===0;
  const stick=$("stick"),lever=$("lever");
 
- stick.onpointerdown=e=>{ if(state!=="playing"||stickDrag||cockpitDrag||!primary(e))return; e.preventDefault(); manualControl("yoke"); stickDrag={id:e.pointerId,x:e.clientX,y:e.clientY}; stick.setPointerCapture(e.pointerId); };
- stick.onpointermove=e=>{ if(stickDrag?.id!==e.pointerId||state!=="playing")return; e.preventDefault(); stickX=clamp((e.clientX-stickDrag.x)/Math.max(35,stick.clientWidth*.3),-1,1); stickY=clamp((e.clientY-stickDrag.y)/Math.max(30,stick.clientHeight*.3),-1,1); };
- lever.onpointerdown=e=>{ if(state!=="playing"||leverDrag||cockpitDrag?.control==="throttle"||!primary(e))return; e.preventDefault(); manualControl("throttle"); leverDrag={id:e.pointerId,y:e.clientY,power:throttle}; lever.setPointerCapture(e.pointerId); };
- lever.onpointermove=e=>{ if(leverDrag?.id!==e.pointerId||state!=="playing")return; e.preventDefault(); throttle=clamp(leverDrag.power+(leverDrag.y-e.clientY)/Math.max(35,lever.clientHeight-42),0,1); };
-
+ stick.onpointerdown=e=>{
+  if(state!=="playing"||stickDrag||cockpitDrag||!primary(e))return;
+  e.preventDefault();
+  manualControl("yoke");
+  stickDrag={id:e.pointerId,x:e.clientX,y:e.clientY};
+  stick.setPointerCapture(e.pointerId);
+ };
+ stick.onpointermove=e=>{
+  if(stickDrag?.id!==e.pointerId||state!=="playing")return;
+  e.preventDefault();
+  stickX=clamp(
+   (e.clientX-stickDrag.x)/Math.max(35,stick.clientWidth*.3),-1,1);
+  stickY=clamp(
+   (e.clientY-stickDrag.y)/Math.max(30,stick.clientHeight*.3),-1,1);
+ };
+ lever.onpointerdown=e=>{
+  if(state!=="playing"||leverDrag||
+   cockpitDrag?.control==="throttle"||!primary(e))return;
+  e.preventDefault();
+  manualControl("throttle");
+  leverDrag={id:e.pointerId,y:e.clientY,power:throttle};
+  lever.setPointerCapture(e.pointerId);
+ };
+ lever.onpointermove=e=>{
+  if(leverDrag?.id!==e.pointerId||state!=="playing")return;
+  e.preventDefault();
+  throttle=clamp(
+   leverDrag.power+(leverDrag.y-e.clientY)/Math.max(35,lever.clientHeight-42),
+   0,1
+  );
+ };
  function hitControl(e){
-  const rect=renderer.domElement.getBoundingClientRect(); pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
-  scene.updateMatrixWorld(true); camera.updateMatrixWorld(true); raycaster.setFromCamera(pointer,camera);
+  const rect=renderer.domElement.getBoundingClientRect();
+  pointer.set(
+   (e.clientX-rect.left)/rect.width*2-1,
+   -(e.clientY-rect.top)/rect.height*2+1
+  );
+  scene.updateMatrixWorld(true);
+  camera.updateMatrixWorld(true);
+  raycaster.setFromCamera(pointer,camera);
   for(const hit of raycaster.intersectObject(cockpitModel,true)){
-   let o=hit.object; const ms=Array.isArray(o.material)?o.material:[o.material]; if(ms.every(m=>m&&!m.visible))continue;
-   while(o&&o!==cockpitRig){ if(o.userData.flightControl)return o.userData.flightControl; o=o.parent; } return null;
+   let o=hit.object;
+   const ms=Array.isArray(o.material)?o.material:[o.material];
+   if(ms.every(m=>m&&!m.visible))continue;
+   while(o&&o!==cockpitRig){
+    if(o.userData.flightControl)return o.userData.flightControl;
+    o=o.parent;
+   }
+   return null;
   }
   return null;
  }
  renderer.domElement.onpointerdown=e=>{
-  if(state==="menu"||lookDrag||cockpitDrag||!primary(e))return; const control=!chase&&cockpitReady&&state==="playing"?hitControl(e):null;
+  if(state==="menu"||lookDrag||cockpitDrag||!primary(e))return;
+  const control=!chase&&cockpitReady&&state==="playing"?hitControl(e):null;
   if(control){
-   if(stickDrag||(control==="throttle"&&leverDrag))return; e.preventDefault();
-   if(control==="flaps"){flaps=!flaps;buttons();return;} if(control==="brakes"){brakes=!brakes;buttons();return;}
-   manualControl(control); cockpitDrag={id:e.pointerId,control,x:e.clientX,y:e.clientY,power:throttle};
-  }else{ e.preventDefault(); lookDrag={id:e.pointerId,x:e.clientX,y:e.clientY}; }
+   if(stickDrag||(control==="throttle"&&leverDrag))return;
+   e.preventDefault();
+   if(control==="flaps"){flaps=!flaps;buttons();return;}
+   if(control==="brakes"){brakes=!brakes;buttons();return;}
+   manualControl(control);
+   cockpitDrag={
+    id:e.pointerId,control,x:e.clientX,y:e.clientY,power:throttle
+   };
+  }else{
+   e.preventDefault();
+   lookDrag={id:e.pointerId,x:e.clientX,y:e.clientY};
+  }
   renderer.domElement.setPointerCapture(e.pointerId);
  };
  renderer.domElement.onpointermove=e=>{
   if(cockpitDrag?.id===e.pointerId&&state==="playing"){
-   e.preventDefault(); const d=cockpitDrag,rect=renderer.domElement.getBoundingClientRect();
-   if(d.control==="yoke"){ const travel=Math.max(50,Math.min(rect.width,rect.height)*.2); stickX=clamp((e.clientX-d.x)/travel,-1,1); stickY=clamp((e.clientY-d.y)/travel,-1,1); }
-   else{ throttle=clamp(d.power-(e.clientY-d.y)/Math.max(100,rect.height*.5),0,1); }
+   e.preventDefault();
+   const d=cockpitDrag,rect=renderer.domElement.getBoundingClientRect();
+   if(d.control==="yoke"){
+    const travel=Math.max(50,Math.min(rect.width,rect.height)*.2);
+    stickX=clamp((e.clientX-d.x)/travel,-1,1);
+    stickY=clamp((e.clientY-d.y)/travel,-1,1);
+   }else{
+    throttle=clamp(
+     d.power-(e.clientY-d.y)/Math.max(100,rect.height*.5),0,1);
+   }
   }else if(lookDrag?.id===e.pointerId){
-   e.preventDefault(); const dx=e.clientX-lookDrag.x,dy=e.clientY-lookDrag.y; lookDrag.x=e.clientX;lookDrag.y=e.clientY;
-   if(chase){ orbitYaw-=dx*.006; orbitPitch=clamp(orbitPitch+dy*.005,rad(-15),rad(80)); }
-   else{ headYaw-=dx*.005; headPitch=clamp(headPitch-dy*.005,rad(-75),rad(75)); }
+   e.preventDefault();
+   const dx=e.clientX-lookDrag.x,dy=e.clientY-lookDrag.y;
+   lookDrag.x=e.clientX;lookDrag.y=e.clientY;
+   if(chase){
+    orbitYaw-=dx*.006;
+    orbitPitch=clamp(orbitPitch+dy*.005,rad(-15),rad(80));
+   }else{
+    headYaw-=dx*.005;
+    headPitch=clamp(headPitch-dy*.005,rad(-75),rad(75));
+   }
    updateCamera(0,true);
   }
  };
  for(const name of ["pointerup","pointercancel","lostpointercapture"]){
-  stick.addEventListener(name,e=>{ if(stickDrag?.id===e.pointerId){ stickDrag=null;stickX=stickY=0; } });
-  lever.addEventListener(name,e=>{ if(leverDrag?.id===e.pointerId)leverDrag=null; });
-  renderer.domElement.addEventListener(name,e=>{ if(cockpitDrag?.id===e.pointerId){ if(cockpitDrag.control==="yoke")stickX=stickY=0; cockpitDrag=null; } if(lookDrag?.id===e.pointerId)lookDrag=null; });
+  stick.addEventListener(name,e=>{
+   if(stickDrag?.id===e.pointerId){
+    stickDrag=null;stickX=stickY=0;
+   }
+  });
+  lever.addEventListener(name,e=>{
+   if(leverDrag?.id===e.pointerId)leverDrag=null;
+  });
+  renderer.domElement.addEventListener(name,e=>{
+   if(cockpitDrag?.id===e.pointerId){
+    if(cockpitDrag.control==="yoke")stickX=stickY=0;
+    cockpitDrag=null;
+   }
+   if(lookDrag?.id===e.pointerId)lookDrag=null;
+  });
  }
 
- $("launch").onclick=start; $("restart").onclick=setup; $("pause").onclick=pause; $("gear").onclick=toggleGear;
- $("flaps").onclick=()=>{ if(state==="playing"){flaps=!flaps;buttons();} };
- $("brakes").onclick=()=>{ if(state==="playing"){brakes=!brakes;buttons();} };
+ $("launch").onclick=start;
+ $("restart").onclick=setup;
+ $("pause").onclick=pause;
+ $("gear").onclick=toggleGear;
+ $("flaps").onclick=()=>{
+  if(state==="playing"){flaps=!flaps;buttons();}
+ };
+ $("brakes").onclick=()=>{
+  if(state==="playing"){brakes=!brakes;buttons();}
+ };
  $("camera").onclick=()=>{
-  if(chase&&!cockpitReady){ message="Cockpit not available yet.";return; }
-  clearControls(); chase=!chase; buttons();updateAircraft();updateCamera(1,true);
+  if(chase&&!cockpitReady){
+   message="Cockpit not available yet. Exterior remains active.";return;
+  }
+  clearControls();
+  chase=!chase;
+  buttons();updateAircraft();updateCamera(1,true);
  };
  window.addEventListener("keydown",e=>{
-  if(["INPUT","SELECT","TEXTAREA","BUTTON","SUMMARY"].includes(e.target?.tagName)){ return; }
+  if(["INPUT","SELECT","TEXTAREA","BUTTON","SUMMARY"].includes(e.target?.tagName)){
+   return;
+  }
   const k=e.key.length===1?e.key.toLowerCase():e.key;
-  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","q","e","w","s"].includes(k)&&state==="playing"){ e.preventDefault(); manualControl(k==="w"||k==="s"?"throttle":"yoke"); keys.add(k); }
-  if(!e.repeat){ if(k==="p")pause(); if(k==="a")toggleAutopilot(); if(k==="l")toggleApproachAssist(); if(k==="r")goAround(); if(k==="g")toggleGear(); if(k==="f"&&state==="playing"){flaps=!flaps;buttons();} if(k==="b"&&state==="playing"){brakes=!brakes;buttons();} }
+  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","q","e","w","s"]
+   .includes(k)&&state==="playing"){
+   e.preventDefault();
+   manualControl(k==="w"||k==="s"?"throttle":"yoke");
+   keys.add(k);
+  }
+  if(!e.repeat){
+   if(k==="p")pause();
+   if(k==="a")toggleAutopilot();
+   if(k==="l")toggleApproachAssist();
+   if(k==="r")goAround();
+   if(k==="g")toggleGear();
+   if(k==="f"&&state==="playing"){flaps=!flaps;buttons();}
+   if(k==="b"&&state==="playing"){brakes=!brakes;buttons();}
+  }
  });
- window.addEventListener("keyup",e=>{ keys.delete(e.key.length===1?e.key.toLowerCase():e.key); });
- function suspend(){ clearControls(); if(state==="playing")pause(); }
+ window.addEventListener("keyup",e=>{
+  keys.delete(e.key.length===1?e.key.toLowerCase():e.key);
+ });
+ function suspend(){
+  clearControls();
+  if(state==="playing")pause();
+ }
  window.addEventListener("blur",suspend);
- document.addEventListener("visibilitychange",()=>{ if(document.hidden)suspend(); });
- renderer.domElement.addEventListener("webglcontextlost",e=>{ e.preventDefault(); stopped=true; suspend(); window.gameFatal("Graphics context lost. Reload."); });
+ document.addEventListener("visibilitychange",()=>{
+  if(document.hidden)suspend();
+ });
+ renderer.domElement.addEventListener("webglcontextlost",e=>{
+  e.preventDefault();
+  stopped=true;
+  suspend();
+  window.gameFatal("Graphics context lost. Reload the app.");
+ });
 
  function resize(){
-  const w=stage.clientWidth,h=stage.clientHeight; if(!w||!h)return;
-  renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); rainWidth=w;rainHeight=h;
-  const dpr=Math.min(devicePixelRatio||1,1.5); rainCanvas.width=Math.round(w*dpr); rainCanvas.height=Math.round(h*dpr);
-  rainCtx.setTransform(dpr,0,0,dpr,0,0); syncControls();
+  const w=stage.clientWidth,h=stage.clientHeight;
+  if(!w||!h)return;
+  renderer.setSize(w,h);
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+  rainWidth=w;rainHeight=h;
+  const dpr=Math.min(devicePixelRatio||1,1.5);
+  rainCanvas.width=Math.round(w*dpr);
+  rainCanvas.height=Math.round(h*dpr);
+  rainCtx.setTransform(dpr,0,0,dpr,0,0);
+  syncControls();
  }
- const resizeObserver=new ResizeObserver(resize); resizeObserver.observe(stage); window.addEventListener("resize",resize);
+ const resizeObserver=new ResizeObserver(resize);
+ resizeObserver.observe(stage);
+ window.addEventListener("resize",resize);
 
- readEye();planeSize();buildMap();resetWeather();resetRoute();resize(); approachPath.visible=false;
- camera.position.set(130,100,airport.length/2+220); camera.lookAt(0,0,airport.length/2-500);
- $("launch").disabled=false; $("camera").disabled=false; $("restart").disabled=false;
- $("launch").textContent="Start flight"; $("notice").textContent="World ready. Start now."; buttons();hud();assetText();weatherVisuals();drawNavigation();
+ readEye();planeSize();buildMap();resetWeather();resetRoute();resize();
+ approachPath.visible=false;
+ camera.position.set(130,100,airport.length/2+220);
+ camera.lookAt(0,0,airport.length/2-500);
+ $("launch").disabled=false;
+ $("camera").disabled=false;
+ $("restart").disabled=false;
+ $("launch").textContent="Start flight";
+ $("notice").textContent=
+  "World ready. Aircraft assets are downloading; you can start now.";
+ buttons();hud();assetText();weatherVisuals();drawNavigation();
 
  let previous=performance.now(),uiClock=0;
  function frame(now){
   if(stopped)return;
   try{
-   const dt=clamp((now-previous)/1000,0,.05); previous=now;
+   const dt=clamp((now-previous)/1000,0,.05);
+   previous=now;
    if(state==="playing"){
-    updateWeather(dt); const steps=Math.max(1,Math.ceil(dt/.008)); for(let i=0;i<steps;i++)physics(dt/steps);
-    updateExterior(dt); if(state==="playing")updateNavigation();
+    updateWeather(dt);
+    const steps=Math.max(1,Math.ceil(dt/.008));
+    for(let i=0;i<steps;i++)physics(dt/steps);
+    updateExterior(dt);
+    if(state==="playing")updateNavigation();
    }
-   if(state!=="menu"){ updateAircraft();updateCamera(dt); } else { approachPath.visible=false; }
+   if(state!=="menu"){
+    updateAircraft();updateCamera(dt);
+   }else{
+    approachPath.visible=false;
+   }
    if(state==="crashed")updateExplosion(dt);
-   weatherVisuals(); drawRain(state==="playing"?dt:0);
-   uiClock+=dt; if(uiClock>.07){ hud();drawNavigation();uiClock=0; }
-   renderer.render(scene,camera); requestAnimationFrame(frame);
-  }catch(error){ stopped=true; suspend(); window.gameFatal("Game stopped: "+error.message+". Reload."); console.error(error); }
+   weatherVisuals();
+   drawRain(state==="playing"?dt:0);
+   uiClock+=dt;
+   if(uiClock>.07){
+    hud();drawNavigation();uiClock=0;
+   }
+   renderer.render(scene,camera);
+   requestAnimationFrame(frame);
+  }catch(error){
+   stopped=true;
+   suspend();
+   window.gameFatal("Game stopped: "+error.message+". Reload to restart.");
+   console.error(error);
+  }
  }
  requestAnimationFrame(frame);
 
  let textureFailure=false;
  const cm=new T.LoadingManager();
- cm.onError=url=>{ textureFailure=true; console.warn("Cockpit asset failed:",url); };
+ cm.onError=url=>{
+  textureFailure=true;
+  console.warn("Cockpit asset failed:",url);
+ };
  new GLTFLoader(cm).load(base+"cockpit.glb",gltf=>{
   const oldP=cockpitRig.position.clone(),oldQ=cockpitRig.quaternion.clone();
   try{
-   cockpitRig.position.set(0,0,0); cockpitRig.quaternion.identity(); cockpitModel.add(gltf.scene); cockpitModel.rotation.set(0,-Math.PI/2,0); cockpitRig.updateMatrixWorld(true);
-   const bounds=new T.Box3().setFromObject(cockpitModel); if(bounds.isEmpty())throw new Error("Empty cockpit model.");
-   cockpitModel.position.x-=bounds.getCenter(new T.Vector3()).x; cockpitModel.position.y+=-1.2-bounds.min.y; cockpitRig.updateMatrixWorld(true);
+   cockpitRig.position.set(0,0,0);
+   cockpitRig.quaternion.identity();
+   cockpitModel.add(gltf.scene);
+   cockpitModel.rotation.set(0,-Math.PI/2,0);
+   cockpitRig.updateMatrixWorld(true);
+   const bounds=new T.Box3().setFromObject(cockpitModel);
+   if(bounds.isEmpty())throw new Error("Empty cockpit model.");
+   cockpitModel.position.x-=bounds.getCenter(new T.Vector3()).x;
+   cockpitModel.position.y+=-1.2-bounds.min.y;
+   cockpitRig.updateMatrixWorld(true);
 
    const seen=new Set();
    gltf.scene.traverse(o=>{
     if(!o.isMesh||!o.material)return;
     for(const m of Array.isArray(o.material)?o.material:[o.material]){
-     if(seen.has(m))continue; seen.add(m);
-     const image=m.map?.image,names=[m.name,m.map?.name,image?.currentSrc||image?.src].join(" ");
-     if(/window[-_ ]?trans/i.test(names)){ glassMaterials.push({material:m,visible:m.visible}); }
+     if(seen.has(m))continue;
+     seen.add(m);
+     const image=m.map?.image;
+     const names=[m.name,m.map?.name,image?.currentSrc||image?.src].join(" ");
+     if(/window[-_ ]?trans/i.test(names)){
+      glassMaterials.push({material:m,visible:m.visible});
+     }
     }
    });
 
-   applyGlass(); calibrateEye(); cockpitStatus="Shared cockpit loaded. Controls: "+installCockpit(gltf.scene)+(textureFailure?". Some textures failed.":"."); cockpitReady=true;
+   applyGlass();
+   calibrateEye();
+   cockpitStatus="Shared cockpit loaded. Controls: "+installCockpit(gltf.scene)+
+    (textureFailure?". Some textures failed.":".");
+   cockpitReady=true;
    $("notice").textContent="Cockpit ready. Drag empty areas to look around.";
-  }catch(error){ cockpitReady=false; cockpitStatus="Cockpit setup failed; exterior flight remains available."; $("notice").textContent=cockpitStatus; console.error(error); }
-  finally{ cockpitRig.position.copy(oldP); cockpitRig.quaternion.copy(oldQ); cockpitRig.updateMatrixWorld(true); assetText(); }
- },undefined,error=>{ cockpitStatus="Cockpit download failed. Exterior flight available."; $("notice").textContent="Cockpit unavailable."; assetText(); console.error(error); });
+  }catch(error){
+   cockpitReady=false;
+   cockpitStatus="Cockpit setup failed; exterior flight remains available.";
+   $("notice").textContent=cockpitStatus;
+   console.error(error);
+  }finally{
+   cockpitRig.position.copy(oldP);
+   cockpitRig.quaternion.copy(oldQ);
+   cockpitRig.updateMatrixWorld(true);
+   assetText();
+  }
+ },undefined,error=>{
+  cockpitStatus="Cockpit download failed. Check cockpit.glb and its texture files.";
+  $("notice").textContent="Cockpit unavailable. Exterior flight remains available.";
+  assetText();
+  console.error(error);
+ });
 
  loadSelectedAircraft();
 }
