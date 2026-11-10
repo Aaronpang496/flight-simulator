@@ -15,10 +15,10 @@ html, body {
 }
 [hidden]{display:none!important}
 
-/* --- GAME CONTAINER (Top 60%) --- */
+/* --- GAME CONTAINER (Top 55%) --- */
 #game {
  position: absolute; top: 0; left: 0; right: 0;
- height: 60%;
+ height: 55%;
  background: #101827;
 }
 
@@ -47,7 +47,7 @@ html, body {
 }
 .menuInner {
  width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 15px;
- margin-bottom: 50px; /* Safe padding for bottom buttons */
+ margin-bottom: 50px; 
 }
 
 .world-grid {
@@ -102,34 +102,34 @@ select {
 #navArrow{display:block;margin:0 auto;width:36px;height:36px;color:#b9ffff;filter:drop-shadow(0 0 8px #00eaff);transform-origin:center}
 #navText{font-size:9px;color:#cffafe;line-height:1.45;white-space:pre-line}
 
-/* --- UI OVERLAY (Bottom 40% Area) --- */
+/* --- UI OVERLAY (Bottom 45% Area) --- */
 #ui-overlay {
- position: absolute; top: 60%; left: 0; right: 0; bottom: 0;
+ position: absolute; top: 55%; left: 0; right: 0; bottom: 0;
  display: flex; flex-direction: column;
  background: #101827; border-top: 1px solid #334155; z-index: 10; padding: 4px;
 }
 
 #instruments{
  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
- gap:5px; padding:0 12px 6px; pointer-events:none;
+ gap:4px; padding:0 8px 4px; pointer-events:none;
  flex-shrink: 0;
 }
 .instrument{
- padding:5px 2px;background:#0f172ade;border-radius:8px;
+ padding:4px 2px;background:#0f172ade;border-radius:8px;
  text-align:center;font-size:10px; border:1px solid #334155;
 }
 .instrument strong{display:block;color:#a5f3fc;font-size:14px}
 
 /* Controls flex row */
 #controls{
- display:flex; justify-content:space-between; gap:6px;
- padding:0 4px; margin-bottom:4px;
+ display:flex; justify-content:space-between; gap:4px;
+ padding:0 2px; margin-bottom:4px;
  flex-grow: 1; min-height: 0;
 }
 .panel{
- padding:4px;border:1px solid #64748b;border-radius:10px;background:#0f172ade;
+ padding:3px;border:1px solid #64748b;border-radius:10px;background:#0f172ade;
  pointer-events:auto;box-shadow:0 4px 10px rgba(0,0,0,0.5);
- display:flex; flex-direction:column; min-height:0; overflow: hidden; /* Prevents text bleeding */
+ display:flex; flex-direction:column; min-height:0; overflow: hidden;
 }
 #yokePanel{width:42%}
 #powerPanel{width:28%}
@@ -137,47 +137,47 @@ select {
 
 .panelTitle{color:#a5f3fc;text-align:center;font-size:10px;font-weight:bold;margin-bottom:2px}
 #stick{
- position:relative;flex-grow:1;min-height:60px;overflow:hidden;
+ position:relative;flex-grow:1;min-height:50px;overflow:hidden;
  background:#0f172acc;border:1px solid #64748b;border-radius:8px;touch-action:none;
 }
 #knob{
- position:absolute;left:50%;top:50%;width:100px;height:70px;
- margin:-35px 0 0 -50px;pointer-events:none
+ position:absolute;left:50%;top:50%;width:90px;height:65px;
+ margin:-32px 0 0 -45px;pointer-events:none
 }
 #yoke{
- width:100px;height:70px;transform-origin:50% 65%;
+ width:90px;height:65px;transform-origin:50% 65%;
  filter:drop-shadow(0 4px 3px #000)
 }
-.guide{font-size:8px;color:#bdcbe0;position:absolute;width:100%;text-align:center;top:4px;pointer-events:none}
-.guide.bottom{top:auto;bottom:4px}
+.guide{font-size:8px;color:#bdcbe0;position:absolute;width:100%;text-align:center;top:2px;pointer-events:none}
+.guide.bottom{top:auto;bottom:2px}
 
 #lever{
- position:relative;flex-grow:1;min-height:60px;overflow:hidden;
+ position:relative;flex-grow:1;min-height:50px;overflow:hidden;
  background:linear-gradient(90deg,#111827,#334155,#111827);
  border:1px solid #64748b;border-radius:8px;touch-action:none;
 }
-.track{position:absolute;top:20px;bottom:20px;left:calc(50% - 5px);width:10px;border-radius:5px;background:#020617}
-.leverLabel{position:absolute;width:100%;text-align:center;font-size:10px;font-weight:bold;color:#cbd5e1}
+.track{position:absolute;top:16px;bottom:16px;left:calc(50% - 4px);width:8px;border-radius:4px;background:#020617}
+.leverLabel{position:absolute;width:100%;text-align:center;font-size:9px;font-weight:bold;color:#cbd5e1}
 .full{top:2px}.idle{bottom:2px}
 #grip{
- position:absolute;left:50%;top:75%;width:75px;height:32px;
+ position:absolute;left:50%;top:75%;width:70px;height:30px;
  transform:translate(-50%,-50%);border:2px solid #94a3b8;
  border-radius:8px;background:linear-gradient(#596579,#1e293b,#111827);
  pointer-events:none;box-shadow:0 4px 8px rgba(0,0,0,0.8);
 }
-.ridges{height:6px;margin:4px 8px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 6px)}
-#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:12px;margin-top:2px;font-weight:bold;}
+.ridges{height:6px;margin:4px 6px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 6px)}
+#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:11px;margin-top:2px;font-weight:bold;}
 
-.mini{display:flex;gap:4px;margin-top:4px;flex-shrink:0;}
-.mini button{flex:1;padding:6px 0;font-size:9px;min-height:24px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;}
-#gear{width:100%;min-height:24px;margin-top:4px;font-size:10px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;flex-shrink:0;}
+.mini{display:flex;gap:2px;margin-top:4px;flex-shrink:0;}
+.mini button{flex:1;padding:4px 0;font-size:9px;min-height:22px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;}
+#gear{width:100%;min-height:22px;margin-top:2px;font-size:10px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;flex-shrink:0;}
 
-#autopilotPanel button{width:100%;margin:3px 0;font-size:10px;min-height:28px;padding:2px; border-radius:6px; border:0; font-weight:bold;flex-shrink:0;}
+#autopilotPanel button{width:100%;margin:2px 0;font-size:9px;min-height:24px;padding:2px; border-radius:6px; border:0; font-weight:bold;flex-shrink:0;}
 #autopilotButton{background:#334155;color:#e2e8f0}
 #assistButton{background:#25465b;color:#e0f2fe}
 #goAroundButton{background:#fde68a;color:#422006}
 #autopilotPanel button.engaged{background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66}
-#autopilotInfo{margin-top:4px;color:#cbd5e1;font-size:9px;line-height:1.2;white-space:pre-line; flex-grow: 1;}
+#autopilotInfo{margin-top:2px;color:#cbd5e1;font-size:8px;line-height:1.2;white-space:pre-line; flex-grow: 1;}
 
 /* Text hidden as requested to prevent clutter */
 #status, #landingHint { display: none !important; }
@@ -186,13 +186,13 @@ select {
 .buttons{
  display:grid;
  grid-template-columns: repeat(3, 1fr);
- gap:6px;
- padding: 4px 12px; 
- padding-bottom: max(16px, env(safe-area-inset-bottom));
+ gap:4px;
+ padding: 4px 4px; 
+ padding-bottom: max(12px, env(safe-area-inset-bottom));
  flex-shrink: 0;
 }
 .buttons button{
- width: 100%; min-height: 36px; font-size: 12px;
+ width: 100%; min-height: 32px; font-size: 12px;
  background:#a5f3fc; color:#083344; border-radius:8px; border:0; font-weight:bold;
 }
 
@@ -2004,7 +2004,7 @@ function initialize(T,GLTFLoader){
    Math.round(enginePower*100)+"%";
   $("gripPower").textContent=Math.round(throttle*100)+"%";
   const h=$("lever").clientHeight;
-  if(h)$("grip").style.top=(h-24-throttle*(h-48))+"px";
+  if(h)$("grip").style.top=(h-20-throttle*(h-40))+"px";
   const s=$("stick"),k=$("knob");
   const dx=Math.max(0,(s.clientWidth-k.offsetWidth)/2-2);
   const dy=Math.max(0,(s.clientHeight-k.offsetHeight)/2-2);
@@ -2018,7 +2018,7 @@ function initialize(T,GLTFLoader){
   syncControls();
  }
  function buttons(){
-  $("camera").textContent="Camera";
+  $("camera").textContent=chase?"Camera: CHASE":"Camera: COCKPIT";
   $("pause").textContent=state==="paused"?"Resume":"Pause";
   $("pause").disabled=!["playing","paused"].includes(state);
   $("flaps").textContent=flaps?"Flaps DOWN":"Flaps UP";
