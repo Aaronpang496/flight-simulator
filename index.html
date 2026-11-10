@@ -109,11 +109,20 @@ select {
  display: flex; flex-direction: column;
  background: #101827; border-top: 1px solid #334155; z-index: 10; padding: 4px;
 }
-#instruments{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:0 0 4px;pointer-events:none;flex-shrink:0;}
-.instrument{padding:2px 0;background:#0f172ade;border-radius:6px;text-align:center;font-size:9px;border:1px solid #334155;}
-.instrument strong{display:block;color:#a5f3fc;font-size:12px;}
 
-#controls{display:flex;justify-content:space-between;gap:6px;padding:0;pointer-events:none;align-items:flex-end;flex-grow:1;}
+/* RESTORED: Original instrument styling */
+#instruments{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:5px; padding:0 12px 6px; pointer-events:none;
+ flex-shrink: 0;
+}
+.instrument{
+ padding:5px 2px;background:#0f172ade;border-radius:8px;
+ text-align:center;font-size:10px; border:1px solid #334155;
+}
+.instrument strong{display:block;color:#a5f3fc;font-size:14px}
+
+#controls{display:flex;justify-content:space-between;gap:6px;padding:0 4px;pointer-events:none;align-items:flex-end;flex-grow:1;}
 .panel{padding:4px;border:1px solid #64748b;border-radius:10px;background:#0f172ade;pointer-events:auto;box-shadow:0 4px 10px rgba(0,0,0,0.5);}
 #yokePanel{width:36%}
 #powerPanel{width:29%}
@@ -134,10 +143,10 @@ select {
 .ridges{height:4px;margin:2px 4px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 5px)}
 #gripPower{display:block;text-align:center;color:#a5f3fc;font-size:10px}
 .mini{display:flex;gap:2px;margin-top:2px}
-.mini button{flex:1;padding:2px 0;font-size:8px;min-height:20px}
-#gear{width:100%;min-height:20px;margin-top:2px;font-size:9px}
+.mini button{flex:1;padding:2px 0;font-size:8px;min-height:20px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;}
+#gear{width:100%;min-height:20px;margin-top:2px;font-size:9px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;}
 
-#autopilotPanel button{width:100%;margin:2px 0;font-size:9px;min-height:24px;padding:2px;}
+#autopilotPanel button{width:100%;margin:2px 0;font-size:9px;min-height:24px;padding:2px; border-radius:6px; border:0; font-weight:bold;}
 #autopilotButton{background:#334155;color:#e2e8f0}
 #assistButton{background:#25465b;color:#e0f2fe}
 #goAroundButton{background:#fde68a;color:#422006}
@@ -145,8 +154,16 @@ select {
 #autopilotInfo{margin-top:2px;color:#cbd5e1;font-size:8px;line-height:1.2;white-space:pre-line}
 #status, #landingHint { display:none; }
 
-.buttons{display:flex;gap:4px;padding:4px 0 0;padding-bottom:max(2px, env(safe-area-inset-bottom));flex-shrink:0;}
-.buttons button{flex:1;min-height:24px;font-size:9px;padding:0;background:#a5f3fc;color:#083344;border-radius:6px;border:0;font-weight:bold;}
+/* RESTORED: Original bottom action buttons styling */
+.buttons{
+ display:flex; flex-wrap:wrap; gap:6px;
+ padding:4px 12px; padding-bottom: max(4px, env(safe-area-inset-bottom));
+ flex-shrink: 0;
+}
+.buttons button{
+ flex:1;min-width:60px; min-height: 32px; font-size: 11px;
+ background:#a5f3fc; color:#083344; border-radius:8px; border:0; font-weight:bold;
+}
 
 small{display:none}
 output{color:#a5f3fc}
@@ -383,10 +400,11 @@ function initialize(T,GLTFLoader){
 
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
+ // FIXED: F-20 now faces 180 (straight down the runway) instead of 90.
  const aircraftOptions={
   boeing737:{name:"Boeing 737",file:"737_max_lion_air.glb",defaultYaw:180,defaultPitch:0},
   learjet:{name:"Learjet",file:"learjet.glb",defaultYaw:180,defaultPitch:14},
-  f20:{name:"F-20",file:"F-20.glb",defaultYaw:90,defaultPitch:0}
+  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0}
  };
 
  let exteriorRequest=0;
@@ -492,7 +510,7 @@ function initialize(T,GLTFLoader){
      model.scale.setScalar(scale);
      model.position.sub(center.multiplyScalar(scale));
      
-     // Rotate to face sideways nicely
+     // Rotate to face sideways nicely for the preview
      model.rotation.y = rad(option.defaultYaw);
      
      previewGroup.add(model);
