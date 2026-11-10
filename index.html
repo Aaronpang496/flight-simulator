@@ -15,10 +15,10 @@ html, body {
 }
 [hidden]{display:none!important}
 
-/* --- MODIFIED GAME CONTAINER (Top 80%) --- */
+/* --- GAME CONTAINER (Top 80%) --- */
 #game {
  position: absolute; top: 0; left: 0; right: 0;
- height: 80%; /* Game world is exactly 80% */
+ height: 80%;
  background: #101827;
 }
 
@@ -31,182 +31,125 @@ html, body {
 
 /* --- HUD ELEMENTS --- */
 #rain{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
-
-/* Notice at top */
 #notice{
  position:absolute;top:6px;left:8px;right:8px;z-index:30;
  padding:6px 8px;border-radius:6px;background:#0a1322d9;
  color:#fde68a;font-size:10px;pointer-events:none;text-align:center;
 }
 
-/* Menu */
-#menu{
- position:absolute;inset:0;z-index:20;overflow:auto;
- padding:60px 16px 20px;background:#0a1322f5
+/* --- NEW MENU DESIGN --- */
+#menu {
+ position: absolute; inset: 0; z-index: 20; overflow-y: auto;
+ background: #0f172af5; /* Dark overlay */
+ display: flex; flex-direction: column; align-items: center;
+ padding: 20px 15px 80px; /* space for UI at bottom */
 }
-.menuInner{max-width:490px;margin:auto}
-h2{margin:0 0 12px;color:#a5f3fc}
-label{display:block;font-size:12px;margin:9px 0}
-select{
- display:block;width:100%;padding:8px;margin-top:4px;
- color:white;background:#24344d;border:1px solid #64748b;
- border-radius:7px;font:inherit
+.menuInner {
+ width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 15px;
 }
-button{
- min-height:40px;padding:8px;border:0;border-radius:8px;
- background:#a5f3fc;color:#083344;font:bold 12px system-ui;
- cursor:pointer;touch-action:manipulation
-}
-button:disabled{opacity:.5}
-#launch{width:100%;margin-top:12px}
 
-/* Map & Weather positions relative to game area */
-#mapLabel{
- position:absolute;top:40px;left:10px;z-index:4;color:white;
- font-size:10px;text-shadow:0 1px 4px #000;
- pointer-events:none;max-width:55%
+/* World Selection (Clickable Images) */
+.world-grid {
+ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
 }
-#weatherLabel{
- position:absolute;top:70px;left:10px;z-index:4;
- font-size:11px;text-shadow:0 1px 4px #000;pointer-events:none
+.world-btn {
+ background: #1e293b; border: 2px solid #334155; border-radius: 8px;
+ padding: 10px 5px; text-align: center; color: #cbd5e1; font-size: 11px;
+ font-weight: bold; cursor: pointer; transition: all 0.2s;
 }
-#radarPanel{
- position:absolute;top:40px;right:8px;z-index:5;width:150px;
- padding:5px;border:1px solid #76e8c477;border-radius:12px;
- background:#071e25cc;pointer-events:none
+.world-btn:hover { border-color: #64748b; }
+.world-btn.active { border-color: #a5f3fc; background: #164e63; color: #a5f3fc; box-shadow: 0 0 10px #22d3ee44; }
+
+/* Aircraft Selection (List + 3D Preview) */
+.aircraft-section {
+ display: flex; gap: 15px; background: #1e293b; border-radius: 12px; padding: 15px;
+ border: 1px solid #334155; align-items: center;
 }
+.aircraft-list {
+ flex: 1; display: flex; flex-direction: column; gap: 8px;
+}
+.ac-btn {
+ background: transparent; border: 1px solid #475569; border-radius: 6px;
+ padding: 10px; text-align: left; color: #cbd5e1; font-size: 13px;
+ cursor: pointer; transition: 0.2s;
+}
+.ac-btn.active { background: #334155; border-color: #a5f3fc; color: #fff; }
+.aircraft-preview {
+ width: 130px; height: 90px; background: #0f172a; border-radius: 8px;
+ position: relative; overflow: hidden; border: 1px solid #1e293b;
+}
+#menu-preview-canvas { width: 100%; height: 100%; display: block; }
+
+/* Difficulty */
+.diff-section { display: flex; flex-direction: column; gap: 5px; }
+select {
+ display: block; width: 100%; padding: 12px;
+ color: white; background: #1e293b; border: 1px solid #475569;
+ border-radius: 8px; font: inherit; font-size: 14px;
+}
+
+#launch { width: 100%; margin-top: 10px; padding: 15px; font-size: 16px; border-radius: 10px; background: #a5f3fc; color: #083344; font-weight: bold; }
+
+
+/* --- HUD / MAP ELEMENTS --- */
+#mapLabel{position:absolute;top:40px;left:10px;z-index:4;color:white;font-size:10px;text-shadow:0 1px 4px #000;pointer-events:none;max-width:55%}
+#weatherLabel{position:absolute;top:70px;left:10px;z-index:4;font-size:11px;text-shadow:0 1px 4px #000;pointer-events:none}
+
+#radarPanel{position:absolute;top:40px;right:8px;z-index:5;width:130px;padding:5px;border:1px solid #76e8c477;border-radius:12px;background:#071e25cc;pointer-events:none}
 #radar{display:block;width:100%;aspect-ratio:1}
 #radarText{text-align:center;font-size:9px;color:#a7f3d0;line-height:1.4}
 
-/* Guidance */
-#guidance{
- position:absolute;top:100px;left:10px;z-index:5;width:160px;
- text-align:center;background:#0a1926bd;
- border:1px solid #7dd3fc55;border-radius:12px;
- padding:6px;pointer-events:none
-}
-#navArrow{
- display:block;margin:0 auto;width:42px;height:42px;
- color:#b9ffff;filter:drop-shadow(0 0 8px #00eaff);
- transform-origin:center
-}
-#navText{font-size:10px;color:#cffafe;line-height:1.45;white-space:pre-line}
+#guidance{position:absolute;top:100px;left:10px;z-index:5;width:135px;text-align:center;background:#0a1926bd;border:1px solid #7dd3fc55;border-radius:12px;padding:6px;pointer-events:none}
+#navArrow{display:block;margin:0 auto;width:36px;height:36px;color:#b9ffff;filter:drop-shadow(0 0 8px #00eaff);transform-origin:center}
+#navText{font-size:9px;color:#cffafe;line-height:1.45;white-space:pre-line}
 
-/* --- MODIFIED UI OVERLAY (Bottom 20% Area) --- */
+/* --- UI OVERLAY (Bottom 20% Area) --- */
 #ui-overlay {
- position: absolute;
- top: 80%; left: 0; right: 0; bottom: 0;
+ position: absolute; top: 80%; left: 0; right: 0; bottom: 0;
  display: flex; flex-direction: column;
- background: #101827;
- border-top: 1px solid #334155;
- z-index: 10;
- padding: 4px;
+ background: #101827; border-top: 1px solid #334155; z-index: 10; padding: 4px;
 }
-
-/* Instruments moved to the top of this container */
-#instruments{
- display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
- gap:3px; padding:0 0 4px; pointer-events:none;
- flex-shrink: 0;
-}
-.instrument{
- padding:2px 0;background:#0f172ade;border-radius:6px;
- text-align:center;font-size:9px; border: 1px solid #334155;
-}
+#instruments{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:0 0 4px;pointer-events:none;flex-shrink:0;}
+.instrument{padding:2px 0;background:#0f172ade;border-radius:6px;text-align:center;font-size:9px;border:1px solid #334155;}
 .instrument strong{display:block;color:#a5f3fc;font-size:12px;}
 
-/* Controls row filling the rest of the space */
-#controls{
- display:flex; justify-content:space-between; gap:6px;
- padding:0; pointer-events:none; align-items:flex-end;
- flex-grow: 1;
-}
-.panel{
- padding:4px;border:1px solid #64748b;border-radius:10px;
- background:#0f172ade;pointer-events:auto;
- box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
+#controls{display:flex;justify-content:space-between;gap:6px;padding:0;pointer-events:none;align-items:flex-end;flex-grow:1;}
+.panel{padding:4px;border:1px solid #64748b;border-radius:10px;background:#0f172ade;pointer-events:auto;box-shadow:0 4px 10px rgba(0,0,0,0.5);}
 #yokePanel{width:36%}
 #powerPanel{width:29%}
 #autopilotPanel{width:31%;text-align:center}
 
-.panelTitle{
- color:#a5f3fc;text-align:center;font-size:9px;
- font-weight:bold;margin-bottom:2px
-}
-#stick{
- position:relative;height:80px;overflow:hidden;
- background:#0f172acc;border:1px solid #64748b;border-radius:8px;
- touch-action:none;
-}
-#knob{
- position:absolute;left:50%;top:50%;width:80px;height:54px;
- margin:-27px 0 0 -40px;pointer-events:none
-}
-#yoke{
- width:80px;height:54px;transform-origin:50% 65%;
- filter:drop-shadow(0 4px 3px #000)
-}
+.panelTitle{color:#a5f3fc;text-align:center;font-size:9px;font-weight:bold;margin-bottom:2px}
+#stick{position:relative;height:80px;overflow:hidden;background:#0f172acc;border:1px solid #64748b;border-radius:8px;touch-action:none;}
+#knob{position:absolute;left:50%;top:50%;width:80px;height:54px;margin:-27px 0 0 -40px;pointer-events:none}
+#yoke{width:80px;height:54px;transform-origin:50% 65%;filter:drop-shadow(0 4px 3px #000)}
 .guide{font-size:7px;color:#bdcbe0;position:absolute;width:100%;text-align:center;top:2px;pointer-events:none}
 .guide.bottom{top:auto;bottom:2px}
 
-#lever{
- position:relative;height:50px;overflow:hidden;
- background:linear-gradient(90deg,#111827,#334155,#111827);
- border:1px solid #64748b;border-radius:8px;
- touch-action:none;
-}
-.track{
- position:absolute;top:12px;bottom:12px;left:calc(50% - 3px);
- width:6px;border-radius:3px;background:#020617
-}
+#lever{position:relative;height:50px;overflow:hidden;background:linear-gradient(90deg,#111827,#334155,#111827);border:1px solid #64748b;border-radius:8px;touch-action:none;}
+.track{position:absolute;top:12px;bottom:12px;left:calc(50% - 3px);width:6px;border-radius:3px;background:#020617}
 .leverLabel{position:absolute;width:100%;text-align:center;font-size:7px;color:#cbd5e1}
 .full{top:1px}.idle{bottom:1px}
-#grip{
- position:absolute;left:50%;top:75%;width:60px;height:24px;
- transform:translate(-50%,-50%);border:1px solid #94a3b8;
- border-radius:6px;background:linear-gradient(#596579,#1e293b,#111827);
- pointer-events:none
-}
+#grip{position:absolute;left:50%;top:75%;width:60px;height:24px;transform:translate(-50%,-50%);border:1px solid #94a3b8;border-radius:6px;background:linear-gradient(#596579,#1e293b,#111827);pointer-events:none}
 .ridges{height:4px;margin:2px 4px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 5px)}
 #gripPower{display:block;text-align:center;color:#a5f3fc;font-size:10px}
 .mini{display:flex;gap:2px;margin-top:2px}
 .mini button{flex:1;padding:2px 0;font-size:8px;min-height:20px}
 #gear{width:100%;min-height:20px;margin-top:2px;font-size:9px}
 
-#autopilotPanel button{
- width:100%;margin:2px 0;font-size:9px;min-height:24px;padding:2px;
-}
+#autopilotPanel button{width:100%;margin:2px 0;font-size:9px;min-height:24px;padding:2px;}
 #autopilotButton{background:#334155;color:#e2e8f0}
 #assistButton{background:#25465b;color:#e0f2fe}
 #goAroundButton{background:#fde68a;color:#422006}
-#autopilotPanel button.engaged{
- background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66
-}
-#autopilotInfo{
- margin-top:2px;color:#cbd5e1;font-size:8px;
- line-height:1.2;white-space:pre-line
-}
-
-/* Status texts hidden in the tiny bottom strip, moved to top via JS logic in original, but here we make them fit */
+#autopilotPanel button.engaged{background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66}
+#autopilotInfo{margin-top:2px;color:#cbd5e1;font-size:8px;line-height:1.2;white-space:pre-line}
 #status, #landingHint { display:none; }
 
-.buttons{
- display:flex; gap:4px;
- padding:4px 0 0; padding-bottom: max(2px, env(safe-area-inset-bottom));
- flex-shrink: 0;
-}
-.buttons button{flex:1; min-height:24px; font-size:9px; padding:0;}
+.buttons{display:flex;gap:4px;padding:4px 0 0;padding-bottom:max(2px, env(safe-area-inset-bottom));flex-shrink:0;}
+.buttons button{flex:1;min-height:24px;font-size:9px;padding:0;background:#a5f3fc;color:#083344;border-radius:6px;border:0;font-weight:bold;}
 
 small{display:none}
 output{color:#a5f3fc}
-
-/* Small screen adjustments */
-@media(max-width:400px){
- #yokePanel{width:34%}
- #autopilotPanel{width:33%}
- #powerPanel{width:29%}
-}
 .hiddenData { display: none !important; }
 </style>
 
@@ -226,37 +169,52 @@ output{color:#a5f3fc}
   <canvas id="rain"></canvas>
  </div>
 
+ <!-- NEW MENU -->
  <div id="menu">
   <div class="menuInner">
-   <h2>✈️ ISLAND FLIGHT</h2>
-   <label>World
-    <select id="airport">
-     <option value="juliana">Princess Juliana — tropical island</option>
-     <option value="heathrow">Heathrow — countryside and city</option>
-     <option value="kaitak">Kai Tak — harbor and mountains</option>
-    </select>
-   </label>
-   <label>Aircraft
-    <select id="aircraftChoice">
-     <option value="boeing737">Boeing 737</option>
-     <option value="learjet">Learjet</option>
-     <option value="f20">F-20</option>
-    </select>
-   </label>
-   <label>Flight difficulty
+   <h2 style="margin:0; color:#a5f3fc; text-align:center; font-size:24px;">✈️ ISLAND FLIGHT</h2>
+   
+   <!-- WORLD SELECTION -->
+   <div>
+    <div style="font-size:13px; margin-bottom:5px; color:#94a3b8;">Select World</div>
+    <div class="world-grid" id="world-selector">
+     <button class="world-btn active" data-val="juliana">🏝️<br>Juliana</button>
+     <button class="world-btn" data-val="heathrow">🌆<br>Heathrow</button>
+     <button class="world-btn" data-val="kaitak">⛰️<br>Kai Tak</button>
+    </div>
+   </div>
+
+   <!-- AIRCRAFT SELECTION -->
+   <div>
+    <div style="font-size:13px; margin-bottom:5px; color:#94a3b8;">Select Aircraft</div>
+    <div class="aircraft-section">
+     <div class="aircraft-list" id="aircraft-selector">
+      <button class="ac-btn active" data-val="boeing737">Boeing 737</button>
+      <button class="ac-btn" data-val="learjet">Learjet</button>
+      <button class="ac-btn" data-val="f20">F-20 Tigershark</button>
+     </div>
+     <div class="aircraft-preview">
+      <canvas id="menu-preview-canvas"></canvas>
+     </div>
+    </div>
+   </div>
+
+   <!-- DIFFICULTY -->
+   <div class="diff-section">
+    <div style="font-size:13px; color:#94a3b8;">Flight Difficulty</div>
     <select id="difficulty">
      <option value="easy">Easy — speed, descent and flare assistance</option>
      <option value="medium">Medium — speed assistance only</option>
      <option value="hard">Hard — manual landing</option>
     </select>
-   </label>
+   </div>
+
    <button id="launch" disabled>Loading engine...</button>
   </div>
  </div>
 
  <div id="notice">Loading 3D engine...</div>
  
- <!-- Map/Wx/Radar now inside #game bounds -->
  <div id="mapLabel"></div>
  <div id="weatherLabel"></div>
 
@@ -274,7 +232,6 @@ output{color:#a5f3fc}
 
  <!-- UI Overlay container (Bottom 20%) -->
  <div id="ui-overlay" hidden>
-  
   <div id="instruments">
    <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
    <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
@@ -351,6 +308,8 @@ output{color:#a5f3fc}
 
  <!-- Hidden Data for Original Logic -->
  <div class="hiddenData">
+  <input id="airport" value="juliana">
+  <input id="aircraftChoice" value="boeing737">
   <input id="planeSize" value="18">
   <input id="cameraDistance" value="55">
   <select id="exteriorYaw"><option value="180" selected>180</option></select>
@@ -485,6 +444,63 @@ function initialize(T,GLTFLoader){
  scene.add(cockpitRig);
  aircraft.visible=cockpitRig.visible=false;
 
+ // --- NEW: MENU 3D PREVIEW SETUP ---
+ const previewCanvas = $("menu-preview-canvas");
+ const previewRenderer = new T.WebGLRenderer({canvas: previewCanvas, antialias: true, alpha: true});
+ previewRenderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
+ previewRenderer.outputColorSpace = T.SRGBColorSpace;
+ const previewScene = new T.Scene();
+ const previewCamera = new T.PerspectiveCamera(45, 1, 0.1, 100);
+ previewCamera.position.set(5, 3, 7);
+ previewCamera.lookAt(0, 0, 0);
+ previewScene.add(new T.HemisphereLight(0xffffff, 0x444444, 2));
+ const previewSun = new T.DirectionalLight(0xffffff, 1.5);
+ previewSun.position.set(5, 5, 5);
+ previewScene.add(previewSun);
+ const previewGroup = new T.Group();
+ previewScene.add(previewGroup);
+
+ function resizePreview() {
+   const rect = previewCanvas.parentElement.getBoundingClientRect();
+   previewRenderer.setSize(rect.width, rect.height, false);
+   previewCamera.aspect = rect.width / rect.height;
+   previewCamera.updateProjectionMatrix();
+ }
+ window.addEventListener("resize", resizePreview);
+ setTimeout(resizePreview, 100);
+
+ let previewLoadedKey = null;
+ function updateMenuPreview(key) {
+   if(previewLoadedKey === key) return;
+   
+   // Remove old
+   while(previewGroup.children.length > 0) previewGroup.remove(previewGroup.children[0]);
+   
+   const option = aircraftOptions[key];
+   if(!option) return;
+
+   new GLTFLoader().load(base + option.file, gltf => {
+     const model = gltf.scene;
+     
+     // Auto scale and center for the tiny preview box
+     const box = new T.Box3().setFromObject(model);
+     const size = box.getSize(new T.Vector3());
+     const center = box.getCenter(new T.Vector3());
+     const maxDim = Math.max(size.x, size.y, size.z);
+     
+     const scale = 4 / maxDim;
+     model.scale.setScalar(scale);
+     model.position.sub(center.multiplyScalar(scale));
+     
+     // Rotate to face sideways nicely
+     model.rotation.y = rad(option.defaultYaw);
+     
+     previewGroup.add(model);
+     previewLoadedKey = key;
+   });
+ }
+ // ----------------------------------
+
  const position=new T.Vector3(),velocity=new T.Vector3();
  const rotation=new T.Quaternion(),wind=new T.Vector3();
  const pilotEye=new T.Vector3(0,1.2,-1.6),eyeOffset=new T.Vector3();
@@ -527,18 +543,9 @@ function initialize(T,GLTFLoader){
  }
 
  const airports={
-  juliana:{
-   title:"PRINCESS JULIANA · TROPICAL ISLAND",
-   length:2300,width:45,heading:100,sky:"#8dd4f4",seed:591
-  },
-  heathrow:{
-   title:"HEATHROW · COUNTRYSIDE / CITY",
-   length:3900,width:50,heading:90,sky:"#b4cadb",seed:127
-  },
-  kaitak:{
-   title:"KAI TAK · HARBOR / MOUNTAINS",
-   length:3390,width:55,heading:130,sky:"#a7bdca",seed:973
-  }
+  juliana:{title:"PRINCESS JULIANA · TROPICAL ISLAND",length:2300,width:45,heading:100,sky:"#8dd4f4",seed:591},
+  heathrow:{title:"HEATHROW · COUNTRYSIDE / CITY",length:3900,width:50,heading:90,sky:"#b4cadb",seed:127},
+  kaitak:{title:"KAI TAK · HARBOR / MOUNTAINS",length:3390,width:55,heading:130,sky:"#a7bdca",seed:973}
  };
  let airportKey="juliana",airport=airports.juliana;
  const airportSites=[{x:0,z:0},{x:6500,z:-10000}];
@@ -1901,9 +1908,28 @@ function initialize(T,GLTFLoader){
    console.error(error);
   });
  }
- $("aircraftChoice").onchange=()=>{
-  if(state==="menu")loadSelectedAircraft();
- };
+
+ // --- NEW MENU CLICK LISTENERS ---
+ $("world-selector").addEventListener("click", (e) => {
+   const btn = e.target.closest(".world-btn");
+   if(!btn) return;
+   document.querySelectorAll(".world-btn").forEach(b => b.classList.remove("active"));
+   btn.classList.add("active");
+   $("airport").value = btn.dataset.val;
+ });
+
+ $("aircraft-selector").addEventListener("click", (e) => {
+   const btn = e.target.closest(".ac-btn");
+   if(!btn) return;
+   document.querySelectorAll(".ac-btn").forEach(b => b.classList.remove("active"));
+   btn.classList.add("active");
+   $("aircraftChoice").value = btn.dataset.val;
+   
+   if(state === "menu") {
+     loadSelectedAircraft();
+     updateMenuPreview(btn.dataset.val);
+   }
+ });
 
  function resetLook(){
   orbitYaw=0;orbitPitch=.22;
@@ -2581,6 +2607,9 @@ function initialize(T,GLTFLoader){
     updateAircraft();updateCamera(dt);
    }else{
     approachPath.visible=false;
+    // Spin the menu preview plane
+    previewGroup.rotation.y += dt * 0.5;
+    previewRenderer.render(previewScene, previewCamera);
    }
    if(state==="crashed")updateExplosion(dt);
    weatherVisuals();
@@ -2659,6 +2688,7 @@ function initialize(T,GLTFLoader){
  });
 
  loadSelectedAircraft();
+ updateMenuPreview("boeing737");
 }
 </script>
 </body>
