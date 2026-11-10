@@ -15,10 +15,10 @@ html, body {
 }
 [hidden]{display:none!important}
 
-/* --- GAME CONTAINER (Top 68%) --- */
+/* --- GAME CONTAINER (Top 80%) --- */
 #game {
  position: absolute; top: 0; left: 0; right: 0;
- height: 68%;
+ height: 80%;
  background: #101827;
 }
 
@@ -37,18 +37,17 @@ html, body {
  color:#fde68a;font-size:10px;pointer-events:none;text-align:center;
 }
 
-/* --- NEW MENU DESIGN --- */
+/* --- MENU DESIGN --- */
 #menu {
  position: absolute; inset: 0; z-index: 20; overflow-y: auto;
- background: #0f172af5; /* Dark overlay */
+ background: #0f172af5;
  display: flex; flex-direction: column; align-items: center;
- padding: 20px 15px 80px; /* space for UI at bottom */
+ padding: 20px 15px 80px;
 }
 .menuInner {
  width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 15px;
 }
 
-/* World Selection (Clickable Images) */
 .world-grid {
  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
 }
@@ -60,7 +59,6 @@ html, body {
 .world-btn:hover { border-color: #64748b; }
 .world-btn.active { border-color: #a5f3fc; background: #164e63; color: #a5f3fc; box-shadow: 0 0 10px #22d3ee44; }
 
-/* Aircraft Selection (List + 3D Preview) */
 .aircraft-section {
  display: flex; gap: 15px; background: #1e293b; border-radius: 12px; padding: 15px;
  border: 1px solid #334155; align-items: center;
@@ -80,7 +78,6 @@ html, body {
 }
 #menu-preview-canvas { width: 100%; height: 100%; display: block; }
 
-/* Difficulty */
 .diff-section { display: flex; flex-direction: column; gap: 5px; }
 select {
  display: block; width: 100%; padding: 12px;
@@ -103,10 +100,10 @@ select {
 #navArrow{display:block;margin:0 auto;width:36px;height:36px;color:#b9ffff;filter:drop-shadow(0 0 8px #00eaff);transform-origin:center}
 #navText{font-size:9px;color:#cffafe;line-height:1.45;white-space:pre-line}
 
-/* --- UI OVERLAY (Bottom 32% Area - Restored Data) --- */
+/* --- UI OVERLAY (Bottom 20% Area) --- */
 #ui-overlay {
- position: absolute; top: 68%; left: 0; right: 0; bottom: 0;
- display: flex; flex-direction: column;
+ position: absolute; top: 80%; left: 0; right: 0; bottom: 0;
+ display: flex; flex-direction: column; justify-content: space-between;
  background: #101827; border-top: 1px solid #334155; z-index: 10; padding: 4px;
 }
 
@@ -121,42 +118,60 @@ select {
 }
 .instrument strong{display:block;color:#a5f3fc;font-size:14px}
 
-#controls{display:flex;justify-content:space-between;gap:6px;padding:0 4px;pointer-events:none;align-items:flex-end;flex-grow:1;}
-.panel{padding:4px;border:1px solid #64748b;border-radius:10px;background:#0f172ade;pointer-events:auto;box-shadow:0 4px 10px rgba(0,0,0,0.5);}
+/* Controls spread to fill the 20% perfectly */
+#controls{display:flex;justify-content:space-between;gap:6px;padding:0 4px;pointer-events:none;align-items:stretch;flex-grow:1;margin-bottom:4px;}
+.panel{padding:4px;border:1px solid #64748b;border-radius:10px;background:#0f172ade;pointer-events:auto;box-shadow:0 4px 10px rgba(0,0,0,0.5);display:flex;flex-direction:column;}
 
-/* --- MASSIVE YOKE UPDATE --- */
+/* --- HUGE YOKE TO FIT SPACE --- */
 #yokePanel{width:42%}
 #powerPanel{width:28%}
 #autopilotPanel{width:28%;text-align:center}
 
 .panelTitle{color:#a5f3fc;text-align:center;font-size:10px;font-weight:bold;margin-bottom:2px}
-#stick{position:relative;height:95px;overflow:hidden;background:#0f172acc;border:1px solid #64748b;border-radius:8px;touch-action:none;}
-#knob{position:absolute;left:50%;top:50%;width:120px;height:85px;margin:-42px 0 0 -60px;pointer-events:none}
-#yoke{width:120px;height:85px;transform-origin:50% 65%;filter:drop-shadow(0 4px 3px #000)}
-.guide{font-size:8px;color:#bdcbe0;position:absolute;width:100%;text-align:center;top:2px;pointer-events:none}
-.guide.bottom{top:auto;bottom:2px}
+#stick{
+ position:relative;flex-grow:1;min-height:80px;overflow:hidden;
+ background:#0f172acc;border:1px solid #64748b;border-radius:8px;touch-action:none;
+}
+#knob{
+ position:absolute;left:50%;top:50%;width:130px;height:90px;
+ margin:-45px 0 0 -65px;pointer-events:none
+}
+#yoke{
+ width:130px;height:90px;transform-origin:50% 65%;
+ filter:drop-shadow(0 4px 3px #000)
+}
+.guide{font-size:8px;color:#bdcbe0;position:absolute;width:100%;text-align:center;top:4px;pointer-events:none}
+.guide.bottom{top:auto;bottom:4px}
 
-/* --- LARGE THROTTLE --- */
-#lever{position:relative;height:85px;overflow:hidden;background:linear-gradient(90deg,#111827,#334155,#111827);border:1px solid #64748b;border-radius:8px;touch-action:none;}
+/* --- BALANCED THROTTLE --- */
+#lever{
+ position:relative;flex-grow:1;min-height:80px;overflow:hidden;
+ background:linear-gradient(90deg,#111827,#334155,#111827);
+ border:1px solid #64748b;border-radius:8px;touch-action:none;
+}
 .track{position:absolute;top:20px;bottom:20px;left:calc(50% - 5px);width:10px;border-radius:5px;background:#020617}
 .leverLabel{position:absolute;width:100%;text-align:center;font-size:10px;font-weight:bold;color:#cbd5e1}
 .full{top:2px}.idle{bottom:2px}
-#grip{position:absolute;left:50%;top:75%;width:90px;height:38px;transform:translate(-50%,-50%);border:2px solid #94a3b8;border-radius:8px;background:linear-gradient(#596579,#1e293b,#111827);pointer-events:none;box-shadow:0 4px 8px rgba(0,0,0,0.8);}
+#grip{
+ position:absolute;left:50%;top:75%;width:85px;height:36px;
+ transform:translate(-50%,-50%);border:2px solid #94a3b8;
+ border-radius:8px;background:linear-gradient(#596579,#1e293b,#111827);
+ pointer-events:none;box-shadow:0 4px 8px rgba(0,0,0,0.8);
+}
 .ridges{height:6px;margin:4px 8px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 6px)}
 #gripPower{display:block;text-align:center;color:#a5f3fc;font-size:13px;margin-top:3px;font-weight:bold;}
 
-.mini{display:flex;gap:4px;margin-top:4px}
+.mini{display:flex;gap:4px;margin-top:4px;flex-shrink:0;}
 .mini button{flex:1;padding:6px 0;font-size:9px;min-height:24px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;}
-#gear{width:100%;min-height:24px;margin-top:4px;font-size:10px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;}
+#gear{width:100%;min-height:24px;margin-top:4px;font-size:10px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;flex-shrink:0;}
 
-#autopilotPanel button{width:100%;margin:3px 0;font-size:10px;min-height:28px;padding:2px; border-radius:6px; border:0; font-weight:bold;}
+#autopilotPanel button{width:100%;margin:3px 0;font-size:10px;min-height:28px;padding:2px; border-radius:6px; border:0; font-weight:bold;flex-shrink:0;}
 #autopilotButton{background:#334155;color:#e2e8f0}
 #assistButton{background:#25465b;color:#e0f2fe}
 #goAroundButton{background:#fde68a;color:#422006}
 #autopilotPanel button.engaged{background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66}
 #autopilotInfo{margin-top:4px;color:#cbd5e1;font-size:9px;line-height:1.2;white-space:pre-line}
 
-/* RESTORED STATUS DATA */
 #status{
  text-align:center; color:#fde68a; font-size:10px;
  text-shadow: 0 2px 4px #000; pointer-events: none; padding: 2px;
@@ -197,12 +212,11 @@ output{color:#a5f3fc}
   <canvas id="rain"></canvas>
  </div>
 
- <!-- NEW MENU -->
+ <!-- MENU -->
  <div id="menu">
   <div class="menuInner">
    <h2 style="margin:0; color:#a5f3fc; text-align:center; font-size:24px;">✈️ ISLAND FLIGHT</h2>
    
-   <!-- WORLD SELECTION -->
    <div>
     <div style="font-size:13px; margin-bottom:5px; color:#94a3b8;">Select World</div>
     <div class="world-grid" id="world-selector">
@@ -212,7 +226,6 @@ output{color:#a5f3fc}
     </div>
    </div>
 
-   <!-- AIRCRAFT SELECTION -->
    <div>
     <div style="font-size:13px; margin-bottom:5px; color:#94a3b8;">Select Aircraft</div>
     <div class="aircraft-section">
@@ -227,7 +240,6 @@ output{color:#a5f3fc}
     </div>
    </div>
 
-   <!-- DIFFICULTY -->
    <div class="diff-section">
     <div style="font-size:13px; color:#94a3b8;">Flight Difficulty</div>
     <select id="difficulty">
@@ -258,7 +270,7 @@ output{color:#a5f3fc}
   <div id="navText">Runway ready</div>
  </div>
 
- <!-- UI Overlay container (Bottom 32%) -->
+ <!-- UI Overlay container -->
  <div id="ui-overlay" hidden>
   <div id="instruments">
    <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
@@ -319,7 +331,7 @@ output{color:#a5f3fc}
    </div>
   </div>
 
-  <div id="status">Choose a world and start.</div>
+  <div id="status"></div>
   <div id="landingHint"></div>
 
   <div class="buttons">
@@ -411,11 +423,11 @@ function initialize(T,GLTFLoader){
 
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
- // FINAL FIX: F-20 defaultYaw 180, modelRotation 0
+ // DEEP LOGIC FIX: F-20 faces left natively (-X). We rotate -90 degrees to face forward (-Z).
  const aircraftOptions={
   boeing737:{name:"Boeing 737",file:"737_max_lion_air.glb",defaultYaw:180,defaultPitch:0,modelRotation:0},
   learjet:{name:"Learjet",file:"learjet.glb",defaultYaw:180,defaultPitch:14,modelRotation:0},
-  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0,modelRotation:0}
+  f20:{name:"F-20",file:"F-20.glb",defaultYaw:0,defaultPitch:0,modelRotation:0}
  };
 
  let exteriorRequest=0;
