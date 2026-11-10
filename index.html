@@ -135,13 +135,13 @@ select {
 .guide.bottom{top:auto;bottom:2px}
 
 /* --- THROTTLE INCREASED SIZE --- */
-#lever{position:relative;height:75px;overflow:hidden;background:linear-gradient(90deg,#111827,#334155,#111827);border:1px solid #64748b;border-radius:8px;touch-action:none;}
-.track{position:absolute;top:16px;bottom:16px;left:calc(50% - 4px);width:8px;border-radius:4px;background:#020617}
-.leverLabel{position:absolute;width:100%;text-align:center;font-size:8px;color:#cbd5e1}
+#lever{position:relative;height:85px;overflow:hidden;background:linear-gradient(90deg,#111827,#334155,#111827);border:1px solid #64748b;border-radius:8px;touch-action:none;}
+.track{position:absolute;top:20px;bottom:20px;left:calc(50% - 5px);width:10px;border-radius:5px;background:#020617}
+.leverLabel{position:absolute;width:100%;text-align:center;font-size:9px;color:#cbd5e1}
 .full{top:2px}.idle{bottom:2px}
-#grip{position:absolute;left:50%;top:75%;width:70px;height:32px;transform:translate(-50%,-50%);border:1px solid #94a3b8;border-radius:6px;background:linear-gradient(#596579,#1e293b,#111827);pointer-events:none;box-shadow:0 2px 4px rgba(0,0,0,0.5);}
-.ridges{height:6px;margin:4px 6px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 5px)}
-#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:10px;margin-top:2px;font-weight:bold;}
+#grip{position:absolute;left:50%;top:75%;width:85px;height:38px;transform:translate(-50%,-50%);border:1px solid #94a3b8;border-radius:8px;background:linear-gradient(#596579,#1e293b,#111827);pointer-events:none;box-shadow:0 3px 6px rgba(0,0,0,0.6);}
+.ridges{height:6px;margin:5px 8px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 6px)}
+#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:12px;margin-top:3px;font-weight:bold;}
 
 .mini{display:flex;gap:2px;margin-top:2px}
 .mini button{flex:1;padding:4px 0;font-size:8px;min-height:22px; background:#a5f3fc; color:#083344; border-radius:6px; border:0; font-weight:bold;}
@@ -400,11 +400,11 @@ function initialize(T,GLTFLoader){
 
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
- // FIXED: F-20 modelRotation to Math.PI (180 degrees) to face down the runway
+ // FIXED: F-20 modelRotation to 0 (native forward points down runway)
  const aircraftOptions={
   boeing737:{name:"Boeing 737",file:"737_max_lion_air.glb",defaultYaw:180,defaultPitch:0,modelRotation:0},
   learjet:{name:"Learjet",file:"learjet.glb",defaultYaw:180,defaultPitch:14,modelRotation:0},
-  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0,modelRotation:Math.PI}
+  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0,modelRotation:0}
  };
 
  let exteriorRequest=0;
@@ -511,11 +511,7 @@ function initialize(T,GLTFLoader){
      model.position.sub(center.multiplyScalar(scale));
      
      // Apply model-specific rotation and base yaw
-     if (option.modelRotation) {
-        model.rotation.y = option.modelRotation;
-     } else {
-        model.rotation.y = rad(option.defaultYaw);
-     }
+     model.rotation.y = rad(option.defaultYaw) + (option.modelRotation || 0);
      
      previewGroup.add(model);
      previewLoadedKey = key;
