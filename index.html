@@ -400,11 +400,11 @@ function initialize(T,GLTFLoader){
 
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
- // FIXED: Added modelRotation for the F-20 to align its nose correctly with the Z-axis
+ // FIXED: F-20 modelRotation to Math.PI (180 degrees) to face away from camera
  const aircraftOptions={
   boeing737:{name:"Boeing 737",file:"737_max_lion_air.glb",defaultYaw:180,defaultPitch:0,modelRotation:0},
   learjet:{name:"Learjet",file:"learjet.glb",defaultYaw:180,defaultPitch:14,modelRotation:0},
-  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0,modelRotation:Math.PI / 2}
+  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0,modelRotation:Math.PI}
  };
 
  let exteriorRequest=0;
@@ -1894,7 +1894,7 @@ function initialize(T,GLTFLoader){
    try{
     exteriorObject=gltf.scene;
     
-    // FIXED: Apply the model-specific rotation correction here
+    // Apply the model-specific rotation correction here
     if (option.modelRotation) {
       exteriorObject.rotation.y = option.modelRotation;
     }
