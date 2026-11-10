@@ -102,17 +102,17 @@ select {
 #navArrow{display:block;margin:0 auto;width:36px;height:36px;color:#b9ffff;filter:drop-shadow(0 0 8px #00eaff);transform-origin:center}
 #navText{font-size:9px;color:#cffafe;line-height:1.45;white-space:pre-line}
 
-/* --- UI OVERLAY (Bottom 40% Area using CSS Grid) --- */
+/* --- UI OVERLAY (Bottom 40% Area) --- */
 #ui-overlay {
  position: absolute; top: 60%; left: 0; right: 0; bottom: 0;
- display: grid;
- grid-template-rows: auto 1fr auto;
+ display: flex; flex-direction: column;
  background: #101827; border-top: 1px solid #334155; z-index: 10; padding: 4px;
 }
 
 #instruments{
  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
  gap:5px; padding:0 12px 6px; pointer-events:none;
+ flex-shrink: 0;
 }
 .instrument{
  padding:5px 2px;background:#0f172ade;border-radius:8px;
@@ -120,16 +120,16 @@ select {
 }
 .instrument strong{display:block;color:#a5f3fc;font-size:14px}
 
-/* Controls constrained to grid row, no overflowing */
+/* Controls flex row */
 #controls{
  display:flex; justify-content:space-between; gap:6px;
  padding:0 4px; margin-bottom:4px;
- min-height: 0; /* Crucial: prevents flexbox overflow */
+ flex-grow: 1; min-height: 0;
 }
 .panel{
  padding:4px;border:1px solid #64748b;border-radius:10px;background:#0f172ade;
  pointer-events:auto;box-shadow:0 4px 10px rgba(0,0,0,0.5);
- display:flex; flex-direction:column; min-height:0;
+ display:flex; flex-direction:column; min-height:0; overflow: hidden; /* Prevents text bleeding */
 }
 #yokePanel{width:42%}
 #powerPanel{width:28%}
@@ -177,21 +177,23 @@ select {
 #assistButton{background:#25465b;color:#e0f2fe}
 #goAroundButton{background:#fde68a;color:#422006}
 #autopilotPanel button.engaged{background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66}
-#autopilotInfo{margin-top:4px;color:#cbd5e1;font-size:9px;line-height:1.2;white-space:pre-line}
+#autopilotInfo{margin-top:4px;color:#cbd5e1;font-size:9px;line-height:1.2;white-space:pre-line; flex-grow: 1;}
 
 /* Text hidden as requested to prevent clutter */
 #status, #landingHint { display: none !important; }
 
+/* --- 3x2 GRID FOR BUTTONS --- */
 .buttons{
- display:flex; gap:6px;
- padding: 4px 0; 
- padding-bottom: max(8px, env(safe-area-inset-bottom));
- overflow-x: auto; /* allow scrolling if too many buttons */
+ display:grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap:6px;
+ padding: 4px 12px; 
+ padding-bottom: max(16px, env(safe-area-inset-bottom));
+ flex-shrink: 0;
 }
 .buttons button{
- flex:1;min-width:60px; min-height: 34px; font-size: 11px;
+ width: 100%; min-height: 36px; font-size: 12px;
  background:#a5f3fc; color:#083344; border-radius:8px; border:0; font-weight:bold;
- white-space: nowrap;
 }
 
 small{display:none}
@@ -425,7 +427,6 @@ function initialize(T,GLTFLoader){
 
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
- // F-20 FIX: Rotating Math.PI / 2 to face straight down the runway
  const aircraftOptions={
   boeing737:{name:"Boeing 737",file:"737_max_lion_air.glb",defaultYaw:180,defaultPitch:0,modelRotation:0},
   learjet:{name:"Learjet",file:"learjet.glb",defaultYaw:180,defaultPitch:14,modelRotation:0},
@@ -2017,7 +2018,7 @@ function initialize(T,GLTFLoader){
   syncControls();
  }
  function buttons(){
-  $("camera").textContent=chase?"Camera: CHASE":"Camera: COCKPIT";
+  $("camera").textContent="Camera";
   $("pause").textContent=state==="paused"?"Resume":"Pause";
   $("pause").disabled=!["playing","paused"].includes(state);
   $("flaps").textContent=flaps?"Flaps DOWN":"Flaps UP";
