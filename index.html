@@ -400,11 +400,11 @@ function initialize(T,GLTFLoader){
 
  const base="https://raw.githubusercontent.com/Aaronpang496/flight-simulator/main/";
 
- // FIXED: F-20 now faces 180 (straight down the runway) instead of 90.
+ // FIXED: Added modelRotation for the F-20 to align its nose correctly with the Z-axis
  const aircraftOptions={
-  boeing737:{name:"Boeing 737",file:"737_max_lion_air.glb",defaultYaw:180,defaultPitch:0},
-  learjet:{name:"Learjet",file:"learjet.glb",defaultYaw:180,defaultPitch:14},
-  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0}
+  boeing737:{name:"Boeing 737",file:"737_max_lion_air.glb",defaultYaw:180,defaultPitch:0,modelRotation:0},
+  learjet:{name:"Learjet",file:"learjet.glb",defaultYaw:180,defaultPitch:14,modelRotation:0},
+  f20:{name:"F-20",file:"F-20.glb",defaultYaw:180,defaultPitch:0,modelRotation:Math.PI / 2}
  };
 
  let exteriorRequest=0;
@@ -510,8 +510,12 @@ function initialize(T,GLTFLoader){
      model.scale.setScalar(scale);
      model.position.sub(center.multiplyScalar(scale));
      
-     // Rotate to face sideways nicely for the preview
-     model.rotation.y = rad(option.defaultYaw);
+     // Apply model-specific rotation and base yaw
+     if (option.modelRotation) {
+        model.rotation.y = option.modelRotation;
+     } else {
+        model.rotation.y = rad(option.defaultYaw);
+     }
      
      previewGroup.add(model);
      previewLoadedKey = key;
@@ -1889,6 +1893,12 @@ function initialize(T,GLTFLoader){
    if(request!==exteriorRequest){disposeModel(gltf.scene);return;}
    try{
     exteriorObject=gltf.scene;
+    
+    // FIXED: Apply the model-specific rotation correction here
+    if (option.modelRotation) {
+      exteriorObject.rotation.y = option.modelRotation;
+    }
+
     exteriorTilt.add(exteriorObject);
     if(key==="learjet"){
      installExteriorAnimations(gltf);
