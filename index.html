@@ -15,9 +15,10 @@ html, body {
 }
 [hidden]{display:none!important}
 
-/* The Game Container */
+/* --- MODIFIED GAME CONTAINER (Top 80%) --- */
 #game {
- position: absolute; inset: 0;
+ position: absolute; top: 0; left: 0; right: 0;
+ height: 80%; /* Game world is exactly 80% */
  background: #101827;
 }
 
@@ -28,13 +29,17 @@ html, body {
 }
 #stage>canvas.world{display:block;width:100%;height:100%;touch-action:none}
 
-/* HUD Elements */
+/* --- HUD ELEMENTS --- */
 #rain{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+
+/* Notice at top */
 #notice{
  position:absolute;top:6px;left:8px;right:8px;z-index:30;
  padding:6px 8px;border-radius:6px;background:#0a1322d9;
- color:#fde68a;font-size:10px;pointer-events:none
+ color:#fde68a;font-size:10px;pointer-events:none;text-align:center;
 }
+
+/* Menu */
 #menu{
  position:absolute;inset:0;z-index:20;overflow:auto;
  padding:60px 16px 20px;background:#0a1322f5
@@ -54,24 +59,28 @@ button{
 }
 button:disabled{opacity:.5}
 #launch{width:100%;margin-top:12px}
+
+/* Map & Weather positions relative to game area */
 #mapLabel{
- position:absolute;top:50px;left:10px;z-index:4;color:white;
+ position:absolute;top:40px;left:10px;z-index:4;color:white;
  font-size:10px;text-shadow:0 1px 4px #000;
  pointer-events:none;max-width:55%
 }
 #weatherLabel{
- position:absolute;top:84px;left:10px;z-index:4;
+ position:absolute;top:70px;left:10px;z-index:4;
  font-size:11px;text-shadow:0 1px 4px #000;pointer-events:none
 }
 #radarPanel{
- position:absolute;top:46px;right:8px;z-index:5;width:150px;
+ position:absolute;top:40px;right:8px;z-index:5;width:150px;
  padding:5px;border:1px solid #76e8c477;border-radius:12px;
  background:#071e25cc;pointer-events:none
 }
 #radar{display:block;width:100%;aspect-ratio:1}
 #radarText{text-align:center;font-size:9px;color:#a7f3d0;line-height:1.4}
+
+/* Guidance */
 #guidance{
- position:absolute;top:115px;left:10px;z-index:5;width:160px;
+ position:absolute;top:100px;left:10px;z-index:5;width:160px;
  text-align:center;background:#0a1926bd;
  border:1px solid #7dd3fc55;border-radius:12px;
  padding:6px;pointer-events:none
@@ -83,80 +92,90 @@ button:disabled{opacity:.5}
 }
 #navText{font-size:10px;color:#cffafe;line-height:1.45;white-space:pre-line}
 
-/* FLOATING CONTROLS OVERLAY */
+/* --- MODIFIED UI OVERLAY (Bottom 20% Area) --- */
 #ui-overlay {
  position: absolute;
- bottom: 0; left: 0; right: 0;
+ top: 80%; left: 0; right: 0; bottom: 0;
  display: flex; flex-direction: column;
- pointer-events: none; z-index: 10;
+ background: #101827;
+ border-top: 1px solid #334155;
+ z-index: 10;
+ padding: 4px;
 }
 
+/* Instruments moved to the top of this container */
+#instruments{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:3px; padding:0 0 4px; pointer-events:none;
+ flex-shrink: 0;
+}
+.instrument{
+ padding:2px 0;background:#0f172ade;border-radius:6px;
+ text-align:center;font-size:9px; border: 1px solid #334155;
+}
+.instrument strong{display:block;color:#a5f3fc;font-size:12px;}
+
+/* Controls row filling the rest of the space */
 #controls{
- display:flex; justify-content:space-between; gap:8px;
- padding:0 12px 8px; pointer-events:none; align-items:flex-end;
+ display:flex; justify-content:space-between; gap:6px;
+ padding:0; pointer-events:none; align-items:flex-end;
+ flex-grow: 1;
 }
 .panel{
- padding:6px;border:1px solid #64748b;border-radius:12px;
+ padding:4px;border:1px solid #64748b;border-radius:10px;
  background:#0f172ade;pointer-events:auto;
- box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+ box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
-#yokePanel{width:185px}
-#powerPanel{width:145px}
+#yokePanel{width:36%}
+#powerPanel{width:29%}
+#autopilotPanel{width:31%;text-align:center}
+
 .panelTitle{
- color:#a5f3fc;text-align:center;font-size:10px;
- font-weight:bold;margin-bottom:5px
+ color:#a5f3fc;text-align:center;font-size:9px;
+ font-weight:bold;margin-bottom:2px
 }
 #stick{
- position:relative;height:130px;overflow:hidden;
- background:#0f172acc;border:1px solid #64748b;border-radius:10px;
- touch-action:none;user-select:none;-webkit-user-select:none
+ position:relative;height:80px;overflow:hidden;
+ background:#0f172acc;border:1px solid #64748b;border-radius:8px;
+ touch-action:none;
 }
 #knob{
- position:absolute;left:50%;top:50%;width:112px;height:76px;
- margin:-38px 0 0 -56px;pointer-events:none
+ position:absolute;left:50%;top:50%;width:80px;height:54px;
+ margin:-27px 0 0 -40px;pointer-events:none
 }
 #yoke{
- width:112px;height:76px;transform-origin:50% 65%;
+ width:80px;height:54px;transform-origin:50% 65%;
  filter:drop-shadow(0 4px 3px #000)
 }
-.guide{
- position:absolute;top:5px;width:100%;text-align:center;
- font-size:8px;color:#bdcbe0;pointer-events:none
-}
-.guide.bottom{top:auto;bottom:5px}
+.guide{font-size:7px;color:#bdcbe0;position:absolute;width:100%;text-align:center;top:2px;pointer-events:none}
+.guide.bottom{top:auto;bottom:2px}
+
 #lever{
- position:relative;height:80px;overflow:hidden;
+ position:relative;height:50px;overflow:hidden;
  background:linear-gradient(90deg,#111827,#334155,#111827);
- border:1px solid #64748b;border-radius:10px;
- touch-action:none;user-select:none;-webkit-user-select:none
+ border:1px solid #64748b;border-radius:8px;
+ touch-action:none;
 }
 .track{
- position:absolute;top:20px;bottom:20px;left:calc(50% - 4px);
- width:8px;border-radius:5px;background:#020617
+ position:absolute;top:12px;bottom:12px;left:calc(50% - 3px);
+ width:6px;border-radius:3px;background:#020617
 }
-.leverLabel{
- position:absolute;width:100%;text-align:center;
- font-size:8px;color:#cbd5e1
-}
-.full{top:3px}.idle{bottom:3px}
+.leverLabel{position:absolute;width:100%;text-align:center;font-size:7px;color:#cbd5e1}
+.full{top:1px}.idle{bottom:1px}
 #grip{
- position:absolute;left:50%;top:75%;width:78px;height:34px;
- transform:translate(-50%,-50%);border:2px solid #94a3b8;
- border-radius:9px;background:linear-gradient(#596579,#1e293b,#111827);
- box-shadow:0 4px 5px #0008;pointer-events:none
+ position:absolute;left:50%;top:75%;width:60px;height:24px;
+ transform:translate(-50%,-50%);border:1px solid #94a3b8;
+ border-radius:6px;background:linear-gradient(#596579,#1e293b,#111827);
+ pointer-events:none
 }
-.ridges{
- height:6px;margin:4px 7px 0;opacity:.6;
- background:repeating-linear-gradient(
-  90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 7px)
-}
-#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:12px}
-.mini{display:flex;gap:4px;margin-top:5px}
-.mini button{flex:1;min-width:0;padding:4px 2px;font-size:9px}
-#gear{width:100%;min-height:30px;margin-top:4px;font-size:10px}
-#autopilotPanel{width:150px;text-align:center;align-self:center}
+.ridges{height:4px;margin:2px 4px 0;background:repeating-linear-gradient(90deg,#94a3b8 0,#94a3b8 2px,transparent 2px,transparent 5px)}
+#gripPower{display:block;text-align:center;color:#a5f3fc;font-size:10px}
+.mini{display:flex;gap:2px;margin-top:2px}
+.mini button{flex:1;padding:2px 0;font-size:8px;min-height:20px}
+#gear{width:100%;min-height:20px;margin-top:2px;font-size:9px}
+
 #autopilotPanel button{
- width:100%;margin:3px 0;font-size:10px;min-height:34px
+ width:100%;margin:2px 0;font-size:9px;min-height:24px;padding:2px;
 }
 #autopilotButton{background:#334155;color:#e2e8f0}
 #assistButton{background:#25465b;color:#e0f2fe}
@@ -165,55 +184,28 @@ button:disabled{opacity:.5}
  background:#86efac;color:#052e16;box-shadow:0 0 10px #22c55e66
 }
 #autopilotInfo{
- margin-top:5px;color:#cbd5e1;font-size:10px;
- line-height:1.4;white-space:pre-line
+ margin-top:2px;color:#cbd5e1;font-size:8px;
+ line-height:1.2;white-space:pre-line
 }
 
-/* INSTRUMENTS & BUTTONS */
-#instruments{
- display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
- gap:5px; padding:0 12px 6px; pointer-events:none;
-}
-.instrument{
- padding:5px 2px;background:#0f172ade;border-radius:8px;
- text-align:center;font-size:10px; border:1px solid #334155;
-}
-.instrument strong{display:block;color:#a5f3fc;font-size:14px}
-
-#status{
- text-align:center; color:#fde68a; font-size:11px;
- text-shadow: 0 2px 4px #000; pointer-events: none;
- padding-bottom: 2px;
-}
-#landingHint{
- text-align:center; color:#86efac; font-size:9px;
- text-shadow: 0 2px 4px #000; pointer-events: none;
- padding-bottom: 4px;
-}
+/* Status texts hidden in the tiny bottom strip, moved to top via JS logic in original, but here we make them fit */
+#status, #landingHint { display:none; }
 
 .buttons{
- display:flex; flex-wrap:wrap; gap:6px;
- padding:6px 12px; padding-bottom: max(6px, env(safe-area-inset-bottom));
- background:#0f172af5; border-top: 1px solid #334155;
- pointer-events: auto;
+ display:flex; gap:4px;
+ padding:4px 0 0; padding-bottom: max(2px, env(safe-area-inset-bottom));
+ flex-shrink: 0;
 }
-.buttons button{flex:1;min-width:85px; min-height: 32px; font-size: 11px;}
+.buttons button{flex:1; min-height:24px; font-size:9px; padding:0;}
 
-small{display:block;color:#adbbcf;font-size:10px;line-height:1.5; padding: 0 10px 10px;}
+small{display:none}
 output{color:#a5f3fc}
 
-/* Mobile tweaks */
-@media(max-width:600px){
- #menu{padding:60px 12px 12px}
- h2{font-size:20px}
- #stick{height:110px}
- #lever{height:70px}
- #radarPanel{width:116px}
- #guidance{width:140px}
- .instrument{font-size:9px}
- .instrument strong{font-size:12px}
- #knob{width:96px;margin-left:-48px}
- #yoke{width:96px}
+/* Small screen adjustments */
+@media(max-width:400px){
+ #yokePanel{width:34%}
+ #autopilotPanel{width:33%}
+ #powerPanel{width:29%}
 }
 .hiddenData { display: none !important; }
 </style>
@@ -263,6 +255,8 @@ output{color:#a5f3fc}
  </div>
 
  <div id="notice">Loading 3D engine...</div>
+ 
+ <!-- Map/Wx/Radar now inside #game bounds -->
  <div id="mapLabel"></div>
  <div id="weatherLabel"></div>
 
@@ -278,14 +272,25 @@ output{color:#a5f3fc}
   <div id="navText">Runway ready</div>
  </div>
 
- <!-- UI Overlay container -->
+ <!-- UI Overlay container (Bottom 20%) -->
  <div id="ui-overlay" hidden>
   
+  <div id="instruments">
+   <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
+   <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
+   <div class="instrument">V/Speed<strong id="vertical">0 ft/min</strong></div>
+   <div class="instrument">Heading<strong id="heading">000°</strong></div>
+   <div class="instrument">Power<strong id="power">0 / 0%</strong></div>
+   <div class="instrument">Time<strong id="timer">0.0 s</strong></div>
+   <div class="instrument">Pitch<strong id="pitchValue">0°</strong></div>
+   <div class="instrument">Bank<strong id="bankValue">0°</strong></div>
+  </div>
+
   <div id="controls">
    <div class="panel" id="yokePanel">
-    <div class="panelTitle">GRAB THE YOKE</div>
+    <div class="panelTitle">YOKE</div>
     <div id="stick">
-     <div class="guide">PUSH: NOSE DOWN</div>
+     <div class="guide">NOSE DOWN</div>
      <div id="knob">
       <svg id="yoke" viewBox="0 0 160 100" aria-hidden="true">
        <path d="M68 58 L92 58 L98 98 L62 98 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
@@ -298,16 +303,16 @@ output{color:#a5f3fc}
        <text x="80" y="69" text-anchor="middle" fill="#e2e8f0" font-size="9">FLIGHT</text>
       </svg>
      </div>
-     <div class="guide bottom">PULL: NOSE UP · LEFT / RIGHT: BANK</div>
+     <div class="guide bottom">NOSE UP</div>
     </div>
    </div>
 
    <div class="panel" id="autopilotPanel">
-    <div class="panelTitle">FLIGHT ASSIST</div>
-    <button id="autopilotButton" aria-pressed="false">AUTOPILOT OFF</button>
-    <button id="assistButton" aria-pressed="false">APPROACH ASSIST</button>
+    <div class="panelTitle">ASSIST</div>
+    <button id="autopilotButton" aria-pressed="false">AUTO OFF</button>
+    <button id="assistButton" aria-pressed="false">APPROACH</button>
     <button id="goAroundButton">GO AROUND</button>
-    <div id="autopilotInfo">Take off manually first.</div>
+    <div id="autopilotInfo">Take off manually.</div>
    </div>
 
    <div class="panel" id="powerPanel">
@@ -322,25 +327,14 @@ output{color:#a5f3fc}
      <div class="leverLabel idle">IDLE</div>
     </div>
     <div class="mini">
-     <button id="flaps">Flaps DOWN</button>
-     <button id="brakes">Brake OFF</button>
+     <button id="flaps">FLAPS</button>
+     <button id="brakes">BRAKE</button>
     </div>
-    <button id="gear">Gear DOWN</button>
+    <button id="gear">GEAR</button>
    </div>
   </div>
 
-  <div id="instruments">
-   <div class="instrument">Airspeed<strong id="speed">0 kt</strong></div>
-   <div class="instrument">Height<strong id="altitude">0 ft</strong></div>
-   <div class="instrument">V/Speed<strong id="vertical">0 ft/min</strong></div>
-   <div class="instrument">Heading<strong id="heading">000°</strong></div>
-   <div class="instrument">Power<strong id="power">0 / 0%</strong></div>
-   <div class="instrument">Time<strong id="timer">0.0 s</strong></div>
-   <div class="instrument">Pitch<strong id="pitchValue">0°</strong></div>
-   <div class="instrument">Bank<strong id="bankValue">0°</strong></div>
-  </div>
-
-  <div id="status">Choose a world and start.</div>
+  <div id="status"></div>
   <div id="landingHint"></div>
 
   <div class="buttons">
@@ -358,7 +352,6 @@ output{color:#a5f3fc}
  <!-- Hidden Data for Original Logic -->
  <div class="hiddenData">
   <input id="planeSize" value="18">
-  <!-- Changed distance from 32 to 55 so the camera isn't pulled so close -->
   <input id="cameraDistance" value="55">
   <select id="exteriorYaw"><option value="180" selected>180</option></select>
   <input id="exteriorPitch" value="0">
@@ -1177,12 +1170,12 @@ function initialize(T,GLTFLoader){
  function assistDisplay(){
   $("autopilotButton").classList.toggle("engaged",autopilot);
   $("autopilotButton").setAttribute("aria-pressed",String(autopilot));
-  $("autopilotButton").textContent=autopilot?"AUTOPILOT ON":"AUTOPILOT OFF";
+  $("autopilotButton").textContent=autopilot?"AUTO ON":"AUTO OFF";
   $("assistButton").classList.toggle("engaged",approachAssist);
   $("assistButton").setAttribute("aria-pressed",String(approachAssist));
   $("assistButton").textContent=mode()==="hard"
-   ?"ASSIST: HARD / OFF"
-   :approachAssist?"APPROACH ASSIST ON":"APPROACH ASSIST";
+   ?"ASSIST OFF"
+   :approachAssist?"ASSIST ON":"APPROACH";
 
   let info;
   if(grounded){
@@ -1194,15 +1187,15 @@ function initialize(T,GLTFLoader){
   }else if(approachAssist){
    if(mode()==="easy"){
     info=position.y-GROUND<8
-     ?"FLARE ASSIST\nSteer left / right only"
-     :"YOU STEER LEFT / RIGHT\nDescent + speed assisted";
+     ?"FLARE ASSIST\nSteer L/R only"
+     :"YOU STEER L/R\nDescend assisted";
    }else{
-    info="YOU STEER\nSpeed assisted only";
+    info="YOU STEER\nSpeed assisted";
    }
   }else{
    info=routeIndex===4
-    ?"FINAL APPROACH\nYou have control"
-    :"Autopilot available\nLanding assist near runway";
+    ?"FINAL\nYou have control"
+    :"Autopilot available";
   }
   $("autopilotInfo").textContent=info;
  }
@@ -1935,7 +1928,7 @@ function initialize(T,GLTFLoader){
    Math.round(enginePower*100)+"%";
   $("gripPower").textContent=Math.round(throttle*100)+"%";
   const h=$("lever").clientHeight;
-  if(h)$("grip").style.top=(h-21-throttle*(h-42))+"px";
+  if(h)$("grip").style.top=(h-16-throttle*(h-32))+"px";
   const s=$("stick"),k=$("knob");
   const dx=Math.max(0,(s.clientWidth-k.offsetWidth)/2-2);
   const dy=Math.max(0,(s.clientHeight-k.offsetHeight)/2-2);
